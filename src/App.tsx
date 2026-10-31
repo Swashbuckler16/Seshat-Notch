@@ -3,9 +3,22 @@ import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
 import { StorageInspector } from './components/StorageInspector';
 import { ComponentShowcase } from './components/ComponentShowcase';
+import { QuickAddPlayground } from './components/QuickAddPlayground';
+import { QuickAddModal } from './components/QuickAddModal';
 import { StatusBadge } from './components/StatusBadge';
+import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
-import { CheckCircle2, ArrowRight, Layers, ShieldCheck, Terminal, Palette, Database } from 'lucide-react';
+import {
+  CheckCircle2,
+  ArrowRight,
+  Layers,
+  ShieldCheck,
+  Terminal,
+  Palette,
+  Database,
+  Sparkles,
+  Command,
+} from 'lucide-react';
 
 interface PhaseInfo {
   number: number;
@@ -41,15 +54,15 @@ const PHASES: PhaseInfo[] = [
     number: 4,
     title: 'Quick-Add Grammar Engine & Keyboard Palette',
     scope: 'Parser for #project >milestone ~estimate !priority @date +metric:value grammar with live preview & Ctrl+K command palette.',
-    outcome: '1-keystroke rapid entry on Windows',
-    status: 'in_progress',
+    outcome: '1-keystroke rapid entry on Windows (PRD 6.9 & TK-3)',
+    status: 'completed',
   },
   {
     number: 5,
     title: 'Areas, Projects & Milestone Planner',
     scope: 'Area tree organizer, Project/Goal inspector (why, criteria, dates), Milestones with finish-to-start dependencies.',
     outcome: 'Hierarchical project architecture',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 6,
@@ -117,11 +130,40 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(3);
-  const [activeTab, setActiveTab] = useState<'components' | 'storage' | 'roadmap'>('components');
+  const [selectedPhase, setSelectedPhase] = useState<number>(4);
+  const [activeTab, setActiveTab] = useState<'quickadd' | 'components' | 'storage' | 'roadmap'>('quickadd');
+  const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
     seedDatabase(false);
+  }, []);
+
+  // Global Keyboard Shortcuts (Ctrl+K and single key 'N')
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if focus is in an input or textarea
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable;
+
+      // Ctrl+K or Cmd+K
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setQuickAddModalOpen((prev) => !prev);
+        return;
+      }
+
+      // Single-key 'n' or 'N' opens Quick Add
+      if (!isInput && e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setQuickAddModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
@@ -134,7 +176,7 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-base tracking-tight">Seshat Notch</span>
               <span className="font-mono text-xs px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-accent)] font-semibold">
-                Phase 3 Completed
+                Phase 4 Completed
               </span>
             </div>
             <span className="text-xs text-[var(--color-ink-muted)]">
@@ -143,9 +185,34 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Quick-Add Shortcut Button in Header */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setQuickAddModalOpen(true)}
+            className="hidden sm:inline-flex"
+            title="Press Ctrl+K or N to open Quick Add"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+            <span>Quick Add</span>
+            <kbd className="ml-1 px-1 py-0.2 text-[10px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">
+              Ctrl+K
+            </kbd>
+          </Button>
+
           {/* Navigation Pill Switcher */}
           <div className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('quickadd')}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'quickadd' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <Command className="w-3.5 h-3.5" />
+              <span>Quick-Add Engine</span>
+            </button>
             <button
               type="button"
               onClick={() => setActiveTab('components')}
@@ -154,7 +221,7 @@ export const App: React.FC = () => {
               }`}
             >
               <Palette className="w-3.5 h-3.5" />
-              <span>Component Library</span>
+              <span>Components</span>
             </button>
             <button
               type="button"
@@ -164,7 +231,7 @@ export const App: React.FC = () => {
               }`}
             >
               <Database className="w-3.5 h-3.5" />
-              <span>Storage & Change Log</span>
+              <span>Storage</span>
             </button>
             <button
               type="button"
@@ -190,34 +257,39 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-mono">
               <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
               <span className="font-semibold text-[var(--color-ink)]">Hallmark v2.0.0 Verification</span>
-              <span className="text-[var(--color-ink-muted)]">· Phase 3: Tactile Ledger Components</span>
+              <span className="text-[var(--color-ink-muted)]">· Phase 4: Quick-Add Grammar & Keyboard Palette</span>
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status="on_track" ratio={1.0} />
             </div>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-            All primitives built to strict Hallmark specifications: 1 primary button, instant focus outlines,
-            tabular numerals, interactive Notch Ribs grouped in sevens, and Measuring Cord progress scrubbers with
-            10% survey ticks.
+            Fast manual entry active. PRD 6.9 grammar supported: <code className="px-1 py-0.5 rounded bg-[var(--color-paper-2)] border border-[var(--color-rule)] font-mono text-[11px] text-[var(--color-accent)]">Write detection card #heimdall &gt;baseline ~90m !high @fri +rules:2</code>. Press <kbd className="px-1 py-0.5 rounded bg-[var(--color-paper)] border border-[var(--color-rule)] font-mono text-[10px]">Ctrl+K</kbd> or <kbd className="px-1 py-0.5 rounded bg-[var(--color-paper)] border border-[var(--color-rule)] font-mono text-[10px]">N</kbd> anywhere to open.
           </p>
         </section>
 
-        {/* Tab 1: Component Library & Brand Motif Primitives */}
+        {/* Tab 1: Quick-Add Grammar Engine & Playground */}
+        {activeTab === 'quickadd' && (
+          <section>
+            <QuickAddPlayground onOpenQuickAddModal={() => setQuickAddModalOpen(true)} />
+          </section>
+        )}
+
+        {/* Tab 2: Component Library & Brand Motif Primitives */}
         {activeTab === 'components' && (
           <section>
             <ComponentShowcase />
           </section>
         )}
 
-        {/* Tab 2: Storage & Change Log Engine */}
+        {/* Tab 3: Storage & Change Log Engine */}
         {activeTab === 'storage' && (
           <section>
             <StorageInspector />
           </section>
         )}
 
-        {/* Tab 3: 14-Phase Implementation Roadmap */}
+        {/* Tab 4: 14-Phase Implementation Roadmap */}
         {activeTab === 'roadmap' && (
           <section className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -318,14 +390,21 @@ export const App: React.FC = () => {
         <section className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-sm)] p-3 flex items-center justify-between text-xs text-[var(--color-ink-muted)] font-mono">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-[var(--color-accent)]" />
-            <span>Windows Ergonomics: Command palette & Quick-add grammar ready for Phase 4</span>
+            <span>Windows Ergonomics: Command palette active via Ctrl+K and single-key 'N'</span>
           </div>
           <div className="flex items-center gap-2">
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[10px]">Ctrl+K</kbd>
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[10px]">N</kbd>
+            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[10px]">Esc</kbd>
           </div>
         </section>
       </main>
+
+      {/* Quick Add Command Palette Modal */}
+      <QuickAddModal
+        isOpen={quickAddModalOpen}
+        onClose={() => setQuickAddModalOpen(false)}
+      />
 
       {/* Footer */}
       <footer className="hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">

@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "node --test",
+    "test": "node --experimental-strip-types --test",
     "audit": "node scripts/hallmark-audit.js"
   },
   "dependencies": {

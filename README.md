@@ -59,8 +59,8 @@ All UI components in `src/components/ui/` adhere strictly to Hallmark quality ga
 | **01** | **Project Architecture, Repository Foundation & Hallmark Design Truth** | Vite + React 19 + TypeScript + Tailwind v4, `design.md`, OKLCH tokens, CI/CD pipeline | **Completed** |
 | **02** | **Domain Model, Typed Storage Layer & Append-Only Change Log** | Dexie schema, append-only change log, PRD TR-3 drop guard, Heimdall SOC Lab seed data | **Completed** |
 | **03** | **Hallmark Component Library & Seshat Brand Motif Primitives** | Notch rib, measuring cord, buttons, inputs, stat tiles with formula popover, hairline table | **Completed** |
-| **04** | **Quick-Add Grammar Engine & Keyboard Palette** | `#project >milestone ~estimate !priority @date +metric:value` parser, live preview, `Ctrl+K` | *In Progress* |
-| **05** | **Areas, Projects/Goals & Milestone Planner** | Area organizer, Project inspector (why, criteria, dates), finish-to-start dependencies | Queued |
+| **04** | **Quick-Add Grammar Engine & Keyboard Palette** | `#project >milestone ~estimate !priority @date +metric:value` parser, live preview, `Ctrl+K` | **Completed** |
+| **05** | **Areas, Projects/Goals & Milestone Planner** | Area organizer, Project inspector (why, criteria, dates), finish-to-start dependencies | *In Progress* |
 | **06** | **Multi-Horizon Planning & Cascade Engine** | Target authoring (Month/Week/Day), cascade distribution helper, copy-forward, re-plan tool | Queued |
 | **07** | **Today View & Rapid Execution Strip** | Morning dashboard (<5s scan), due targets & habits, planned vs logged time, day timeline | Queued |
 | **08** | **Carry-Over Inbox & Review Workflows** | Carry-over triage (reschedule, split, drop with reason), Daily/Weekly/Monthly reviews | Queued |
