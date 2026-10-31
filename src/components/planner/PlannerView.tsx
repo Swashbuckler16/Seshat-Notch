@@ -5,6 +5,7 @@ import { domainService } from '../../services/domainService';
 import { AreaManager } from './AreaManager';
 import { ProjectInspector } from './ProjectInspector';
 import { MilestoneTimeline } from './MilestoneTimeline';
+import { HorizonPlanner } from './HorizonPlanner';
 import { EntityId, Priority } from '../../types';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -14,9 +15,11 @@ import {
   Briefcase,
   Plus,
   Check,
+  Calendar,
 } from 'lucide-react';
 
 export const PlannerView: React.FC = () => {
+  const [plannerMode, setPlannerMode] = useState<'projects' | 'horizons'>('projects');
   const [selectedAreaId, setSelectedAreaId] = useState<EntityId | 'all'>('all');
   const [selectedProjectId, setSelectedProjectId] = useState<EntityId | null>(null);
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
@@ -82,32 +85,74 @@ export const PlannerView: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Top Banner */}
+      {/* Top Banner & Mode Switcher */}
       <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="font-semibold text-sm">Your projects</h3>
+            {plannerMode === 'projects' ? (
+              <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
+            ) : (
+              <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
+            )}
+            <h3 className="font-semibold text-sm">
+              {plannerMode === 'projects' ? 'Your projects' : 'Planning horizons & targets'}
+            </h3>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-            Group work by area, keep its purpose in view, and map the milestones ahead.
+            {plannerMode === 'projects'
+              ? 'Group work by area, keep its purpose in view, and map the milestones ahead.'
+              : 'Set monthly, weekly, and daily targets; distribute them across periods or adjust timelines.'}
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          onClick={() => {
-            setAreaId(selectedAreaId !== 'all' ? selectedAreaId : areas?.[0]?.id || '');
-            setIsNewProjectModalOpen(true);
-          }}
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>New project</span>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Sub-mode switcher */}
+          <div className="flex items-center gap-1 bg-[var(--color-paper-2)] p-1 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+            <button
+              type="button"
+              onClick={() => setPlannerMode('projects')}
+              className={`min-h-11 sm:min-h-8 px-3 py-1 text-xs rounded-[var(--radius-xs)] font-medium inline-flex items-center gap-1.5 transition-colors ${
+                plannerMode === 'projects'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Projects</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPlannerMode('horizons')}
+              className={`min-h-11 sm:min-h-8 px-3 py-1 text-xs rounded-[var(--radius-xs)] font-medium inline-flex items-center gap-1.5 transition-colors ${
+                plannerMode === 'horizons'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Time horizons</span>
+            </button>
+          </div>
+
+          {plannerMode === 'projects' && (
+            <Button
+              variant="primary"
+              onClick={() => {
+                setAreaId(selectedAreaId !== 'all' ? selectedAreaId : areas?.[0]?.id || '');
+                setIsNewProjectModalOpen(true);
+              }}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New project</span>
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Main Grid: Left Area Manager + Center Project Inspector & Milestones */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      {plannerMode === 'horizons' ? (
+        <HorizonPlanner />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Left Column: Area Manager & Projects List */}
         <div className="lg:col-span-1 flex flex-col gap-4">
           <AreaManager
@@ -177,6 +222,15 @@ export const PlannerView: React.FC = () => {
                 projectId={activeProject.id}
                 projectTitle={activeProject.title}
               />
+              <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
+                <div className="flex items-center gap-2 hairline-b pb-2.5">
+                  <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
+                  <h3 className="font-semibold text-xs text-[var(--color-ink-muted)]">
+                    Goals and targets for this project
+                  </h3>
+                </div>
+                <HorizonPlanner selectedProjectId={activeProject.id} />
+              </div>
             </>
           ) : (
             <div className="surface-card rounded-[var(--radius-sm)] p-8 text-center text-sm text-[var(--color-ink-muted)]">
@@ -189,6 +243,7 @@ export const PlannerView: React.FC = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* New Project / Goal Modal (PRD PL-2) */}
       <Modal

@@ -69,14 +69,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Planning across time periods',
     scope: 'Set monthly, weekly, and daily targets; carry plans forward or adjust them.',
     outcome: 'Connect longer plans to daily work',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 7,
     title: 'Today view',
     scope: 'See what is due, what you planned, and the time you have logged today.',
     outcome: 'A focused view of today’s work',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 8,
@@ -130,7 +130,7 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(5);
+  const [selectedPhase, setSelectedPhase] = useState<number>(6);
   const [activeTab, setActiveTab] = useState<'planner' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('planner');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 

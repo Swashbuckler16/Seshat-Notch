@@ -5,6 +5,7 @@ import {
   ProjectGoal,
   MilestonePhase,
   Target,
+  TargetHorizon,
   Task,
   Habit,
   Routine,
@@ -310,6 +311,207 @@ export const domainService = {
     });
 
     return updated;
+  },
+
+  async updateTarget(id: EntityId, updates: Partial<Target>): Promise<Target> {
+    const existing = await db.targets.get(id);
+    if (!existing) throw new Error(`Target ${id} not found`);
+
+    const now = getCurrentUTC();
+    const updated: Target = { ...existing, ...updates, updatedAt: now };
+    await db.targets.put(updated);
+
+    await recordChange({
+      entityType: 'target',
+      entityId: id,
+      action: 'update',
+      oldValue: existing,
+      newValue: updated,
+    });
+    return updated;
+  },
+
+  async softDeleteTarget(id: EntityId, reason?: string): Promise<void> {
+    const existing = await db.targets.get(id);
+    if (!existing) throw new Error(`Target ${id} not found`);
+
+    const now = getCurrentUTC();
+    await db.targets.update(id, { isDeleted: true, updatedAt: now });
+
+    await recordChange({
+      entityType: 'target',
+      entityId: id,
+      action: 'soft_delete',
+      reason,
+    });
+  },
+
+  /**
+   * Cascade Distribution Engine (PRD Section 6.2)
+   * Splits a higher horizon target (Month or Week) into sub-targets (Week or Day)
+   */
+  async cascadeTarget(params: {
+    parentTargetId: EntityId;
+    childHorizon: TargetHorizon;
+    distribution: { period: string; title?: string; value: number }[];
+  }): Promise<Target[]> {
+    const parent = await db.targets.get(params.parentTargetId);
+    if (!parent) throw new Error(`Parent target ${params.parentTargetId} not found`);
+
+    const now = getCurrentUTC();
+    const createdChildren: Target[] = [];
+
+    for (const item of params.distribution) {
+      if (item.value <= 0) continue;
+      const child: Target = {
+        id: generateId(),
+        projectId: parent.projectId,
+        parentTargetId: parent.id,
+        horizon: params.childHorizon,
+        period: item.period,
+        title: item.title?.trim() || parent.title,
+        metricType: parent.metricType,
+        targetValue: item.value,
+        currentValue: 0,
+        unit: parent.unit,
+        weight: 1.0,
+        status: 'not_started',
+        isDeleted: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await db.targets.add(child);
+      await recordChange({
+        entityType: 'target',
+        entityId: child.id,
+        action: 'create',
+        newValue: child,
+        reason: `Cascaded from ${parent.title} (${parent.horizon} -> ${params.childHorizon})`,
+      });
+      createdChildren.push(child);
+    }
+
+    return createdChildren;
+  },
+
+  /**
+   * Copy-Forward Period Tool (PRD Section 6.3)
+   * Replicates targets from a previous period into the new active period with zeroed progress
+   */
+  async copyForwardPeriod(params: {
+    sourcePeriod: string;
+    targetPeriod: string;
+    horizon: TargetHorizon;
+    targetIds?: EntityId[];
+  }): Promise<Target[]> {
+    let sourceTargets = await db.targets
+      .where('period')
+      .equals(params.sourcePeriod)
+      .filter((t) => !t.isDeleted && t.horizon === params.horizon)
+      .toArray();
+
+    if (params.targetIds && params.targetIds.length > 0) {
+      sourceTargets = sourceTargets.filter((t) => params.targetIds!.includes(t.id));
+    }
+
+    const now = getCurrentUTC();
+    const copiedTargets: Target[] = [];
+
+    for (const src of sourceTargets) {
+      const clone: Target = {
+        id: generateId(),
+        projectId: src.projectId,
+        parentTargetId: src.parentTargetId,
+        horizon: params.horizon,
+        period: params.targetPeriod,
+        title: src.title,
+        metricType: src.metricType,
+        targetValue: src.targetValue,
+        currentValue: 0,
+        unit: src.unit,
+        weight: src.weight,
+        status: 'not_started',
+        isDeleted: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await db.targets.add(clone);
+      await recordChange({
+        entityType: 'target',
+        entityId: clone.id,
+        action: 'create',
+        newValue: clone,
+        reason: `Copied forward from ${src.period} to ${params.targetPeriod}`,
+      });
+      copiedTargets.push(clone);
+    }
+
+    return copiedTargets;
+  },
+
+  /**
+   * Re-Plan & Shift Tool (PRD Section 6.3)
+   * Shifts target periods or milestone end dates forward by N days
+   */
+  async shiftPlanPeriod(params: {
+    targetIds?: EntityId[];
+    milestoneIds?: EntityId[];
+    shiftDays: number;
+    reason?: string;
+  }): Promise<void> {
+    const now = getCurrentUTC();
+
+    if (params.targetIds && params.targetIds.length > 0) {
+      for (const id of params.targetIds) {
+        const tgt = await db.targets.get(id);
+        if (!tgt) continue;
+
+        let newPeriod = tgt.period;
+        if (tgt.horizon === 'day') {
+          const d = new Date(`${tgt.period}T00:00:00Z`);
+          d.setUTCDate(d.getUTCDate() + params.shiftDays);
+          newPeriod = d.toISOString().split('T')[0];
+        }
+
+        await db.targets.update(id, { period: newPeriod, updatedAt: now });
+        await recordChange({
+          entityType: 'target',
+          entityId: id,
+          action: 'update',
+          fieldChanged: 'period',
+          oldValue: tgt.period,
+          newValue: newPeriod,
+          reason: params.reason || `Shifted by ${params.shiftDays} days`,
+        });
+      }
+    }
+
+    if (params.milestoneIds && params.milestoneIds.length > 0) {
+      for (const id of params.milestoneIds) {
+        const ms = await db.milestones.get(id);
+        if (!ms) continue;
+
+        let newEnd = ms.endDate;
+        if (ms.endDate) {
+          const d = new Date(`${ms.endDate}T00:00:00Z`);
+          d.setUTCDate(d.getUTCDate() + params.shiftDays);
+          newEnd = d.toISOString().split('T')[0];
+        }
+
+        await db.milestones.update(id, { endDate: newEnd, updatedAt: now });
+        await recordChange({
+          entityType: 'milestone',
+          entityId: id,
+          action: 'update',
+          fieldChanged: 'endDate',
+          oldValue: ms.endDate,
+          newValue: newEnd,
+          reason: params.reason || `Shifted by ${params.shiftDays} days`,
+        });
+      }
+    }
   },
 
   // ==========================================
