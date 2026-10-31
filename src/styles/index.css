@@ -1,0 +1,25 @@
+/* hallmark v2.0.0 · theme: seshat-ledger · genre: modern-minimal · shape: workbench · modes: light+dark */
+/* critique: dense ledger instrument panel, tabular numerals hero, notch-and-cord motif, zero ai-slop */
+/* waive: none */
+
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./base.css";
+
+/* Custom utility bindings for Seshat design system */
+@theme {
+  --color-paper: var(--color-paper);
+  --color-paper-2: var(--color-paper-2);
+  --color-paper-3: var(--color-paper-3);
+  --color-rule: var(--color-rule);
+  --color-rule-strong: var(--color-rule-strong);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-subtle: var(--color-ink-subtle);
+  --color-accent: var(--color-accent);
+  --color-accent-ink: var(--color-accent-ink);
+  --color-focus: var(--color-focus);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
