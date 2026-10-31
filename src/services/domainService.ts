@@ -53,6 +53,24 @@ export const domainService = {
     });
   },
 
+  async archiveArea(id: EntityId, isArchived = true): Promise<void> {
+    await this.updateArea(id, { isArchived });
+  },
+
+  async reorderAreas(orderedIds: EntityId[]): Promise<void> {
+    const now = getCurrentUTC();
+    for (let i = 0; i < orderedIds.length; i++) {
+      await db.areas.update(orderedIds[i], { order: i + 1, updatedAt: now });
+    }
+    await recordChange({
+      entityType: 'area',
+      entityId: 'batch_reorder',
+      action: 'update',
+      fieldChanged: 'order',
+      newValue: orderedIds,
+    });
+  },
+
   // ==========================================
   // PROJECTS & GOALS
   // ==========================================
@@ -133,6 +151,100 @@ export const domainService = {
       newValue: milestone,
     });
     return milestone;
+  },
+
+  async updateMilestone(id: EntityId, updates: Partial<MilestonePhase>): Promise<void> {
+    const existing = await db.milestones.get(id);
+    if (!existing) throw new Error(`Milestone ${id} not found`);
+
+    const now = getCurrentUTC();
+    const updated = { ...existing, ...updates, updatedAt: now };
+    await db.milestones.put(updated);
+
+    await recordChange({
+      entityType: 'milestone',
+      entityId: id,
+      action: 'update',
+      oldValue: existing,
+      newValue: updated,
+    });
+  },
+
+  async softDeleteMilestone(id: EntityId, reason?: string): Promise<void> {
+    const existing = await db.milestones.get(id);
+    if (!existing) throw new Error(`Milestone ${id} not found`);
+
+    const now = getCurrentUTC();
+    await db.milestones.update(id, { isDeleted: true, updatedAt: now });
+
+    await recordChange({
+      entityType: 'milestone',
+      entityId: id,
+      action: 'soft_delete',
+      reason,
+    });
+  },
+
+  // ==========================================
+  // BLOCKERS (PRD 5.2 & TR-5)
+  // ==========================================
+  async raiseBlocker(data: { entityType: 'project' | 'task' | 'milestone'; entityId: EntityId; description: string }): Promise<void> {
+    const now = getCurrentUTC();
+    const blocker = {
+      id: generateId(),
+      entityType: data.entityType,
+      entityId: data.entityId,
+      description: data.description,
+      dateRaised: now.split('T')[0],
+      createdAt: now,
+    };
+    await db.blockers.add(blocker);
+
+    // If it's a project or task, mark its status as blocked
+    if (data.entityType === 'project') {
+      await db.projects.update(data.entityId, { status: 'blocked', updatedAt: now });
+    } else if (data.entityType === 'task') {
+      await db.tasks.update(data.entityId, { status: 'blocked', updatedAt: now });
+    }
+
+    await recordChange({
+      entityType: 'blocker',
+      entityId: blocker.id,
+      action: 'create',
+      newValue: blocker,
+      reason: data.description,
+    });
+  },
+
+  async clearBlocker(blockerId: EntityId): Promise<void> {
+    const existing = await db.blockers.get(blockerId);
+    if (!existing) throw new Error(`Blocker ${blockerId} not found`);
+
+    const now = getCurrentUTC();
+    await db.blockers.update(blockerId, { dateCleared: now.split('T')[0] });
+
+    // Check if other open blockers exist for this entity
+    const remainingOpen = await db.blockers
+      .where('entityId')
+      .equals(existing.entityId)
+      .filter((b) => !b.dateCleared)
+      .count();
+
+    if (remainingOpen <= 1) {
+      if (existing.entityType === 'project') {
+        await db.projects.update(existing.entityId, { status: 'active', updatedAt: now });
+      } else if (existing.entityType === 'task') {
+        await db.tasks.update(existing.entityId, { status: 'active', updatedAt: now });
+      }
+    }
+
+    await recordChange({
+      entityType: 'blocker',
+      entityId: blockerId,
+      action: 'update',
+      fieldChanged: 'dateCleared',
+      newValue: now.split('T')[0],
+    });
   },
 
   // ==========================================

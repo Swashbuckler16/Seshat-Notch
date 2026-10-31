@@ -5,6 +5,7 @@ import { StorageInspector } from './components/StorageInspector';
 import { ComponentShowcase } from './components/ComponentShowcase';
 import { QuickAddPlayground } from './components/QuickAddPlayground';
 import { QuickAddModal } from './components/QuickAddModal';
+import { PlannerView } from './components/planner/PlannerView';
 import { StatusBadge } from './components/StatusBadge';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
@@ -18,6 +19,7 @@ import {
   Database,
   Sparkles,
   Command,
+  Briefcase,
 } from 'lucide-react';
 
 interface PhaseInfo {
@@ -62,14 +64,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Areas, Projects & Milestone Planner',
     scope: 'Area tree organizer, Project/Goal inspector (why, criteria, dates), Milestones with finish-to-start dependencies.',
     outcome: 'Hierarchical project architecture',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 6,
     title: 'Multi-Horizon Planning & Cascade Engine',
     scope: 'Target authoring at Month/Week/Day horizons, cascade distribution helper, copy-forward period tool, re-plan shift tool.',
     outcome: 'Seamless multi-horizon planning',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 7,
@@ -130,8 +132,8 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(4);
-  const [activeTab, setActiveTab] = useState<'quickadd' | 'components' | 'storage' | 'roadmap'>('quickadd');
+  const [selectedPhase, setSelectedPhase] = useState<number>(5);
+  const [activeTab, setActiveTab] = useState<'planner' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('planner');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -176,7 +178,7 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-base tracking-tight">Seshat Notch</span>
               <span className="font-mono text-xs px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-accent)] font-semibold">
-                Phase 4 Completed
+                Phase 5 Completed
               </span>
             </div>
             <span className="text-xs text-[var(--color-ink-muted)]">
@@ -203,6 +205,16 @@ export const App: React.FC = () => {
 
           {/* Navigation Pill Switcher */}
           <div className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('planner')}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'planner' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Planner</span>
+            </button>
             <button
               type="button"
               onClick={() => setActiveTab('quickadd')}
@@ -257,18 +269,25 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-mono">
               <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
               <span className="font-semibold text-[var(--color-ink)]">Hallmark v2.0.0 Verification</span>
-              <span className="text-[var(--color-ink-muted)]">· Phase 4: Quick-Add Grammar & Keyboard Palette</span>
+              <span className="text-[var(--color-ink-muted)]">· Phase 5: Areas, Projects & Milestone Planner</span>
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status="on_track" ratio={1.0} />
             </div>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-            Fast manual entry active. PRD 6.9 grammar supported: <code className="px-1 py-0.5 rounded bg-[var(--color-paper-2)] border border-[var(--color-rule)] font-mono text-[11px] text-[var(--color-accent)]">Write detection card #heimdall &gt;baseline ~90m !high @fri +rules:2</code>. Press <kbd className="px-1 py-0.5 rounded bg-[var(--color-paper)] border border-[var(--color-rule)] font-mono text-[10px]">Ctrl+K</kbd> or <kbd className="px-1 py-0.5 rounded bg-[var(--color-paper)] border border-[var(--color-rule)] font-mono text-[10px]">N</kbd> anywhere to open.
+            Hierarchical project architecture active. Area tree organizer, Project inspector (why, criteria, targets), and Milestones with finish-to-start dependencies &amp; weight distribution.
           </p>
         </section>
 
-        {/* Tab 1: Quick-Add Grammar Engine & Playground */}
+        {/* Tab 1: Areas, Projects & Milestone Planner */}
+        {activeTab === 'planner' && (
+          <section>
+            <PlannerView />
+          </section>
+        )}
+
+        {/* Tab 2: Quick-Add Grammar Engine & Playground */}
         {activeTab === 'quickadd' && (
           <section>
             <QuickAddPlayground onOpenQuickAddModal={() => setQuickAddModalOpen(true)} />

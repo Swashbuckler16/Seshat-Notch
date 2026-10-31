@@ -60,8 +60,8 @@ All UI components in `src/components/ui/` adhere strictly to Hallmark quality ga
 | **02** | **Domain Model, Typed Storage Layer & Append-Only Change Log** | Dexie schema, append-only change log, PRD TR-3 drop guard, Heimdall SOC Lab seed data | **Completed** |
 | **03** | **Hallmark Component Library & Seshat Brand Motif Primitives** | Notch rib, measuring cord, buttons, inputs, stat tiles with formula popover, hairline table | **Completed** |
 | **04** | **Quick-Add Grammar Engine & Keyboard Palette** | `#project >milestone ~estimate !priority @date +metric:value` parser, live preview, `Ctrl+K` | **Completed** |
-| **05** | **Areas, Projects/Goals & Milestone Planner** | Area organizer, Project inspector (why, criteria, dates), finish-to-start dependencies | *In Progress* |
-| **06** | **Multi-Horizon Planning & Cascade Engine** | Target authoring (Month/Week/Day), cascade distribution helper, copy-forward, re-plan tool | Queued |
+| **05** | **Areas, Projects/Goals & Milestone Planner** | Area organizer, Project inspector (why, criteria, dates), finish-to-start dependencies | **Completed** |
+| **06** | **Multi-Horizon Planning & Cascade Engine** | Target authoring (Month/Week/Day), cascade distribution helper, copy-forward, re-plan tool | *In Progress* |
 | **07** | **Today View & Rapid Execution Strip** | Morning dashboard (<5s scan), due targets & habits, planned vs logged time, day timeline | Queued |
 | **08** | **Carry-Over Inbox & Review Workflows** | Carry-over triage (reschedule, split, drop with reason), Daily/Weekly/Monthly reviews | Queued |
 | **09** | **Habit Tracker & Fair Streak Logic** | Flexible schedules, fair streak engine (excused pauses/skips), ledger-style year heatmap | Queued |
@@ -87,7 +87,7 @@ npm.cmd run dev
 # Run automated Hallmark 58-gate design audit
 npm.cmd run audit
 
-# Run automated unit test suite (12 tests)
+# Run automated unit test suite (24 tests)
 npm.cmd test
 
 # Build production bundle
