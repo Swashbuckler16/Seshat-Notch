@@ -77,7 +77,7 @@ export const CordBar: React.FC<CordBarProps> = ({
         {/* Progress fill */}
         <div
           className="seshat-cord-fill"
-          style={{ width: `${percentage}%` }}
+          style={{ transform: `scaleX(${percentage / 100})` }}
         />
 
         {/* Expected marker (if supplied) */}

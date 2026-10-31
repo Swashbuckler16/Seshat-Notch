@@ -65,8 +65,8 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
       <div className="flex items-center justify-between hairline-b pb-2.5">
         <div className="flex items-center gap-2">
           <Folder className="w-4 h-4 text-[var(--color-accent)]" />
-          <h3 className="font-semibold text-xs tracking-tight uppercase text-[var(--color-ink-muted)]">
-            Life Areas (PL-1)
+          <h3 className="font-semibold text-xs tracking-tight text-[var(--color-ink-muted)]">
+            Areas
           </h3>
         </div>
         <Button size="sm" variant="ghost" onClick={() => setIsAddModalOpen(true)} title="Add Area">
@@ -87,7 +87,7 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
               : 'hover:bg-[var(--color-paper-2)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
           }`}
         >
-          <span>All Life Areas</span>
+          <span>All areas</span>
           <span className="font-mono text-[11px] tabular-figure opacity-80">
             {projects?.length ?? 0}
           </span>
@@ -112,7 +112,7 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
               >
                 <span className="truncate">{area.name}</span>
                 {area.isArchived && (
-                  <span className="text-[10px] font-mono px-1 rounded bg-[var(--color-paper-3)] text-[var(--color-ink-subtle)]">
+                  <span className="text-[11px] px-1 rounded bg-[var(--color-paper-3)] text-[var(--color-ink-subtle)]">
                     archived
                   </span>
                 )}
@@ -184,7 +184,7 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="Create Life Area (PL-1)"
+        title="New area"
         subtitle="Group related projects, certifications, habits, and routines."
         footer={
           <>

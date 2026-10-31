@@ -150,11 +150,11 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[400] flex items-start justify-center pt-20 px-4 bg-black/45 backdrop-contrast-125"
+      className="fixed inset-0 z-[400] flex items-start justify-center pt-20 px-4 bg-[var(--color-scrim)] backdrop-contrast-125"
     >
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-2xl bg-[var(--color-paper)] border border-[var(--color-rule-strong)] shadow-2xl rounded-[var(--radius-sm)] flex flex-col overflow-hidden z-10 text-[var(--color-ink)]">
+      <div className="relative w-full max-w-2xl bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded-[var(--radius-sm)] flex flex-col overflow-hidden z-10 text-[var(--color-ink)]">
         {/* Top Input Bar */}
         <form onSubmit={handleSave} className="flex flex-col">
           <div className="p-4 bg-[var(--color-paper-2)] hairline-b flex items-center gap-3">
@@ -179,46 +179,46 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
           {/* Grammar Token Helper Chips */}
           <div className="px-4 py-2 bg-[var(--color-paper)] hairline-b flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--color-ink-muted)]">
-            <span className="font-mono text-[10px] text-[var(--color-ink-subtle)] mr-1">Insert:</span>
+            <span className="text-[11px] text-[var(--color-ink-subtle)] mr-1">Add:</span>
             <button
               type="button"
               onClick={() => handleAppendToken('#heimdall')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] font-mono text-[var(--color-accent)]"
+              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
               #heimdall
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('>baseline')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] font-mono text-[var(--color-accent)]"
+              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
               &gt;baseline
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('~90m')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] font-mono text-[var(--color-ink)]"
+              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
             >
               ~90m
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('!high')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] font-mono text-[var(--color-status-at-risk)]"
+              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-status-at-risk)]"
             >
               !high
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('@today')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] font-mono text-[var(--color-ink)]"
+              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
             >
               @today
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('+rules:2')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] font-mono text-[var(--color-accent)]"
+              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
               +rules:2
             </button>
@@ -229,14 +229,14 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               className="ml-auto inline-flex items-center gap-1 text-[11px] text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
             >
               <HelpCircle className="w-3.5 h-3.5" />
-              <span>Grammar Help</span>
+              <span>How quick add works</span>
             </button>
           </div>
 
           {/* Grammar Cheat Sheet Modal Dropdown */}
           {showCheatSheet && (
             <div className="p-3 bg-[var(--color-paper-2)] hairline-b text-xs text-[var(--color-ink-muted)] flex flex-col gap-1.5 font-mono text-[11px]">
-              <div className="font-bold text-[var(--color-ink)] mb-0.5">Quick-Add Grammar Rules (PRD 6.9):</div>
+              <div className="font-bold text-[var(--color-ink)] mb-0.5">Add details with these shortcuts:</div>
               <div><strong className="text-[var(--color-accent)]">#name</strong> Project, goal, or area (e.g. #heimdall, #secplus)</div>
               <div><strong className="text-[var(--color-accent)]">&gt;name</strong> Phase, milestone, or week (e.g. &gt;baseline, &gt;week3)</div>
               <div><strong className="text-[var(--color-ink)]">~time</strong> Time estimate in minutes or hours (e.g. ~90m, ~1.5h)</div>
@@ -248,10 +248,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
           {/* Live Decomposition & Preview Card (PRD 6.9: Live preview before saving) */}
           <div className="p-4 flex flex-col gap-3">
-            <div className="text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] font-semibold flex items-center justify-between">
-              <span>Live Parse Preview</span>
-              <span className="font-mono text-[10px] text-[var(--color-ink-subtle)]">
-                {parsed.tokens.length} tokens extracted
+            <div className="text-xs text-[var(--color-ink-muted)] font-semibold flex items-center justify-between">
+              <span>Preview</span>
+              <span className="text-[11px] text-[var(--color-ink-subtle)]">
+                {parsed.tokens.length} details found
               </span>
             </div>
 
@@ -331,10 +331,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
           {/* Footer Bar */}
           <div className="hairline-t px-4 py-3 bg-[var(--color-paper-2)] flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
-            <div className="flex items-center gap-2 font-mono text-[11px]">
+            <div className="flex items-center gap-2">
               <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded">Esc</kbd>
               <span>to close</span>
-              <span className="opacity-50">·</span>
+              <span>and</span>
               <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded">Enter</kbd>
               <span>to save</span>
             </div>

@@ -46,9 +46,8 @@ export const PlannerView: React.FC = () => {
 
   // Automatically select first project if none selected
   const activeProject =
-    (allProjects || []).find((p) => p.id === selectedProjectId) ||
-    filteredProjects[0] ||
-    allProjects?.[0];
+    filteredProjects.find((project) => project.id === selectedProjectId) ||
+    filteredProjects[0];
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,13 +87,10 @@ export const PlannerView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="font-semibold text-sm">Areas, Projects & Milestone Planner</h3>
-            <span className="font-mono text-[11px] px-1.5 py-0.2 bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded text-[var(--color-accent)] font-semibold">
-              PRD 6.1: PL-1 · PL-2 · PL-3
-            </span>
+            <h3 className="font-semibold text-sm">Your projects</h3>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-            Organize efforts across Life Areas. Each Project / Goal carries architectural motivation, success criteria, and a finish-to-start milestone dependency chain.
+            Group work by area, keep its purpose in view, and map the milestones ahead.
           </p>
         </div>
 
@@ -106,7 +102,7 @@ export const PlannerView: React.FC = () => {
           }}
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>New Project / Goal</span>
+          <span>New project</span>
         </Button>
       </div>
 
@@ -122,15 +118,21 @@ export const PlannerView: React.FC = () => {
           {/* Projects in Area */}
           <div className="surface-card rounded-[var(--radius-sm)] p-3.5 flex flex-col gap-2.5">
             <div className="flex items-center justify-between hairline-b pb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]">
-                Projects ({filteredProjects.length})
+              <span className="text-xs font-semibold text-[var(--color-ink-muted)]">
+                Projects <span className="font-normal tabular-figure">{filteredProjects.length}</span>
               </span>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              {filteredProjects.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[var(--color-ink-muted)]">
-                  No projects in this area.
+              {allProjects === undefined || areas === undefined ? (
+                <p role="status" className="py-5 text-xs text-[var(--color-ink-muted)]">Loading projects…</p>
+              ) : filteredProjects.length === 0 ? (
+                <div className="py-5 flex flex-col items-start gap-2 text-xs text-[var(--color-ink-muted)]">
+                  <p>No projects here yet.</p>
+                  {areas.length > 0 ? <button type="button" className="min-h-11 text-[var(--color-accent)] underline underline-offset-2 focus-visible:outline-2" onClick={() => {
+                    setAreaId(selectedAreaId !== 'all' ? selectedAreaId : areas?.[0]?.id || '');
+                    setIsNewProjectModalOpen(true);
+                  }}>Create a project</button> : <p>Create an area first using “New Area”.</p>}
                 </div>
               ) : (
                 filteredProjects.map((p) => {
@@ -166,7 +168,9 @@ export const PlannerView: React.FC = () => {
 
         {/* Center/Right Columns: Project Inspector & Milestone Dependency Timeline */}
         <div className="lg:col-span-3 flex flex-col gap-6">
-          {activeProject ? (
+          {allProjects === undefined || areas === undefined ? (
+            <div role="status" className="surface-well p-6 text-sm text-[var(--color-ink-muted)]">Loading your workspace…</div>
+          ) : activeProject ? (
             <>
               <ProjectInspector project={activeProject} />
               <MilestoneTimeline
@@ -175,8 +179,12 @@ export const PlannerView: React.FC = () => {
               />
             </>
           ) : (
-            <div className="surface-card rounded-[var(--radius-sm)] p-12 text-center text-xs text-[var(--color-ink-muted)]">
-              No project selected. Click "New Project / Goal" above to create your first effort.
+            <div className="surface-card rounded-[var(--radius-sm)] p-8 text-center text-sm text-[var(--color-ink-muted)]">
+              <p>No project selected.</p>
+              {areas.length > 0 ? <button type="button" className="mt-2 min-h-11 text-[var(--color-accent)] underline underline-offset-2 focus-visible:outline-2" onClick={() => {
+                setAreaId(selectedAreaId !== 'all' ? selectedAreaId : areas?.[0]?.id || '');
+                setIsNewProjectModalOpen(true);
+              }}>Create a project</button> : <p className="mt-2">Create an area first using “New Area”.</p>}
             </div>
           )}
         </div>
@@ -186,8 +194,8 @@ export const PlannerView: React.FC = () => {
       <Modal
         isOpen={isNewProjectModalOpen}
         onClose={() => setIsNewProjectModalOpen(false)}
-        title="Create Project or Goal (PL-2)"
-        subtitle="Author a new technical project or personal goal with clear success criteria."
+        title="New project"
+        subtitle="Give it a name, choose an area, and set a finish line."
         footer={
           <>
             <Button variant="ghost" onClick={() => setIsNewProjectModalOpen(false)}>
@@ -199,7 +207,7 @@ export const PlannerView: React.FC = () => {
               disabled={!title.trim() || !areaId}
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Create Effort</span>
+              <span>Create project</span>
             </Button>
           </>
         }
@@ -216,14 +224,14 @@ export const PlannerView: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-[var(--color-ink)]">Life Area</label>
+              <label className="text-xs font-medium text-[var(--color-ink)]">Area</label>
               <select
                 value={areaId}
                 onChange={(e) => setAreaId(e.target.value)}
                 className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
                 required
               >
-                <option value="">Select an Area...</option>
+                <option value="">Choose an area</option>
                 {(areas || []).map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}
@@ -239,22 +247,22 @@ export const PlannerView: React.FC = () => {
                 onChange={(e) => setIsGoal(e.target.value === 'goal')}
                 className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
               >
-                <option value="project">Technical Project (Milestone Driven)</option>
-                <option value="goal">Personal Goal (Target Driven)</option>
+                <option value="project">Project</option>
+                <option value="goal">Goal</option>
               </select>
             </div>
           </div>
 
           <Input
-            label="Why This Effort Matters (Motivation)"
-            placeholder="e.g. Master enterprise detection engineering and Windows telemetry"
+            label="Why it matters"
+            placeholder="What makes this worth doing?"
             value={why}
             onChange={(e) => setWhy(e.target.value)}
           />
 
           <Input
-            label="Success Criteria (Definition of Done)"
-            placeholder="e.g. 12 ATT&CK techniques emulated with documented Sigma rules"
+            label="Finish line"
+            placeholder="Describe the result you want."
             value={successCriteria}
             onChange={(e) => setSuccessCriteria(e.target.value)}
           />
@@ -267,7 +275,7 @@ export const PlannerView: React.FC = () => {
               onChange={(e) => setStartDate(e.target.value)}
             />
             <Input
-              label="Target End Date"
+              label="End date"
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
@@ -288,11 +296,11 @@ export const PlannerView: React.FC = () => {
           </div>
 
           <Input
-            label="Tags (Comma separated)"
+            label="Tags"
             placeholder="e.g. soc, detection, splunk, active-directory"
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
-            helperText="Tags allow grouping and dashboard filtering."
+            helperText="Separate tags with commas or spaces."
           />
         </form>
       </Modal>

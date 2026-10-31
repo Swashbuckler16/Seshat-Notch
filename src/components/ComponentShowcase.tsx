@@ -87,15 +87,15 @@ export const ComponentShowcase: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="font-semibold text-sm">Hallmark Component Library & Motif Workbench</h3>
+            <h3 className="font-semibold text-sm">Interface examples</h3>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-            Strict compliance with Hallmark design skill: 1 primary button, instant focus outlines, tabular numerals everywhere, zero AI-slop.
+            Preview the marks, buttons, fields, and tables used in the planner. Figures on this screen are examples.
           </p>
         </div>
         <Button variant="secondary" onClick={() => setModalOpen(true)}>
           <Eye className="w-3.5 h-3.5" />
-          <span>Launch Modal Inspector</span>
+          <span>Open dialog example</span>
         </Button>
       </div>
 
@@ -103,8 +103,8 @@ export const ComponentShowcase: React.FC = () => {
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Sliders className="w-4 h-4 text-[var(--color-accent)]" />
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]">
-            1. Brand Motif Primitives (The Notch & The Cord)
+          <h4 className="text-xs font-semibold text-[var(--color-ink-muted)]">
+            Progress marks
           </h4>
         </div>
 
@@ -112,16 +112,16 @@ export const ComponentShowcase: React.FC = () => {
           {/* Interactive Notch on a Rib */}
           <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-xs">Interactive Notch Rib (Click any tick)</span>
-              <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Grouped in 7s</span>
+              <span className="font-semibold text-xs">Daily check-ins</span>
+              <span className="text-[11px] text-[var(--color-ink-muted)]">Grouped by week</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              Click any notch to toggle completion state in real-time. Shorter ticks represent excused rest days (PRD HB-3).
+              Select a mark to change its state. Shorter marks indicate a rest day.
             </p>
             <div className="pt-2">
               <NotchRib
                 notches={notches}
-                label="MITRE Attack Emulation Streak"
+                label="Study days"
                 onToggleNotch={handleToggleNotch}
               />
             </div>
@@ -130,11 +130,11 @@ export const ComponentShowcase: React.FC = () => {
           {/* Interactive Measuring Cord */}
           <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-xs">Interactive Measuring Cord (Click to scrub)</span>
+              <span className="font-semibold text-xs">Progress to target</span>
               <StatusBadge status={cordValue >= 8 ? 'on_track' : cordValue >= 5 ? 'at_risk' : 'behind'} />
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              Etched with 10% survey marks and black expected threshold pin. Click anywhere on the bar to scrub value.
+              Select the bar to adjust progress. The marker shows the expected amount.
             </p>
             <div className="pt-2 flex flex-col gap-2">
               <CordBar
@@ -159,8 +159,8 @@ export const ComponentShowcase: React.FC = () => {
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <CheckSquare className="w-4 h-4 text-[var(--color-accent)]" />
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]">
-            2. Stat Tiles (Tabular Numerals Hero & Visible Math)
+          <h4 className="text-xs font-semibold text-[var(--color-ink-muted)]">
+            Progress figures
           </h4>
         </div>
 
@@ -207,8 +207,8 @@ export const ComponentShowcase: React.FC = () => {
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-[var(--color-accent)]" />
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]">
-            3. Controls & Form Primitives (Strict Hallmark Hierarchy)
+          <h4 className="text-xs font-semibold text-[var(--color-ink-muted)]">
+            Buttons and fields
           </h4>
         </div>
 
@@ -216,14 +216,14 @@ export const ComponentShowcase: React.FC = () => {
           {/* Button Styles */}
           <div className="flex flex-col gap-2">
             <span className="text-xs font-medium text-[var(--color-ink)]">
-              Button Hierarchy (Only 1 primary per view, instant focus outline):
+              Button styles
             </span>
             <div className="flex flex-wrap items-center gap-2.5">
-              <Button variant="primary">Primary Signal</Button>
-              <Button variant="secondary">Secondary Hairline</Button>
-              <Button variant="ghost">Typographic Ghost</Button>
+              <Button variant="primary">Primary</Button>
+              <Button variant="secondary">Secondary</Button>
+              <Button variant="ghost">Quiet</Button>
               <Button variant="danger">Destructive</Button>
-              <Button variant="secondary" isLoading>Saving Entry</Button>
+              <Button variant="secondary" isLoading>Saving</Button>
               <Button variant="secondary" disabled>Disabled State</Button>
             </div>
           </div>
@@ -233,18 +233,18 @@ export const ComponentShowcase: React.FC = () => {
           {/* Form Inputs */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
-              label="Task / Target Title"
+              label="Task name"
               placeholder="e.g. Write Kerberoasting detection card"
               value={testInput}
               onChange={(e) => setTestInput(e.target.value)}
-              helperText="Instant focus outline, constant 1px border width."
+              helperText="A short, clear name works best."
             />
             <Input
               label="Estimate Duration"
               type="number"
               unit="mins"
               defaultValue={90}
-              helperText="Tabular numerals with unit badge."
+              helperText="Enter an estimate in minutes."
             />
             <Input
               label="Target Metric Value"
@@ -252,7 +252,7 @@ export const ComponentShowcase: React.FC = () => {
               unit="rules"
               defaultValue={3}
               error={testInput.length > 30 ? 'Title exceeds 30 characters' : undefined}
-              helperText="Error message reserves height to avoid layout jump."
+              helperText="Use a shorter title."
             />
           </div>
         </div>
@@ -261,10 +261,10 @@ export const ComponentShowcase: React.FC = () => {
       {/* 4. Hairline Table Primitive */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]">
-            4. Hairline Table Ledger (PRD Section 7.4)
+          <h4 className="text-xs font-semibold text-[var(--color-ink-muted)]">
+            Milestone table
           </h4>
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Sentence-case heads · Hairlines only</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Example rows</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] overflow-hidden">
@@ -280,8 +280,8 @@ export const ComponentShowcase: React.FC = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="Seshat Ledger Modal Inspector"
-        subtitle="Hallmark Z-level 400 · Measured scrim · Escape key trap"
+        title="Dialog example"
+        subtitle="Close with Escape or click outside."
         footer={
           <>
             <Button variant="ghost" onClick={() => setModalOpen(false)}>
@@ -295,13 +295,12 @@ export const ComponentShowcase: React.FC = () => {
       >
         <div className="flex flex-col gap-3 text-xs text-[var(--color-ink-muted)]">
           <p>
-            This dialog implements the accessible modal pattern defined in the PRD and Hallmark craft guide.
+            Dialogs keep the current task in view until you finish or close them.
           </p>
           <ul className="list-disc pl-4 space-y-1">
-            <li>Escape key closes instantly.</li>
-            <li>Background click dismisses.</li>
-            <li>No glowing neon or blurred drop shadows.</li>
-            <li>Consistent typography scale with tabular numerals.</li>
+            <li>Press Escape to close.</li>
+            <li>Click outside to close.</li>
+            <li>Use the buttons to continue or cancel.</li>
           </ul>
         </div>
       </Modal>

@@ -1,6 +1,7 @@
-/* hallmark v2.0.0 · theme: seshat-ledger · genre: modern-minimal · shape: workbench · modes: light+dark */
-/* critique: dense ledger instrument panel, tabular numerals hero, notch-and-cord motif, zero ai-slop */
-/* waive: none */
+/* Hallmark · v2.0.0 · theme: seshat-ledger · genre: modern-minimal · shape: app screen · modes: light+dark · redesign: full */
+/* Hallmark · critique: P4 H5 E4 S5 R4 V4 · weakest: restraint, remove the verification banner and keep the planner in focus */
+/* Hallmark · waive 47b · notch ticks render real habit records · the notch rib is the project’s data motif */
+/* Hallmark · dismissed F1 · the warning reads JSX attribute quotes, not visible interface copy */
 
 @import "tailwindcss";
 @import "./tokens.css";
@@ -19,7 +20,102 @@
   --color-accent: var(--color-accent);
   --color-accent-ink: var(--color-accent-ink);
   --color-focus: var(--color-focus);
+  --color-scrim: var(--color-scrim);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+* {
+  scrollbar-color: var(--color-rule-strong) var(--color-paper-2);
+}
+
+.app-header {
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.app-header > div:last-child {
+  min-width: 0;
+}
+
+.app-header > div:last-child > button {
+  min-height: 44px;
+}
+
+.app-primary-nav {
+  min-width: 0;
+}
+
+.app-nav-item {
+  min-height: 44px;
+  white-space: nowrap;
+  transition: color var(--dur-short) var(--ease-ledger), background-color var(--dur-short) var(--ease-ledger);
+}
+
+.app-nav-item[aria-current="page"] {
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+
+.app-shortcuts kbd {
+  min-width: 2rem;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 60rem) {
+  .app-header {
+    padding-inline: var(--space-md);
+  }
+
+  .app-header > div:last-child {
+    flex: 1 0 100%;
+    justify-content: space-between;
+  }
+
+  .app-primary-nav {
+    flex: 1 1 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .app-main {
+    padding-inline: var(--space-md);
+  }
+}
+
+@media (max-width: 40rem) {
+  .app-header {
+    padding-inline: var(--space-sm);
+  }
+
+  .app-header > div:last-child {
+    gap: var(--space-xs);
+  }
+
+  .app-nav-item {
+    min-height: 44px;
+    padding-inline: var(--space-xs);
+  }
+
+  .app-main {
+    padding-inline: var(--space-sm);
+    padding-block: var(--space-lg);
+  }
+
+  .app-shortcuts {
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .app-footer {
+    gap: var(--space-xs);
+  }
 }

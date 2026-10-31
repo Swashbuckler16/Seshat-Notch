@@ -23,19 +23,19 @@ interface QuickAddPlaygroundProps {
 
 const PRESET_EXAMPLES = [
   {
-    label: 'PRD Official Example (Section 6.9)',
+    label: 'Detection task',
     text: 'Write Kerberoasting detection card #heimdall >baseline ~90m !high @fri +rules:2',
   },
   {
-    label: 'Security+ Study Task',
+    label: 'Study task',
     text: 'Review Chapter 4 Cryptography & PKI architectures #secplus ~75m !med @today',
   },
   {
-    label: 'Incident Simulation Task',
+    label: 'Lab exercise',
     text: 'Simulate LSASS memory dumping using procdump #heimdall >attack_detect ~60m !urgent @tomorrow',
   },
   {
-    label: 'Target-Led Daily Task',
+    label: 'Daily target',
     text: 'Complete Network Security practice quiz #secplus ~45m !high @fri +questions:50',
   },
 ];
@@ -44,6 +44,7 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
   const [inputText, setInputText] = useState(PRESET_EXAMPLES[0].text);
   const [parsed, setParsed] = useState<ParsedQuickAdd>(() => parseQuickAdd(PRESET_EXAMPLES[0].text));
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Live queries
   const recentTasks = useLiveQuery(
@@ -84,6 +85,7 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
   const handleExecuteSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim()) return;
+    setSaveError(null);
 
     try {
       let targetId: string | undefined;
@@ -121,6 +123,7 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
       setTimeout(() => setSaveSuccess(null), 3000);
     } catch (err) {
       console.error(err);
+      setSaveError('The task could not be saved. Check your local data and try again.');
     }
   };
 
@@ -131,34 +134,31 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
         <div>
           <div className="flex items-center gap-2">
             <Command className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="font-semibold text-sm">Quick-Add Grammar Engine & Keyboard Palette</h3>
-            <span className="font-mono text-[11px] px-1.5 py-0.2 bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded text-[var(--color-accent)] font-semibold">
-              PRD 6.9
-            </span>
+            <h3 className="font-semibold text-sm">Quick add</h3>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-            Fast manual entry is core to Seshat Notch. Type or paste commands; tokens are parsed in real time with live preview.
+            Write a task in one line. Add a project, date, estimate, or target when you need one.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="primary" onClick={onOpenQuickAddModal}>
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Launch Quick-Add Palette</span>
-            <kbd className="ml-1.5 px-1 py-0.2 text-[10px] bg-black/20 rounded font-mono">Ctrl+K</kbd>
+            <span>Open quick add</span>
+            <kbd className="ml-1.5 px-1 py-0.2 text-[11px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">Ctrl+K</kbd>
           </Button>
         </div>
       </div>
 
       {/* Preset Example Picker */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="text-[var(--color-ink-muted)] font-mono text-[11px]">Test Presets:</span>
+        <span className="text-[var(--color-ink-muted)] text-xs">Examples:</span>
         {PRESET_EXAMPLES.map((ex, i) => (
           <button
             key={i}
             type="button"
             onClick={() => handleSelectPreset(ex.text)}
-            className={`px-2.5 py-1 rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-[11px] font-mono transition-opacity ${
+            className={`px-2.5 py-1 rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-[11px] transition-opacity ${
               inputText === ex.text
                 ? 'bg-[var(--color-accent)] text-[var(--color-accent-ink)] font-semibold'
                 : 'bg-[var(--color-paper-2)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
@@ -173,7 +173,7 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
       <form onSubmit={handleExecuteSave} className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold text-[var(--color-ink)] flex items-center justify-between">
-            <span>Quick-Add Grammar Input:</span>
+            <span>Task details</span>
             <span className="font-mono text-[11px] text-[var(--color-ink-muted)]">
               Tokens: #project &gt;milestone ~estimate !priority @date +target:value
             </span>
@@ -193,57 +193,62 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
         </div>
 
         {saveSuccess && (
-          <div className="p-2.5 bg-[var(--color-status-on-track-bg)] text-[var(--color-status-on-track)] rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex items-center gap-2 text-xs font-mono font-medium">
+          <div className="p-2.5 bg-[var(--color-status-on-track-bg)] text-[var(--color-status-on-track)] rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex items-center gap-2 text-xs font-medium">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{saveSuccess}</span>
           </div>
+        )}
+        {saveError && (
+          <p role="alert" className="p-2.5 text-xs text-[var(--color-status-behind)] bg-[var(--color-status-behind-bg)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
+            {saveError}
+          </p>
         )}
 
         {/* Live Parse Decomposition Inspector (PRD 6.9 Live preview before saving) */}
         <div className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-xs)] p-3.5 flex flex-col gap-3">
           <div className="flex items-center justify-between hairline-b pb-2">
             <span className="font-semibold text-xs text-[var(--color-ink)]">
-              Live Token Decomposition:
+              Preview
             </span>
-            <span className="font-mono text-[11px] text-[var(--color-ink-muted)]">
-              {parsed.tokens.length} parsed tokens
+            <span className="text-[11px] text-[var(--color-ink-muted)]">
+              {parsed.tokens.length} details found
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs font-mono">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-xs">
             {/* Title */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] col-span-2">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">Title</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Task</span>
               <span className="font-medium text-[var(--color-ink)] truncate block">{parsed.title}</span>
             </div>
 
             {/* Project */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">#Project / Area</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Project</span>
               <span className="font-medium text-[var(--color-accent)] truncate block">
-                {matchedProject ? matchedProject.title : parsed.projectQuery ? `#${parsed.projectQuery}` : 'Inbox'}
+              {matchedProject ? matchedProject.title : parsed.projectQuery ? `#${parsed.projectQuery}` : 'No project'}
               </span>
             </div>
 
             {/* Milestone */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">&gt;Milestone</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Milestone</span>
               <span className="font-medium text-[var(--color-ink)] truncate block">
-                {matchedMilestone ? matchedMilestone.title : parsed.milestoneQuery ? `>${parsed.milestoneQuery}` : '—'}
+                {matchedMilestone ? matchedMilestone.title : parsed.milestoneQuery ? `>${parsed.milestoneQuery}` : 'None'}
               </span>
             </div>
 
             {/* Estimate */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">~Estimate</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Estimate</span>
               <span className="font-medium text-[var(--color-ink)] tabular-figure block">
-                {parsed.estimateMinutes ? `${parsed.estimateMinutes}m` : '—'}
+                {parsed.estimateMinutes ? `${parsed.estimateMinutes}m` : 'None'}
               </span>
             </div>
 
             {/* Priority */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">!Priority</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Priority</span>
               <span className="font-medium text-[var(--color-status-at-risk)] capitalize block">
                 {parsed.priority || 'Medium'}
               </span>
@@ -251,7 +256,7 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
 
             {/* Date */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">@Date</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Date</span>
               <span className="font-medium text-[var(--color-ink)] tabular-figure truncate block">
                 {parsed.scheduleDateLabel}
               </span>
@@ -259,9 +264,9 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
 
             {/* Target Metric */}
             <div className="p-2 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
-              <span className="text-[10px] text-[var(--color-ink-subtle)] block">+Metric</span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)] block">Target</span>
               <span className="font-medium text-[var(--color-accent)] tabular-figure block">
-                {parsed.targetMetric ? `${parsed.targetMetric.value} ${parsed.targetMetric.unit}` : '—'}
+                {parsed.targetMetric ? `${parsed.targetMetric.value} ${parsed.targetMetric.unit}` : 'None'}
               </span>
             </div>
           </div>
@@ -273,17 +278,19 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
         <div className="p-3 bg-[var(--color-paper-2)] hairline-b flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ListTodo className="w-4 h-4 text-[var(--color-accent)]" />
-            <h4 className="font-semibold text-xs">Recent Tasks in Ledger</h4>
+            <h4 className="font-semibold text-xs">Recent tasks</h4>
           </div>
-          <span className="font-mono text-[11px] text-[var(--color-ink-muted)]">
-            {recentTasks?.length ?? 0} total active tasks
+          <span className="text-[11px] text-[var(--color-ink-muted)]">
+            {recentTasks === undefined ? 'Loading…' : `${recentTasks.length} tasks`}
           </span>
         </div>
 
         <div className="divide-y divide-[var(--color-rule)]">
-          {(!recentTasks || recentTasks.length === 0) ? (
+          {recentTasks === undefined ? (
+            <div role="status" className="p-5 text-xs text-[var(--color-ink-muted)]">Loading tasks…</div>
+          ) : recentTasks.length === 0 ? (
             <div className="p-6 text-center text-xs text-[var(--color-ink-muted)]">
-              No tasks logged yet. Try typing a command above and clicking Save!
+              No tasks yet. Add one using the field above.
             </div>
           ) : (
             recentTasks.slice(0, 6).map((task) => (
@@ -301,11 +308,11 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
                     <span className="text-xs font-medium text-[var(--color-ink)] block">
                       {task.title}
                     </span>
-                    <div className="flex items-center gap-2 text-[11px] font-mono text-[var(--color-ink-muted)] mt-0.5">
+                    <div className="flex items-center gap-2 text-[11px] text-[var(--color-ink-muted)] mt-0.5">
                       {task.projectId && (
                         <span className="inline-flex items-center gap-1 text-[var(--color-accent)]">
                           <Folder className="w-3 h-3" />
-                          <span>{task.projectId.replace('proj_', '').replace('goal_', '')}</span>
+                          <span>{projects?.find((project) => project.id === task.projectId)?.title || 'Project unavailable'}</span>
                         </span>
                       )}
                       {task.scheduleDate && (
@@ -325,7 +332,7 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[var(--color-ink-muted)] uppercase">
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[var(--color-ink-muted)] capitalize">
                     {task.priority}
                   </span>
                   <StatusBadge status={task.status === 'done' ? 'on_track' : 'paused'} />

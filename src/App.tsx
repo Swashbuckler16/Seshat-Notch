@@ -6,14 +6,12 @@ import { ComponentShowcase } from './components/ComponentShowcase';
 import { QuickAddPlayground } from './components/QuickAddPlayground';
 import { QuickAddModal } from './components/QuickAddModal';
 import { PlannerView } from './components/planner/PlannerView';
-import { StatusBadge } from './components/StatusBadge';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
   CheckCircle2,
   ArrowRight,
   Layers,
-  ShieldCheck,
   Terminal,
   Palette,
   Database,
@@ -33,100 +31,100 @@ interface PhaseInfo {
 const PHASES: PhaseInfo[] = [
   {
     number: 1,
-    title: 'Architecture, Repository & Hallmark Design Truth',
-    scope: 'Vite + React 19 + TypeScript + Tailwind v4, design.md source of truth, OKLCH tokens, base rules, audit gates.',
-    outcome: 'v0.1 Foundation, 100% Hallmark compliance',
+    title: 'Project foundation',
+    scope: 'Set up the app, its visual system, and the rules used to keep the interface consistent.',
+    outcome: 'A working foundation for the planner',
     status: 'completed',
   },
   {
     number: 2,
-    title: 'Domain Model, Typed Storage & Change Log',
-    scope: 'Typed entities for all PRD 5.2 models, Dexie/SQLite offline engine, append-only Change Log, Heimdall SOC Lab seed.',
-    outcome: 'Reliable local-first persistence with auditability & undo',
+    title: 'Local data and change history',
+    scope: 'Create the records the planner needs and keep a history of changes.',
+    outcome: 'Project data saved on this device',
     status: 'completed',
   },
   {
     number: 3,
-    title: 'Design System Primitives & Seshat Brand Motif',
-    scope: 'Notch rib generator, measuring cord progress bars, instant focus inputs, single-primary buttons, hairline ledger tables.',
-    outcome: 'Tactile ledger component library',
+    title: 'Interface building blocks',
+    scope: 'Create the planner’s buttons, fields, progress marks, and tables.',
+    outcome: 'A consistent set of interface controls',
     status: 'completed',
   },
   {
     number: 4,
-    title: 'Quick-Add Grammar Engine & Keyboard Palette',
-    scope: 'Parser for #project >milestone ~estimate !priority @date +metric:value grammar with live preview & Ctrl+K command palette.',
-    outcome: '1-keystroke rapid entry on Windows (PRD 6.9 & TK-3)',
+    title: 'Quick add and keyboard shortcuts',
+    scope: 'Add tasks from a short command, with a live preview and a Ctrl+K shortcut.',
+    outcome: 'Create a task without leaving the planner',
     status: 'completed',
   },
   {
     number: 5,
-    title: 'Areas, Projects & Milestone Planner',
-    scope: 'Area tree organizer, Project/Goal inspector (why, criteria, dates), Milestones with finish-to-start dependencies.',
-    outcome: 'Hierarchical project architecture',
+    title: 'Areas, projects, and milestones',
+    scope: 'Group projects by area, record what success means, and order milestones by dependency.',
+    outcome: 'Plan a project from first step to finish',
     status: 'completed',
   },
   {
     number: 6,
-    title: 'Multi-Horizon Planning & Cascade Engine',
-    scope: 'Target authoring at Month/Week/Day horizons, cascade distribution helper, copy-forward period tool, re-plan shift tool.',
-    outcome: 'Seamless multi-horizon planning',
+    title: 'Planning across time periods',
+    scope: 'Set monthly, weekly, and daily targets; carry plans forward or adjust them.',
+    outcome: 'Connect longer plans to daily work',
     status: 'in_progress',
   },
   {
     number: 7,
-    title: 'Today View & Rapid Execution Strip',
-    scope: 'Morning summary (<5s scan), targets & habits due today, planned vs logged time, 1-keystroke logger, day timeline.',
-    outcome: 'Instant daily execution cockpit',
+    title: 'Today view',
+    scope: 'See what is due, what you planned, and the time you have logged today.',
+    outcome: 'A focused view of today’s work',
     status: 'queued',
   },
   {
     number: 8,
-    title: 'Carry-Over Inbox & Periodic Reviews',
-    scope: 'Carry-over inbox (reschedule, split, drop with reason), Daily/Weekly/Monthly reviews with mood & energy ratings.',
-    outcome: 'Zero silent plan drift',
+    title: 'Carry-over and reviews',
+    scope: 'Review unfinished work and decide whether to reschedule, split, or remove it.',
+    outcome: 'Make a clear plan for what comes next',
     status: 'queued',
   },
   {
     number: 9,
-    title: 'Habit Tracker & Fair Streak Logic',
-    scope: 'Schedules (daily, weekdays, N/wk), fair streak engine (skip/vacation pauses, non-breaking rest days), year heatmap.',
-    outcome: 'Trustworthy habit ledger',
+    title: 'Habits and routines',
+    scope: 'Track routines on flexible schedules, with rest days and pauses accounted for.',
+    outcome: 'A record that reflects how you actually work',
     status: 'queued',
   },
   {
     number: 10,
-    title: 'Time Tracker & Deep Work Focus Mode',
-    scope: 'Stopwatch timer, manual duration logging, focus intervals (work/break), categorization (deep, shallow, learning).',
-    outcome: 'Rigorous time attribution',
+    title: 'Time tracking and focus sessions',
+    scope: 'Track time with a timer or manual entries, and record focused work and breaks.',
+    outcome: 'See where your time went',
     status: 'queued',
   },
   {
     number: 11,
-    title: 'Pure Metric Engine & Formula Inspector',
-    scope: 'Deterministic pure functions: Progress %, Expected %, Schedule ratio, 14-day velocity forecast date range, clickable formula inspector.',
-    outcome: 'Traceable math across all numbers',
+    title: 'Progress calculations',
+    scope: 'Calculate progress and pace from your plans, with an explanation for each figure.',
+    outcome: 'Understand how each figure is calculated',
     status: 'queued',
   },
   {
     number: 12,
-    title: 'Comprehensive Multi-Tab Dashboard & SVG Charts',
-    scope: 'Overview, Execution, Projects, Goals, Habits, Time, Reviews, Insights tabs with inline custom SVG sparklines and burn-ups.',
-    outcome: 'Complete central instrument panel',
+    title: 'Overview and reports',
+    scope: 'Bring projects, goals, habits, time, and reviews into one place with clear charts.',
+    outcome: 'A useful overview of your planning data',
     status: 'queued',
   },
   {
     number: 13,
-    title: 'Data Ownership, Import/Export & Recovery Bin',
-    scope: 'Export to JSON/CSV/Markdown, plan import, soft-delete recovery bin, automatic snapshot backups.',
-    outcome: '100% local user ownership',
+    title: 'Import, export, and recovery',
+    scope: 'Move your plans between formats, restore removed items, and save backups.',
+    outcome: 'Keep control of your planning data',
     status: 'queued',
   },
   {
     number: 14,
-    title: 'Windows Desktop Shell & Offline Packaging',
-    scope: 'System tray integration, global quick-add shortcut, offline local notifications, build release artifacts.',
-    outcome: 'Native Windows desktop packaging',
+    title: 'Windows app packaging',
+    scope: 'Prepare a desktop release with a system tray, quick-add shortcut, and local reminders.',
+    outcome: 'A planner that runs as a Windows app',
     status: 'queued',
   },
 ];
@@ -148,6 +146,7 @@ export const App: React.FC = () => {
       const isInput =
         target.tagName === 'INPUT' ||
         target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
         target.isContentEditable;
 
       // Ctrl+K or Cmd+K
@@ -169,17 +168,14 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] flex flex-col">
+    <div className="app-shell min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] flex flex-col">
       {/* Top Ledger Chrome */}
-      <header className="hairline-b bg-[var(--color-paper)] sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+      <header className="app-header hairline-b bg-[var(--color-paper)] sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <BrandLogo size={28} />
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-base tracking-tight">Seshat Notch</span>
-              <span className="font-mono text-xs px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-accent)] font-semibold">
-                Phase 5 Completed
-              </span>
             </div>
             <span className="text-xs text-[var(--color-ink-muted)]">
               Every day, a notch. Every goal, measured.
@@ -198,37 +194,40 @@ export const App: React.FC = () => {
           >
             <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
             <span>Quick Add</span>
-            <kbd className="ml-1 px-1 py-0.2 text-[10px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">
+            <kbd className="ml-1 px-1 py-0.2 text-[11px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">
               Ctrl+K
             </kbd>
           </Button>
 
           {/* Navigation Pill Switcher */}
-          <div className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs">
+          <nav className="app-primary-nav flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs" aria-label="Main navigation">
             <button
               type="button"
               onClick={() => setActiveTab('planner')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+              aria-current={activeTab === 'planner' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
                 activeTab === 'planner' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
-              <span>Planner</span>
+              <span>Projects</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('quickadd')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+              aria-current={activeTab === 'quickadd' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
                 activeTab === 'quickadd' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
               <Command className="w-3.5 h-3.5" />
-              <span>Quick-Add Engine</span>
+              <span>Quick add</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('components')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+              aria-current={activeTab === 'components' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
                 activeTab === 'components' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
@@ -238,48 +237,33 @@ export const App: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('storage')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+              aria-current={activeTab === 'storage' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
                 activeTab === 'storage' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
               <Database className="w-3.5 h-3.5" />
-              <span>Storage</span>
+              <span>Data</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('roadmap')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+              aria-current={activeTab === 'roadmap' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
                 activeTab === 'roadmap' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Roadmap</span>
             </button>
-          </div>
+          </nav>
 
           <ThemeToggle />
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-6 flex flex-col gap-8">
-        {/* Hallmark Floor & Verification Banner */}
-        <section className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 hairline-b pb-2.5">
-            <div className="flex items-center gap-2 text-xs font-mono">
-              <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
-              <span className="font-semibold text-[var(--color-ink)]">Hallmark v2.0.0 Verification</span>
-              <span className="text-[var(--color-ink-muted)]">· Phase 5: Areas, Projects & Milestone Planner</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <StatusBadge status="on_track" ratio={1.0} />
-            </div>
-          </div>
-          <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-            Hierarchical project architecture active. Area tree organizer, Project inspector (why, criteria, targets), and Milestones with finish-to-start dependencies &amp; weight distribution.
-          </p>
-        </section>
-
+      <main className="app-main flex-1 max-w-6xl w-full mx-auto px-6 py-6 flex flex-col gap-8">
         {/* Tab 1: Areas, Projects & Milestone Planner */}
         {activeTab === 'planner' && (
           <section>
@@ -314,12 +298,12 @@ export const App: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-[var(--color-accent)]" />
-                <h2 className="text-sm font-semibold tracking-tight uppercase text-[var(--color-ink-muted)]">
-                  Implementation Roadmap (14 Structured Phases)
+                  <h2 className="text-sm font-semibold tracking-tight text-[var(--color-ink-muted)]">
+                  Development plan
                 </h2>
               </div>
-              <span className="text-xs text-[var(--color-ink-muted)] font-mono">
-                Complete one phase at a time · Commit & push per phase
+              <span className="text-xs text-[var(--color-ink-muted)]">
+                Current phase: multi-period planning
               </span>
             </div>
 
@@ -329,8 +313,8 @@ export const App: React.FC = () => {
                   <thead>
                     <tr className="bg-[var(--color-paper-2)] hairline-b text-[var(--color-ink-muted)] font-medium">
                       <th className="py-2.5 px-3 w-16">Phase</th>
-                      <th className="py-2.5 px-3">Title & Deliverables</th>
-                      <th className="py-2.5 px-3 hidden md:table-cell">Target Outcome</th>
+                      <th className="py-2.5 px-3">What is included</th>
+                      <th className="py-2.5 px-3 hidden md:table-cell">Result</th>
                       <th className="py-2.5 px-3 w-28 text-right">Status</th>
                     </tr>
                   </thead>
@@ -340,8 +324,7 @@ export const App: React.FC = () => {
                       return (
                         <tr
                           key={phase.number}
-                          onClick={() => setSelectedPhase(phase.number)}
-                          className={`cursor-pointer hover:bg-[var(--color-paper-2)] transition-opacity ${
+                          className={`hover:bg-[var(--color-paper-2)] transition-opacity ${
                             isSelected ? 'bg-[var(--color-paper-2)] font-medium' : ''
                           }`}
                         >
@@ -349,12 +332,17 @@ export const App: React.FC = () => {
                             #{phase.number.toString().padStart(2, '0')}
                           </td>
                           <td className="py-2.5 px-3">
-                            <div className="font-semibold text-[var(--color-ink)]">{phase.title}</div>
+                            <button
+                              type="button"
+                              aria-pressed={isSelected}
+                              onClick={() => setSelectedPhase(phase.number)}
+                              className="font-semibold text-left text-[var(--color-ink)] hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus)]"
+                            >{phase.title}</button>
                             <div className="text-[11px] text-[var(--color-ink-muted)] mt-0.5 line-clamp-1">
                               {phase.scope}
                             </div>
                           </td>
-                          <td className="py-2.5 px-3 hidden md:table-cell text-[var(--color-ink-muted)] font-mono text-[11px]">
+                          <td className="py-2.5 px-3 hidden md:table-cell text-[var(--color-ink-muted)] text-xs">
                             {phase.outcome}
                           </td>
                           <td className="py-2.5 px-3 text-right">
@@ -371,7 +359,7 @@ export const App: React.FC = () => {
                               </span>
                             )}
                             {phase.status === 'queued' && (
-                              <span className="text-[var(--color-ink-subtle)] font-mono text-[11px]">
+                              <span className="text-[var(--color-ink-subtle)] text-[11px]">
                                 Queued
                               </span>
                             )}
@@ -387,36 +375,35 @@ export const App: React.FC = () => {
             {selectedPhase && (
               <section className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-2">
                 <div className="flex items-center justify-between hairline-b pb-2">
-                  <span className="text-xs font-mono font-semibold text-[var(--color-accent)]">
+                  <span className="text-xs font-semibold text-[var(--color-accent)]">
                     Phase {selectedPhase.toString().padStart(2, '0')}: {PHASES[selectedPhase - 1].title}
                   </span>
-                  <span className="text-xs font-mono text-[var(--color-ink-muted)]">
-                    Status: {PHASES[selectedPhase - 1].status.toUpperCase()}
+                  <span className="text-xs text-[var(--color-ink-muted)]">
+                    {PHASES[selectedPhase - 1].status === 'in_progress' ? 'In progress' : PHASES[selectedPhase - 1].status === 'completed' ? 'Complete' : 'Planned'}
                   </span>
                 </div>
                 <p className="text-xs text-[var(--color-ink)] leading-relaxed">
                   {PHASES[selectedPhase - 1].scope}
                 </p>
-                <div className="text-xs text-[var(--color-ink-muted)] font-mono">
-                  Target Outcome: {PHASES[selectedPhase - 1].outcome}
+                <div className="text-xs text-[var(--color-ink-muted)]">
+                  Result: {PHASES[selectedPhase - 1].outcome}
                 </div>
               </section>
             )}
           </section>
         )}
 
-        {/* Windows Terminal & Hotkey Readiness */}
-        <section className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-sm)] p-3 flex items-center justify-between text-xs text-[var(--color-ink-muted)] font-mono">
+        <aside aria-label="Keyboard shortcuts" className="app-shortcuts hairline-t pt-3 flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-[var(--color-accent)]" />
-            <span>Windows Ergonomics: Command palette active via Ctrl+K and single-key 'N'</span>
+            <span>Open quick add</span>
           </div>
           <div className="flex items-center gap-2">
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[10px]">Ctrl+K</kbd>
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[10px]">N</kbd>
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[10px]">Esc</kbd>
           </div>
-        </section>
+        </aside>
       </main>
 
       {/* Quick Add Command Palette Modal */}
@@ -426,9 +413,9 @@ export const App: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
-        <div>Seshat Notch — Every day, a notch. Every goal, measured.</div>
-        <div className="font-mono">Local-First · Windows Native Shell · 100% Offline Capable</div>
+      <footer className="app-footer hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
+<div>Seshat Notch: Every day, a notch. Every goal, measured.</div>
+        <div>Plans stay on this device</div>
       </footer>
     </div>
   );

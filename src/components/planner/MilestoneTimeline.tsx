@@ -84,8 +84,8 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
         <div className="flex items-center gap-2">
           <GitCommit className="w-4 h-4 text-[var(--color-accent)]" />
           <div>
-            <h3 className="font-semibold text-xs tracking-tight uppercase text-[var(--color-ink-muted)]">
-              Phases & Finish-to-Start Dependencies (PL-3)
+            <h3 className="font-semibold text-xs tracking-tight text-[var(--color-ink-muted)]">
+              Milestones
             </h3>
             <span className="text-xs text-[var(--color-ink)] font-medium">
               {projectTitle}
@@ -95,7 +95,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-xs font-mono">
-            <span className="text-[var(--color-ink-muted)]">Total Weight:</span>
+            <span className="text-[var(--color-ink-muted)]">Total weight:</span>
             <span
               className={`font-semibold tabular-figure ${
                 totalWeight === 100
@@ -106,13 +106,13 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
               {totalWeight}%
             </span>
             <span className="text-[10px] text-[var(--color-ink-subtle)]">
-              ({milestones?.length ?? 0} phases)
+              ({milestones?.length ?? 0})
             </span>
           </div>
 
           <Button size="sm" variant="secondary" onClick={() => setIsAddModalOpen(true)}>
             <Plus className="w-3.5 h-3.5" />
-            <span>Add Phase</span>
+            <span>Add milestone</span>
           </Button>
         </div>
       </div>
@@ -133,7 +133,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
       <div className="flex flex-col divide-y divide-[var(--color-rule)]">
         {(!milestones || milestones.length === 0) ? (
           <div className="py-8 text-center text-xs text-[var(--color-ink-muted)]">
-            No milestones or phases defined for this effort. Click "Add Phase" to build your timeline.
+            No milestones yet. Add one to map the work ahead.
           </div>
         ) : (
           milestones.map((ms, idx) => {
@@ -147,8 +147,8 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
               >
                 {/* Left: Step Number, Title, Dependency */}
                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[var(--color-ink-muted)] shrink-0 mt-0.5">
-                    P{idx + 1}
+                  <span className="text-xs tabular-figure px-1.5 py-0.5 rounded bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[var(--color-ink-muted)] shrink-0 mt-0.5">
+                    {String(idx + 1).padStart(2, '0')}
                   </span>
 
                   <div className="flex flex-col min-w-0 flex-1">
@@ -160,7 +160,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
 
                     {/* Predecessor link */}
                     {predecessor && (
-                      <div className="flex items-center gap-1 text-[11px] font-mono text-[var(--color-accent)] mt-0.5">
+                      <div className="flex items-center gap-1 text-[11px] text-[var(--color-accent)] mt-0.5">
                         <ArrowRight className="w-3 h-3 shrink-0" />
                         <span className="truncate">Depends on: {predecessor.title}</span>
                       </div>
@@ -180,8 +180,8 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
 
                 {/* Right: Weight, Status selector, Delete */}
                 <div className="flex items-center gap-3 shrink-0 justify-end">
-                  <span className="font-mono text-xs tabular-figure text-[var(--color-ink-muted)] px-1.5 py-0.5 bg-[var(--color-paper-2)] rounded border border-[var(--color-rule)]">
-                    Weight: {ms.weight}%
+                  <span className="text-xs text-[var(--color-ink-muted)] px-1.5 py-0.5 bg-[var(--color-paper-2)] rounded border border-[var(--color-rule)]">
+                    Weight: <span className="font-mono tabular-figure">{ms.weight}%</span>
                   </span>
 
                   {/* Status Toggle Button */}

@@ -31,6 +31,8 @@ export const StorageInspector: React.FC = () => {
     progressLogs: progressLogs?.length ?? 0,
     changeLogs: changeLogs?.length ?? 0,
   };
+  const isLoading = [areas, projects, milestones, targets, tasks, habits, routines, progressLogs, changeLogs]
+    .some((records) => records === undefined);
 
   const notify = (msg: string) => {
     setStatusMessage(msg);
@@ -38,9 +40,10 @@ export const StorageInspector: React.FC = () => {
   };
 
   const handleSeed = async (force: boolean) => {
+    if (force && !window.confirm('This replaces all planning data on this device with sample data. Continue?')) return;
     try {
       await seedDatabase(force);
-      notify(force ? 'Database reset and re-seeded with Heimdall SOC Lab data.' : 'Database seeded successfully.');
+      notify(force ? 'All local data was replaced with sample data.' : 'Sample data is ready.');
     } catch (err: unknown) {
       notify(`Seed error: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -52,9 +55,9 @@ export const StorageInspector: React.FC = () => {
       const activeTarget = targets?.find(t => t.id === 'tgt_month_11_techniques');
       if (activeTarget) {
         await domainService.updateTargetProgress(activeTarget.id, 1, 'Logged 1 simulated technique via Storage Inspector test');
-        notify(`Target updated: ${activeTarget.title} (+1 logged)`);
+        notify(`Progress updated for ${activeTarget.title}.`);
       } else {
-        notify('Active target not found. Please click "Seed Real Data" first.');
+        notify('No sample target found. Restore the sample data to begin.');
       }
     } catch (err: unknown) {
       notify(`Mutation error: ${err instanceof Error ? err.message : String(err)}`);
@@ -62,14 +65,17 @@ export const StorageInspector: React.FC = () => {
   };
 
   const handleTestDropWithoutReason = async () => {
+    const task = tasks?.[0];
+    if (!task) {
+      notify(tasks === undefined ? 'Tasks are still loading. Try again in a moment.' : 'Add a task before trying this check.');
+      return;
+    }
+
     try {
-      const task = tasks?.[0];
-      if (task) {
         // Should throw per PRD TR-3
         await domainService.setTaskStatus(task.id, 'dropped');
-      }
     } catch (err: unknown) {
-      notify(`Expected TR-3 validation caught: ${err instanceof Error ? err.message : String(err)}`);
+      notify('The change was blocked because it has no reason.');
     }
   };
 
@@ -88,13 +94,13 @@ export const StorageInspector: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm">IndexedDB Local Storage & Change Log Engine</h3>
-              <span className="font-mono text-[11px] px-1.5 py-0.2 bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded text-[var(--color-accent)]">
-                Dexie v4 · Offline
+              <h3 className="font-semibold text-sm">Data on this device</h3>
+              <span className="text-[11px] px-1.5 py-0.2 bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded text-[var(--color-accent)]">
+                Local storage
               </span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)]">
-              All writes append an immutable record to the change log for auditability, conflict-free sync, and undo.
+              Review the records saved in this browser and the changes made to them.
             </p>
           </div>
         </div>
@@ -103,18 +109,18 @@ export const StorageInspector: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSeed(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--color-paper-3)] hover:bg-[var(--color-rule)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-ink)]"
+            className="min-h-11 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--color-paper-3)] hover:bg-[var(--color-rule)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-ink)]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset / Re-Seed Data</span>
+            <span>Replace data with sample</span>
           </button>
           <button
             type="button"
             onClick={handleTestMutation}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--color-accent)] text-[var(--color-accent-ink)] rounded-[var(--radius-xs)] hover:opacity-90"
+            className="min-h-11 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--color-accent)] text-[var(--color-accent-ink)] rounded-[var(--radius-xs)] hover:opacity-90"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Log Test Technique (+1)</span>
+            <span>Update sample progress</span>
           </button>
         </div>
       </div>
@@ -130,13 +136,13 @@ export const StorageInspector: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         {[
           { label: 'Projects & Goals', count: counts.projects, entity: 'project' },
-          { label: 'Phases & Milestones', count: counts.milestones, entity: 'milestone' },
-          { label: 'Targets (M/W/D)', count: counts.targets, entity: 'target' },
-          { label: 'Tasks & Subtasks', count: counts.tasks, entity: 'task' },
+          { label: 'Milestones', count: counts.milestones, entity: 'milestone' },
+          { label: 'Targets', count: counts.targets, entity: 'target' },
+          { label: 'Tasks', count: counts.tasks, entity: 'task' },
           { label: 'Habits & Routines', count: counts.habits + counts.routines, entity: 'habit' },
           { label: 'Progress Logs', count: counts.progressLogs, entity: 'log' },
-          { label: 'Life Areas', count: counts.areas, entity: 'area' },
-          { label: 'Total Change Logs', count: counts.changeLogs, entity: 'change' },
+          { label: 'Areas', count: counts.areas, entity: 'area' },
+          { label: 'Changes', count: counts.changeLogs, entity: 'change' },
         ].map((item, idx) => (
           <div
             key={idx}
@@ -145,9 +151,9 @@ export const StorageInspector: React.FC = () => {
             <span className="text-[11px] text-[var(--color-ink-muted)] truncate">{item.label}</span>
             <div className="flex items-baseline justify-between mt-1">
               <span className="tabular-figure font-mono text-lg font-semibold text-[var(--color-ink)]">
-                {item.count}
+                {isLoading ? '…' : item.count}
               </span>
-              <span className="text-[10px] text-[var(--color-ink-subtle)] font-mono">stored</span>
+              <span className="text-[11px] text-[var(--color-ink-subtle)]">stored</span>
             </div>
           </div>
         ))}
@@ -158,20 +164,20 @@ export const StorageInspector: React.FC = () => {
         <div className="p-3 bg-[var(--color-paper-2)] hairline-b flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <History className="w-4 h-4 text-[var(--color-accent)]" />
-            <span className="text-xs font-semibold">Append-Only Change Log (PRD Section 10.3)</span>
+              <span className="text-xs font-semibold">Change history</span>
             <span className="tabular-figure font-mono text-[11px] text-[var(--color-ink-muted)]">
-              ({filteredChangeLogs.length} events)
+              ({isLoading ? 'loading' : `${filteredChangeLogs.length} changes`})
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-[var(--color-ink-muted)] text-[11px]">Filter:</span>
+            <span className="text-[var(--color-ink-muted)] text-[11px]">Show:</span>
             <select
               value={selectedEntityFilter}
               onChange={(e) => setSelectedEntityFilter(e.target.value)}
               className="bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] px-2 py-1 text-xs text-[var(--color-ink)]"
             >
-              <option value="all">All Entities</option>
+              <option value="all">All records</option>
               <option value="project">Project</option>
               <option value="milestone">Milestone</option>
               <option value="target">Target</option>
@@ -182,10 +188,10 @@ export const StorageInspector: React.FC = () => {
             <button
               type="button"
               onClick={handleTestDropWithoutReason}
-              className="px-2 py-1 text-[11px] border border-[var(--color-rule)] rounded-[var(--radius-xs)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink-muted)]"
-              title="Tests PRD TR-3: Dropping requires an explicit reason"
+              className="min-h-11 whitespace-nowrap px-2 py-1 text-[11px] border border-[var(--color-rule)] rounded-[var(--radius-xs)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink-muted)]"
+              title="Try removing a task without a reason"
             >
-              Test TR-3 Drop Guard
+              Check drop rule
             </button>
           </div>
         </div>
@@ -194,19 +200,21 @@ export const StorageInspector: React.FC = () => {
         <div className="overflow-x-auto max-h-80">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="hairline-b bg-[var(--color-paper-2)] text-[var(--color-ink-muted)] font-mono text-[11px]">
-                <th className="py-2 px-3 w-32">Timestamp (UTC)</th>
-                <th className="py-2 px-3 w-24">Entity</th>
+              <tr className="hairline-b bg-[var(--color-paper-2)] text-[var(--color-ink-muted)] text-xs">
+                <th className="py-2 px-3 w-32">Time (UTC)</th>
+                <th className="py-2 px-3 w-24">Record</th>
                 <th className="py-2 px-3 w-24">Action</th>
-                <th className="py-2 px-3">Diff / Values</th>
-                <th className="py-2 px-3">Reason / Audit Trail</th>
+                <th className="py-2 px-3">Changed value</th>
+                <th className="py-2 px-3">Reason</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--color-rule)] font-mono text-[11px]">
-              {filteredChangeLogs.length === 0 ? (
+            <tbody className="divide-y divide-[var(--color-rule)] text-[11px]">
+              {isLoading ? (
+                <tr><td colSpan={5} role="status" className="py-6 text-center text-[var(--color-ink-muted)]">Loading change history…</td></tr>
+              ) : filteredChangeLogs.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-6 text-center text-[var(--color-ink-muted)]">
-                    No change log entries found. Click "Reset / Re-Seed Data" to populate.
+                    No changes for this selection.
                   </td>
                 </tr>
               ) : (
@@ -219,14 +227,14 @@ export const StorageInspector: React.FC = () => {
                       {entry.entityType}
                     </td>
                     <td className="py-2 px-3">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold ${
+                      <span className={`px-1.5 py-0.5 rounded text-[11px] font-semibold ${
                         entry.action === 'create'
                           ? 'bg-[var(--color-status-on-track-bg)] text-[var(--color-status-on-track)]'
                           : entry.action === 'soft_delete'
                           ? 'bg-[var(--color-status-behind-bg)] text-[var(--color-status-behind)]'
                           : 'bg-[var(--color-paper-3)] text-[var(--color-ink)]'
                       }`}>
-                        {entry.action}
+                        {entry.action.replace('_', ' ')}
                       </span>
                     </td>
                     <td className="py-2 px-3 text-[var(--color-ink)] max-w-xs truncate">
@@ -242,7 +250,7 @@ export const StorageInspector: React.FC = () => {
                       )}
                     </td>
                     <td className="py-2 px-3 text-[var(--color-ink-muted)] max-w-xs truncate">
-                      {entry.reason || '—'}
+                      {entry.reason || 'No reason recorded'}
                     </td>
                   </tr>
                 ))

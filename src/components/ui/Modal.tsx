@@ -49,14 +49,14 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/40 backdrop-contrast-125"
+      className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-[var(--color-scrim)] backdrop-contrast-125"
     >
       {/* Backdrop click */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
       {/* Dialog Surface */}
       <div
-        className={`relative w-full ${widthClass} bg-[var(--color-paper)] border border-[var(--color-rule-strong)] shadow-xl rounded-[var(--radius-sm)] flex flex-col max-h-[90vh] overflow-hidden z-10 text-[var(--color-ink)]`}
+        className={`relative w-full ${widthClass} bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded-[var(--radius-sm)] flex flex-col max-h-[90vh] overflow-hidden z-10 text-[var(--color-ink)]`}
       >
         {/* Header */}
         <div className="hairline-b px-5 py-3.5 flex items-center justify-between bg-[var(--color-paper-2)]">

@@ -112,18 +112,18 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
       {/* Top Banner: Area, Priority, Status */}
       <div className="flex flex-wrap items-center justify-between gap-3 hairline-b pb-3.5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs px-2 py-0.5 rounded bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[var(--color-accent)] font-semibold">
-            {project.isGoal ? 'Personal Goal' : 'Technical Project'}
+          <span className="text-xs px-2 py-0.5 rounded bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[var(--color-accent)] font-semibold">
+            {project.isGoal ? 'Goal' : 'Project'}
           </span>
 
           {area && (
-            <span className="inline-flex items-center gap-1 text-xs text-[var(--color-ink-muted)] font-mono">
+            <span className="inline-flex items-center gap-1 text-xs text-[var(--color-ink-muted)]">
               <Folder className="w-3.5 h-3.5" />
               <span>{area.name}</span>
             </span>
           )}
 
-          <span className="inline-flex items-center gap-1 text-xs text-[var(--color-ink-muted)] font-mono">
+          <span className="inline-flex items-center gap-1 text-xs text-[var(--color-ink-muted)]">
             <TargetIcon className="w-3.5 h-3.5 text-[var(--color-accent)]" />
             <span className="tabular-figure">{targets?.length ?? 0}</span>
             <span>Targets</span>
@@ -132,12 +132,12 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
 
         <div className="flex items-center gap-2.5">
           {/* Priority selector */}
-          <div className="flex items-center gap-1 text-xs font-mono">
+          <div className="flex items-center gap-1 text-xs">
             <Flag className="w-3.5 h-3.5 text-[var(--color-status-at-risk)]" />
             <select
               value={project.priority}
               onChange={(e) => handlePriorityChange(e.target.value as Priority)}
-              className="bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] px-2 py-1 text-xs text-[var(--color-ink)] capitalize font-mono"
+              className="bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] px-2 py-1 text-xs text-[var(--color-ink)] capitalize"
             >
               <option value="urgent">Urgent</option>
               <option value="high">High</option>
@@ -157,7 +157,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
             <option value="paused">Paused</option>
             <option value="blocked">Blocked</option>
             <option value="done">Done</option>
-            <option value="dropped">Dropped...</option>
+            <option value="dropped">Dropped</option>
           </select>
         </div>
       </div>
@@ -167,15 +167,14 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
         <h2 className="text-lg font-bold text-[var(--color-ink)] tracking-tight">
           {project.title}
         </h2>
-        <div className="flex items-center gap-3 text-xs font-mono text-[var(--color-ink-muted)]">
+        <div className="flex items-center gap-3 text-xs text-[var(--color-ink-muted)]">
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            <span>Timeline: {project.startDate} → {project.endDate || 'No target date'}</span>
+            <span>{project.startDate} → {project.endDate || 'No end date'}</span>
           </div>
-          <span className="opacity-40">·</span>
           <div className="flex items-center gap-1">
-            <Scale className="w-3.5 h-3.5" />
-            <span>Weighting: {project.weightType}</span>
+            <Scale className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Progress weighting: {project.weightType}</span>
           </div>
         </div>
       </div>
@@ -184,21 +183,21 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Why this matters */}
         <div className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-xs)] p-3.5 flex flex-col gap-1.5">
-          <span className="text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] font-semibold">
-            Why This Effort Matters
+          <span className="text-xs text-[var(--color-ink-muted)] font-semibold">
+            Why it matters
           </span>
           <p className="text-xs text-[var(--color-ink)] leading-relaxed">
-            {project.why || 'No architectural motivation specified.'}
+            {project.why || 'Add a reason to keep this work in view.'}
           </p>
         </div>
 
         {/* Success Criteria */}
         <div className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-xs)] p-3.5 flex flex-col gap-1.5">
-          <span className="text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] font-semibold">
-            Success Criteria (Definition of Done)
+          <span className="text-xs text-[var(--color-ink-muted)] font-semibold">
+            Finish line
           </span>
           <p className="text-xs text-[var(--color-ink)] leading-relaxed">
-            {project.successCriteria || 'No explicit success criteria specified.'}
+            {project.successCriteria || 'Set a clear finish line for this project.'}
           </p>
         </div>
       </div>
@@ -219,8 +218,8 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
         </div>
 
         {openBlockers.length === 0 ? (
-          <p className="text-xs text-[var(--color-ink-muted)] font-mono">
-            No active blockers. Execution pipeline is unobstructed.
+          <p className="text-xs text-[var(--color-ink-muted)]">
+            No blockers recorded.
           </p>
         ) : (
           <div className="flex flex-col gap-2 pt-1">
@@ -233,7 +232,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
                   <span className="font-semibold text-[var(--color-status-behind)] block">
                     {b.description}
                   </span>
-                  <span className="font-mono text-[11px] text-[var(--color-ink-muted)]">
+                  <span className="text-[11px] text-[var(--color-ink-muted)]">
                     Raised: {b.dateRaised}
                   </span>
                 </div>
@@ -249,7 +248,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
 
       {/* Tags Section */}
       <div className="flex flex-wrap items-center gap-1.5 text-xs">
-        <span className="text-[var(--color-ink-muted)] font-mono text-[11px] flex items-center gap-1 mr-1">
+        <span className="text-[var(--color-ink-muted)] text-[11px] flex items-center gap-1 mr-1">
           <Tag className="w-3.5 h-3.5" />
           <span>Tags:</span>
         </span>
@@ -257,7 +256,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
         {project.tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink)] font-mono text-[11px]"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink)] text-[11px]"
           >
             <span>#{tag}</span>
             <button
@@ -279,7 +278,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
               onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
               placeholder="tag"
               autoFocus
-              className="h-6 w-20 px-1.5 text-xs bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded text-[var(--color-ink)] font-mono"
+              className="h-8 min-w-28 px-2 text-xs bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded text-[var(--color-ink)]"
             />
             <Button size="sm" variant="ghost" onClick={handleAddTag}>Add</Button>
             <button type="button" onClick={() => setIsAddingTag(false)} className="text-xs text-[var(--color-ink-subtle)]">
@@ -290,7 +289,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
           <button
             type="button"
             onClick={() => setIsAddingTag(true)}
-            className="px-1.5 py-0.5 text-[11px] font-mono text-[var(--color-accent)] hover:underline"
+            className="min-h-11 px-1.5 py-0.5 text-xs text-[var(--color-accent)] hover:underline"
           >
             + add tag
           </button>

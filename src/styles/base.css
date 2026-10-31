@@ -66,6 +66,7 @@ th,
 }
 .surface-card {
   background-color: var(--color-paper-2);
+  color: var(--color-ink);
   border: 1px solid var(--color-rule);
 }
 
@@ -74,8 +75,8 @@ th,
 .seshat-notch-group {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px 4px;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) var(--space-2xs);
 }
 
 .seshat-notch-tick {
@@ -113,9 +114,11 @@ th,
 }
 
 .seshat-cord-fill {
+  width: 100%;
   height: 100%;
   background-color: var(--color-accent);
-  transition: width var(--dur-short) var(--ease-ledger);
+  transform-origin: left center;
+  transition: transform var(--dur-short) var(--ease-ledger);
 }
 
 .seshat-cord-ticks {

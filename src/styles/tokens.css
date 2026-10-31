@@ -22,6 +22,7 @@
   --color-accent-subtle: oklch(95.0% 0.025 205);
   --color-accent-ink: oklch(98.5% 0.005 205);
   --color-focus: oklch(50.0% 0.180 205);
+  --color-scrim: oklch(16.5% 0.014 200 / 0.58);
 
   /* Semantic Status — Dual encodings (Color + Glyph/Word) */
   --color-status-on-track: oklch(56.0% 0.145 145);
@@ -88,6 +89,7 @@
   --color-accent-subtle: oklch(22.0% 0.035 205);
   --color-accent-ink: oklch(14.0% 0.010 205);
   --color-focus: oklch(72.0% 0.160 205);
+  --color-scrim: oklch(7.0% 0.008 200 / 0.78);
 
   /* Dark semantic status */
   --color-status-on-track: oklch(68.0% 0.135 145);
@@ -116,6 +118,7 @@
     --color-accent-subtle: oklch(22.0% 0.035 205);
     --color-accent-ink: oklch(14.0% 0.010 205);
     --color-focus: oklch(72.0% 0.160 205);
+    --color-scrim: oklch(7.0% 0.008 200 / 0.78);
   }
 }
 
