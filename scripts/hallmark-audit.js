@@ -41,7 +41,7 @@ const CSS_FLOOR_CHECKS = [
   },
   {
     name: 'Floor 15: Hallmark stamp and critique header',
-    test: (css) => /hallmark\s+v2\.0\.0/i.test(css),
+    test: (css) => /hallmark(?:\s+·\s+|\s+)v2\.0\.0/i.test(css),
     failMessage: 'Missing Hallmark v2.0.0 stamp comment header.'
   }
 ];
