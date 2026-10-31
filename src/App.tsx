@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
 import { NotchRib, DayNotch } from './components/NotchRib';
 import { CordBar } from './components/CordBar';
 import { StatusBadge } from './components/StatusBadge';
+import { StorageInspector } from './components/StorageInspector';
+import { seedDatabase } from './db/seedData';
 import { CheckCircle2, Clock, Calendar, ArrowRight, Layers, ShieldCheck, Terminal } from 'lucide-react';
 
 interface PhaseInfo {
@@ -26,15 +28,15 @@ const PHASES: PhaseInfo[] = [
     number: 2,
     title: 'Domain Model, Typed Storage & Change Log',
     scope: 'Typed entities for all PRD 5.2 models, Dexie/SQLite offline engine, append-only Change Log, Heimdall SOC Lab seed.',
-    outcome: 'Reliable local-first persistence',
-    status: 'queued',
+    outcome: 'Reliable local-first persistence with auditability & undo',
+    status: 'completed',
   },
   {
     number: 3,
     title: 'Design System Primitives & Seshat Brand Motif',
     scope: 'Notch rib generator, measuring cord progress bars, instant focus inputs, single-primary buttons, hairline ledger tables.',
     outcome: 'Tactile ledger component library',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 4,
@@ -115,11 +117,10 @@ const PHASES: PhaseInfo[] = [
   },
 ];
 
-// Sample real seed data for the Phase 1 Motif validation (Heimdall SOC Lab)
 const SAMPLE_STUDY_NOTCHES: DayNotch[] = Array.from({ length: 28 }).map((_, i) => {
   const dayNum = i + 1;
   const isCompleted = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19, 22, 23, 24, 25].includes(dayNum);
-  const isSkipped = [6, 13, 20, 27].includes(dayNum); // Sunday rest
+  const isSkipped = [6, 13, 20, 27].includes(dayNum);
   const isToday = dayNum === 25;
   return {
     dayLabel: `Day ${dayNum}`,
@@ -131,7 +132,13 @@ const SAMPLE_STUDY_NOTCHES: DayNotch[] = Array.from({ length: 28 }).map((_, i) =
 });
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(1);
+  const [selectedPhase, setSelectedPhase] = useState<number>(2);
+  const [activeTab, setActiveTab] = useState<'storage' | 'motif' | 'roadmap'>('storage');
+
+  useEffect(() => {
+    // Seed initial data once on mount if empty
+    seedDatabase(false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] flex flex-col">
@@ -142,8 +149,8 @@ export const App: React.FC = () => {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-base tracking-tight">Seshat Notch</span>
-              <span className="font-mono text-xs px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-ink-muted)]">
-                v0.1.0 · Phase 1
+              <span className="font-mono text-xs px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-accent)] font-semibold">
+                Phase 2 Completed
               </span>
             </div>
             <span className="text-xs text-[var(--color-ink-muted)]">
@@ -153,9 +160,37 @@ export const App: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 text-xs text-[var(--color-ink-muted)] font-mono">
-            <span>Repo: Swashbuckler16/Seshat-Notch</span>
+          {/* Navigation Pill Switcher */}
+          <div className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('storage')}
+              className={`px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'storage' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              Storage & Change Log
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('motif')}
+              className={`px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'motif' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              Brand Motif
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('roadmap')}
+              className={`px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'roadmap' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              Roadmap (14 Phases)
+            </button>
           </div>
+
           <ThemeToggle />
         </div>
       </header>
@@ -168,171 +203,181 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-mono">
               <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
               <span className="font-semibold text-[var(--color-ink)]">Hallmark v2.0.0 Verification</span>
-              <span className="text-[var(--color-ink-muted)]">· Theme: seshat-ledger · Genre: modern-minimal</span>
+              <span className="text-[var(--color-ink-muted)]">· Phase 2: Domain Model & Typed Storage</span>
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status="on_track" ratio={1.0} />
             </div>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-            Designed strictly under the Hallmark design skill rules. Tabular figures enforced across all metrics.
-            Zero AI-slop: no purple gradients, no glassmorphism, no emojis as icons, no fake statistics.
-            Every number is traceable to its formula and entries.
+            Local-first storage active. All state changes are written through a domain service appending to an
+            immutable change log (PRD Section 10.3). Seeded with the full Heimdall SOC Lab project (8 phases, weekly
+            and monthly targets, MITRE ATT&CK techniques, habits, and routines).
           </p>
         </section>
 
-        {/* Brand Motif Demonstration: The Notch and The Cord */}
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold tracking-tight uppercase text-[var(--color-ink-muted)]">
-              Brand Motif Architecture (PRD Section 9.3)
-            </h2>
-            <span className="text-xs font-mono text-[var(--color-ink-muted)]">Real Heimdall SOC Lab Seed Preview</span>
-          </div>
+        {/* Tab 1: Storage & Change Log Engine */}
+        {activeTab === 'storage' && (
+          <section>
+            <StorageInspector />
+          </section>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* The Notch on a Rib */}
-            <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
-                  <span className="text-xs font-semibold">The Notch on a Rib (Daily Study Streak)</span>
-                </div>
-                <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">4 weeks (7-day ticks)</span>
-              </div>
-              <p className="text-xs text-[var(--color-ink-muted)]">
-                Completed days are marked as vertical ticks on a rib grouped in sevens. Rest days are fair skips.
-              </p>
-              <div className="pt-2">
-                <NotchRib notches={SAMPLE_STUDY_NOTCHES} label="October 2026 Study Block" />
-              </div>
-            </div>
-
-            {/* The Measuring Cord */}
-            <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[var(--color-accent)]" />
-                  <span className="text-xs font-semibold">The Measuring Cord (Techniques Emulated)</span>
-                </div>
-                <StatusBadge status="on_track" ratio={0.92} />
-              </div>
-              <p className="text-xs text-[var(--color-ink-muted)]">
-                Progress and target-vs-actual bars carry an etched 10% survey scale with visible arithmetic.
-              </p>
-              <div className="pt-2 flex flex-col gap-3">
-                <CordBar
-                  current={11}
-                  total={12}
-                  expected={10}
-                  unit="techniques"
-                  label="Phase 6: Attack & Detect Target"
-                />
-                <CordBar
-                  current={3}
-                  total={3}
-                  expected={2}
-                  unit="detections"
-                  label="Week 44 Target: Document 3 detections"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 14-Phase Implementation Roadmap */}
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[var(--color-accent)]" />
+        {/* Tab 2: Brand Motif Demonstration */}
+        {activeTab === 'motif' && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold tracking-tight uppercase text-[var(--color-ink-muted)]">
-                Implementation Roadmap (14 Structured Phases)
+                Brand Motif Architecture (PRD Section 9.3)
               </h2>
+              <span className="text-xs font-mono text-[var(--color-ink-muted)]">Real Heimdall SOC Lab Seed Preview</span>
             </div>
-            <span className="text-xs text-[var(--color-ink-muted)] font-mono">
-              Complete one phase at a time · Commit & push per phase
-            </span>
-          </div>
 
-          <div className="border border-[var(--color-rule)] rounded-[var(--radius-sm)] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[var(--color-paper-2)] hairline-b text-[var(--color-ink-muted)] font-medium">
-                    <th className="py-2.5 px-3 w-16">Phase</th>
-                    <th className="py-2.5 px-3">Title & Deliverables</th>
-                    <th className="py-2.5 px-3 hidden md:table-cell">Target Outcome</th>
-                    <th className="py-2.5 px-3 w-28 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--color-rule)]">
-                  {PHASES.map((phase) => {
-                    const isSelected = selectedPhase === phase.number;
-                    return (
-                      <tr
-                        key={phase.number}
-                        onClick={() => setSelectedPhase(phase.number)}
-                        className={`cursor-pointer hover:bg-[var(--color-paper-2)] transition-opacity ${
-                          isSelected ? 'bg-[var(--color-paper-2)] font-medium' : ''
-                        }`}
-                      >
-                        <td className="py-2.5 px-3 font-mono text-[var(--color-ink-muted)]">
-                          #{phase.number.toString().padStart(2, '0')}
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <div className="font-semibold text-[var(--color-ink)]">{phase.title}</div>
-                          <div className="text-[11px] text-[var(--color-ink-muted)] mt-0.5 line-clamp-1">
-                            {phase.scope}
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3 hidden md:table-cell text-[var(--color-ink-muted)] font-mono text-[11px]">
-                          {phase.outcome}
-                        </td>
-                        <td className="py-2.5 px-3 text-right">
-                          {phase.status === 'completed' && (
-                            <span className="inline-flex items-center gap-1 text-[var(--color-status-on-track)] font-medium">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Done</span>
-                            </span>
-                          )}
-                          {phase.status === 'in_progress' && (
-                            <span className="inline-flex items-center gap-1 text-[var(--color-status-at-risk)] font-medium">
-                              <ArrowRight className="w-3.5 h-3.5" />
-                              <span>Active</span>
-                            </span>
-                          )}
-                          {phase.status === 'queued' && (
-                            <span className="text-[var(--color-ink-subtle)] font-mono text-[11px]">
-                              Queued
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* The Notch on a Rib */}
+              <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
+                    <span className="text-xs font-semibold">The Notch on a Rib (Daily Study Streak)</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">4 weeks (7-day ticks)</span>
+                </div>
+                <p className="text-xs text-[var(--color-ink-muted)]">
+                  Completed days are marked as vertical ticks on a rib grouped in sevens. Rest days are fair skips.
+                </p>
+                <div className="pt-2">
+                  <NotchRib notches={SAMPLE_STUDY_NOTCHES} label="October 2026 Study Block" />
+                </div>
+              </div>
+
+              {/* The Measuring Cord */}
+              <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[var(--color-accent)]" />
+                    <span className="text-xs font-semibold">The Measuring Cord (Techniques Emulated)</span>
+                  </div>
+                  <StatusBadge status="on_track" ratio={0.92} />
+                </div>
+                <p className="text-xs text-[var(--color-ink-muted)]">
+                  Progress and target-vs-actual bars carry an etched 10% survey scale with visible arithmetic.
+                </p>
+                <div className="pt-2 flex flex-col gap-3">
+                  <CordBar
+                    current={11}
+                    total={12}
+                    expected={10}
+                    unit="techniques"
+                    label="Phase 6: Attack & Detect Target"
+                  />
+                  <CordBar
+                    current={3}
+                    total={3}
+                    expected={2}
+                    unit="detections"
+                    label="Week 44 Target: Document 3 detections"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* Selected Phase Detail Card */}
-        {selectedPhase && (
-          <section className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-2">
-            <div className="flex items-center justify-between hairline-b pb-2">
-              <span className="text-xs font-mono font-semibold text-[var(--color-accent)]">
-                Phase {selectedPhase.toString().padStart(2, '0')}: {PHASES[selectedPhase - 1].title}
-              </span>
-              <span className="text-xs font-mono text-[var(--color-ink-muted)]">
-                Status: {PHASES[selectedPhase - 1].status.toUpperCase()}
+        {/* Tab 3: 14-Phase Implementation Roadmap */}
+        {activeTab === 'roadmap' && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-[var(--color-accent)]" />
+                <h2 className="text-sm font-semibold tracking-tight uppercase text-[var(--color-ink-muted)]">
+                  Implementation Roadmap (14 Structured Phases)
+                </h2>
+              </div>
+              <span className="text-xs text-[var(--color-ink-muted)] font-mono">
+                Complete one phase at a time · Commit & push per phase
               </span>
             </div>
-            <p className="text-xs text-[var(--color-ink)] leading-relaxed">
-              {PHASES[selectedPhase - 1].scope}
-            </p>
-            <div className="text-xs text-[var(--color-ink-muted)] font-mono">
-              Target Outcome: {PHASES[selectedPhase - 1].outcome}
+
+            <div className="border border-[var(--color-rule)] rounded-[var(--radius-sm)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[var(--color-paper-2)] hairline-b text-[var(--color-ink-muted)] font-medium">
+                      <th className="py-2.5 px-3 w-16">Phase</th>
+                      <th className="py-2.5 px-3">Title & Deliverables</th>
+                      <th className="py-2.5 px-3 hidden md:table-cell">Target Outcome</th>
+                      <th className="py-2.5 px-3 w-28 text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--color-rule)]">
+                    {PHASES.map((phase) => {
+                      const isSelected = selectedPhase === phase.number;
+                      return (
+                        <tr
+                          key={phase.number}
+                          onClick={() => setSelectedPhase(phase.number)}
+                          className={`cursor-pointer hover:bg-[var(--color-paper-2)] transition-opacity ${
+                            isSelected ? 'bg-[var(--color-paper-2)] font-medium' : ''
+                          }`}
+                        >
+                          <td className="py-2.5 px-3 font-mono text-[var(--color-ink-muted)]">
+                            #{phase.number.toString().padStart(2, '0')}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="font-semibold text-[var(--color-ink)]">{phase.title}</div>
+                            <div className="text-[11px] text-[var(--color-ink-muted)] mt-0.5 line-clamp-1">
+                              {phase.scope}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-3 hidden md:table-cell text-[var(--color-ink-muted)] font-mono text-[11px]">
+                            {phase.outcome}
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            {phase.status === 'completed' && (
+                              <span className="inline-flex items-center gap-1 text-[var(--color-status-on-track)] font-medium">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Done</span>
+                              </span>
+                            )}
+                            {phase.status === 'in_progress' && (
+                              <span className="inline-flex items-center gap-1 text-[var(--color-status-at-risk)] font-medium">
+                                <ArrowRight className="w-3.5 h-3.5" />
+                                <span>Active</span>
+                              </span>
+                            )}
+                            {phase.status === 'queued' && (
+                              <span className="text-[var(--color-ink-subtle)] font-mono text-[11px]">
+                                Queued
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
+            {selectedPhase && (
+              <section className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-2">
+                <div className="flex items-center justify-between hairline-b pb-2">
+                  <span className="text-xs font-mono font-semibold text-[var(--color-accent)]">
+                    Phase {selectedPhase.toString().padStart(2, '0')}: {PHASES[selectedPhase - 1].title}
+                  </span>
+                  <span className="text-xs font-mono text-[var(--color-ink-muted)]">
+                    Status: {PHASES[selectedPhase - 1].status.toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--color-ink)] leading-relaxed">
+                  {PHASES[selectedPhase - 1].scope}
+                </p>
+                <div className="text-xs text-[var(--color-ink-muted)] font-mono">
+                  Target Outcome: {PHASES[selectedPhase - 1].outcome}
+                </div>
+              </section>
+            )}
           </section>
         )}
 
@@ -359,4 +404,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
