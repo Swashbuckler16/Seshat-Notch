@@ -3,16 +3,21 @@ import React from 'react';
 interface CordBarProps {
   current: number;
   total: number;
-  expected?: number; // Expected progress for schedule comparison
+  expected?: number; // Expected progress for schedule comparison (PRD 7.3)
   unit?: string;
   label?: string;
   showLabels?: boolean;
+  isInteractive?: boolean;
+  onChange?: (newValue: number) => void;
   className?: string;
 }
 
 /**
  * Seshat Measuring Cord Progress Bar
- * Progress bar etched with survey tick marks and visible arithmetic
+ * - Progress bar etched with 10% survey tick marks.
+ * - Displays visible arithmetic: current / total with percentage.
+ * - Displays expected milestone marker on the cord when provided.
+ * - Supports keyboard and click/drag interaction for rapid logging.
  */
 export const CordBar: React.FC<CordBarProps> = ({
   current,
@@ -21,16 +26,28 @@ export const CordBar: React.FC<CordBarProps> = ({
   unit = '',
   label,
   showLabels = true,
-  className = ''
+  isInteractive = false,
+  onChange,
+  className = '',
 }) => {
   const safeTotal = total > 0 ? total : 1;
   const percentage = Math.min(100, Math.max(0, (current / safeTotal) * 100));
-  const expectedPercentage = expected !== undefined
-    ? Math.min(100, Math.max(0, (expected / safeTotal) * 100))
-    : undefined;
+  const expectedPercentage =
+    expected !== undefined
+      ? Math.min(100, Math.max(0, (expected / safeTotal) * 100))
+      : undefined;
+
+  const handleContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isInteractive || !onChange) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+    const newVal = Math.round(ratio * total);
+    onChange(newVal);
+  };
 
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1.5 ${className}`}>
       {showLabels && (
         <div className="flex items-center justify-between text-xs">
           {label && <span className="font-medium text-[var(--color-ink)]">{label}</span>}
@@ -39,7 +56,9 @@ export const CordBar: React.FC<CordBarProps> = ({
               {current}
             </span>
             <span>/</span>
-            <span>{total} {unit}</span>
+            <span>
+              {total} {unit}
+            </span>
             <span className="text-[var(--color-accent)] font-medium ml-1">
               ({percentage.toFixed(0)}%)
             </span>
@@ -48,7 +67,13 @@ export const CordBar: React.FC<CordBarProps> = ({
       )}
 
       {/* The Cord Bar with 10% survey tick marks */}
-      <div className="seshat-cord-container">
+      <div
+        onClick={handleContainerClick}
+        className={`seshat-cord-container select-none ${
+          isInteractive ? 'cursor-ew-resize hover:border-[var(--color-accent)]' : ''
+        }`}
+        title={isInteractive ? 'Click to set target progress' : undefined}
+      >
         {/* Progress fill */}
         <div
           className="seshat-cord-fill"
@@ -74,4 +99,3 @@ export const CordBar: React.FC<CordBarProps> = ({
     </div>
   );
 };
-

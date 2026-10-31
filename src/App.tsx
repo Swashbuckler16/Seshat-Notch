@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
-import { NotchRib, DayNotch } from './components/NotchRib';
-import { CordBar } from './components/CordBar';
-import { StatusBadge } from './components/StatusBadge';
 import { StorageInspector } from './components/StorageInspector';
+import { ComponentShowcase } from './components/ComponentShowcase';
+import { StatusBadge } from './components/StatusBadge';
 import { seedDatabase } from './db/seedData';
-import { CheckCircle2, Clock, Calendar, ArrowRight, Layers, ShieldCheck, Terminal } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Layers, ShieldCheck, Terminal, Palette, Database } from 'lucide-react';
 
 interface PhaseInfo {
   number: number;
@@ -36,14 +35,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Design System Primitives & Seshat Brand Motif',
     scope: 'Notch rib generator, measuring cord progress bars, instant focus inputs, single-primary buttons, hairline ledger tables.',
     outcome: 'Tactile ledger component library',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 4,
     title: 'Quick-Add Grammar Engine & Keyboard Palette',
     scope: 'Parser for #project >milestone ~estimate !priority @date +metric:value grammar with live preview & Ctrl+K command palette.',
     outcome: '1-keystroke rapid entry on Windows',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 5,
@@ -117,26 +116,11 @@ const PHASES: PhaseInfo[] = [
   },
 ];
 
-const SAMPLE_STUDY_NOTCHES: DayNotch[] = Array.from({ length: 28 }).map((_, i) => {
-  const dayNum = i + 1;
-  const isCompleted = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16, 17, 18, 19, 22, 23, 24, 25].includes(dayNum);
-  const isSkipped = [6, 13, 20, 27].includes(dayNum);
-  const isToday = dayNum === 25;
-  return {
-    dayLabel: `Day ${dayNum}`,
-    dateStr: `2026-10-${dayNum.toString().padStart(2, '0')}`,
-    isCompleted,
-    isSkipped,
-    isToday,
-  };
-});
-
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(2);
-  const [activeTab, setActiveTab] = useState<'storage' | 'motif' | 'roadmap'>('storage');
+  const [selectedPhase, setSelectedPhase] = useState<number>(3);
+  const [activeTab, setActiveTab] = useState<'components' | 'storage' | 'roadmap'>('components');
 
   useEffect(() => {
-    // Seed initial data once on mount if empty
     seedDatabase(false);
   }, []);
 
@@ -150,7 +134,7 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-base tracking-tight">Seshat Notch</span>
               <span className="font-mono text-xs px-1.5 py-0.2 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-accent)] font-semibold">
-                Phase 2 Completed
+                Phase 3 Completed
               </span>
             </div>
             <span className="text-xs text-[var(--color-ink-muted)]">
@@ -164,30 +148,33 @@ export const App: React.FC = () => {
           <div className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs">
             <button
               type="button"
-              onClick={() => setActiveTab('storage')}
-              className={`px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
-                activeTab === 'storage' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              onClick={() => setActiveTab('components')}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'components' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
-              Storage & Change Log
+              <Palette className="w-3.5 h-3.5" />
+              <span>Component Library</span>
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('motif')}
-              className={`px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
-                activeTab === 'motif' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              onClick={() => setActiveTab('storage')}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'storage' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
-              Brand Motif
+              <Database className="w-3.5 h-3.5" />
+              <span>Storage & Change Log</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('roadmap')}
-              className={`px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
                 activeTab === 'roadmap' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
               }`}
             >
-              Roadmap (14 Phases)
+              <Layers className="w-3.5 h-3.5" />
+              <span>Roadmap</span>
             </button>
           </div>
 
@@ -203,84 +190,30 @@ export const App: React.FC = () => {
             <div className="flex items-center gap-2 text-xs font-mono">
               <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
               <span className="font-semibold text-[var(--color-ink)]">Hallmark v2.0.0 Verification</span>
-              <span className="text-[var(--color-ink-muted)]">· Phase 2: Domain Model & Typed Storage</span>
+              <span className="text-[var(--color-ink-muted)]">· Phase 3: Tactile Ledger Components</span>
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status="on_track" ratio={1.0} />
             </div>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-            Local-first storage active. All state changes are written through a domain service appending to an
-            immutable change log (PRD Section 10.3). Seeded with the full Heimdall SOC Lab project (8 phases, weekly
-            and monthly targets, MITRE ATT&CK techniques, habits, and routines).
+            All primitives built to strict Hallmark specifications: 1 primary button, instant focus outlines,
+            tabular numerals, interactive Notch Ribs grouped in sevens, and Measuring Cord progress scrubbers with
+            10% survey ticks.
           </p>
         </section>
 
-        {/* Tab 1: Storage & Change Log Engine */}
-        {activeTab === 'storage' && (
+        {/* Tab 1: Component Library & Brand Motif Primitives */}
+        {activeTab === 'components' && (
           <section>
-            <StorageInspector />
+            <ComponentShowcase />
           </section>
         )}
 
-        {/* Tab 2: Brand Motif Demonstration */}
-        {activeTab === 'motif' && (
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold tracking-tight uppercase text-[var(--color-ink-muted)]">
-                Brand Motif Architecture (PRD Section 9.3)
-              </h2>
-              <span className="text-xs font-mono text-[var(--color-ink-muted)]">Real Heimdall SOC Lab Seed Preview</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* The Notch on a Rib */}
-              <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
-                    <span className="text-xs font-semibold">The Notch on a Rib (Daily Study Streak)</span>
-                  </div>
-                  <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">4 weeks (7-day ticks)</span>
-                </div>
-                <p className="text-xs text-[var(--color-ink-muted)]">
-                  Completed days are marked as vertical ticks on a rib grouped in sevens. Rest days are fair skips.
-                </p>
-                <div className="pt-2">
-                  <NotchRib notches={SAMPLE_STUDY_NOTCHES} label="October 2026 Study Block" />
-                </div>
-              </div>
-
-              {/* The Measuring Cord */}
-              <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[var(--color-accent)]" />
-                    <span className="text-xs font-semibold">The Measuring Cord (Techniques Emulated)</span>
-                  </div>
-                  <StatusBadge status="on_track" ratio={0.92} />
-                </div>
-                <p className="text-xs text-[var(--color-ink-muted)]">
-                  Progress and target-vs-actual bars carry an etched 10% survey scale with visible arithmetic.
-                </p>
-                <div className="pt-2 flex flex-col gap-3">
-                  <CordBar
-                    current={11}
-                    total={12}
-                    expected={10}
-                    unit="techniques"
-                    label="Phase 6: Attack & Detect Target"
-                  />
-                  <CordBar
-                    current={3}
-                    total={3}
-                    expected={2}
-                    unit="detections"
-                    label="Week 44 Target: Document 3 detections"
-                  />
-                </div>
-              </div>
-            </div>
+        {/* Tab 2: Storage & Change Log Engine */}
+        {activeTab === 'storage' && (
+          <section>
+            <StorageInspector />
           </section>
         )}
 
