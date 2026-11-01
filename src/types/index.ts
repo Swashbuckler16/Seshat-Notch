@@ -119,6 +119,12 @@ export interface Task {
 
 export type HabitScheduleType = 'daily' | 'weekdays' | 'n_per_week' | 'every_n_days';
 
+export interface HabitPauseRange {
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD
+  reason?: string;
+}
+
 export interface Habit {
   id: EntityId;
   linkedGoalId?: EntityId;
@@ -127,10 +133,13 @@ export interface Habit {
   scheduleType: HabitScheduleType;
   scheduleDaysOfWeek?: number[]; // [0..6] (0 = Sunday or Monday per setting)
   targetFrequency?: number; // e.g. 3 times per week
+  intervalDays?: number; // for every_n_days
   targetValue: number; // e.g. 30 (mins) or 1 (boolean)
   unit?: string;
   isAvoidance: boolean; // HB-6: things to stop with relapse tracking
   startDate: string;
+  pausedRanges?: HabitPauseRange[]; // HB-3: vacation/sick pause ranges
+  customSkipDates?: string[]; // HB-3: explicit excused skip dates
   isArchived: boolean;
   isDeleted: boolean;
   createdAt: string;

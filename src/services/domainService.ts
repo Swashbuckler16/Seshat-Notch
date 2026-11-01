@@ -737,6 +737,168 @@ export const domainService = {
     return log;
   },
 
+  async updateHabit(habitId: EntityId, updates: Partial<Habit>): Promise<Habit> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    const now = getCurrentUTC();
+    const updated: Habit = {
+      ...habit,
+      ...updates,
+      updatedAt: now,
+    };
+
+    await db.habits.put(updated);
+    await recordChange({
+      entityType: 'habit',
+      entityId: habitId,
+      action: 'update',
+      fieldChanged: Object.keys(updates).join(', '),
+      oldValue: habit,
+      newValue: updated,
+    });
+    return updated;
+  },
+
+  async archiveHabit(habitId: EntityId, isArchived: boolean): Promise<void> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    await this.updateHabit(habitId, { isArchived });
+  },
+
+  async deleteHabit(habitId: EntityId, reason = 'Deleted by user'): Promise<void> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    const now = getCurrentUTC();
+    const updated: Habit = {
+      ...habit,
+      isDeleted: true,
+      updatedAt: now,
+    };
+
+    await db.habits.put(updated);
+    await recordChange({
+      entityType: 'habit',
+      entityId: habitId,
+      action: 'soft_delete',
+      oldValue: habit,
+      newValue: updated,
+      reason,
+    });
+  },
+
+  /**
+   * Logs an excused skip day for fair streak preservation (PRD HB-3)
+   */
+  async logHabitSkip(habitId: EntityId, date: string, reason = 'Excused rest day'): Promise<ProgressLog> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    // Remove any existing log for this date first
+    const existing = await db.progressLogs
+      .where('entityId')
+      .equals(habitId)
+      .filter((l) => !l.isDeleted && l.entityType === 'habit' && l.date === date)
+      .first();
+
+    if (existing) {
+      await db.progressLogs.delete(existing.id);
+    }
+
+    const now = getCurrentUTC();
+    const log: ProgressLog = {
+      id: generateId(),
+      entityType: 'habit',
+      entityId: habitId,
+      timestamp: now,
+      date,
+      value: 0,
+      unit: habit.unit || 'skip',
+      note: `excused_skip: ${reason}`,
+      isDeleted: false,
+      createdAt: now,
+    };
+
+    await db.progressLogs.add(log);
+    await recordChange({
+      entityType: 'habit',
+      entityId: habitId,
+      action: 'update',
+      fieldChanged: 'excused_skip',
+      newValue: { date, reason },
+      reason,
+    });
+
+    return log;
+  },
+
+  /**
+   * Logs a relapse event for avoidance habits (PRD HB-6)
+   */
+  async logAvoidanceRelapse(habitId: EntityId, date: string, reason = 'Relapse event'): Promise<ProgressLog> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    const now = getCurrentUTC();
+    const log: ProgressLog = {
+      id: generateId(),
+      entityType: 'habit',
+      entityId: habitId,
+      timestamp: now,
+      date,
+      value: -1, // Negative denotes relapse
+      unit: 'relapse',
+      note: `relapse: ${reason}`,
+      isDeleted: false,
+      createdAt: now,
+    };
+
+    await db.progressLogs.add(log);
+    await recordChange({
+      entityType: 'habit',
+      entityId: habitId,
+      action: 'update',
+      fieldChanged: 'relapse',
+      newValue: { date, reason },
+      reason,
+    });
+
+    return log;
+  },
+
+  /**
+   * Defines a vacation/sick pause range (PRD HB-3)
+   */
+  async addHabitPauseRange(
+    habitId: EntityId,
+    startDate: string,
+    endDate: string,
+    reason = 'Vacation or sick pause'
+  ): Promise<void> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    const currentRanges = habit.pausedRanges || [];
+    const updatedRanges = [...currentRanges, { startDate, endDate, reason }];
+
+    await this.updateHabit(habitId, { pausedRanges: updatedRanges });
+  },
+
+  /**
+   * Removes a vacation/sick pause range
+   */
+  async removeHabitPauseRange(habitId: EntityId, rangeIndex: number): Promise<void> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    const currentRanges = habit.pausedRanges || [];
+    const updatedRanges = currentRanges.filter((_, idx) => idx !== rangeIndex);
+
+    await this.updateHabit(habitId, { pausedRanges: updatedRanges });
+  },
+
   async createRoutine(data: Omit<Routine, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<Routine> {
     const now = getCurrentUTC();
     const routine: Routine = {

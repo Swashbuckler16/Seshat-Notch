@@ -8,6 +8,7 @@ import { QuickAddModal } from './components/QuickAddModal';
 import { PlannerView } from './components/planner/PlannerView';
 import { TodayView } from './components/today/TodayView';
 import { ReviewsView } from './components/reviews/ReviewsView';
+import { HabitsView } from './components/habits/HabitsView';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
@@ -22,6 +23,7 @@ import {
   Briefcase,
   Sun,
   Inbox,
+  Flame,
 } from 'lucide-react';
 
 interface PhaseInfo {
@@ -94,14 +96,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Habits and routines',
     scope: 'Track routines on flexible schedules, with rest days and pauses accounted for.',
     outcome: 'A record that reflects how you actually work',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 10,
     title: 'Time tracking and focus sessions',
     scope: 'Track time with a timer or manual entries, and record focused work and breaks.',
     outcome: 'See where your time went',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 11,
@@ -134,8 +136,8 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(8);
-  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
+  const [selectedPhase, setSelectedPhase] = useState<number>(9);
+  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'habits' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -229,6 +231,17 @@ export const App: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('habits')}
+              aria-current={activeTab === 'habits' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'habits' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5" />
+              <span>Habits</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('reviews')}
               aria-current={activeTab === 'reviews' ? 'page' : undefined}
               className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
@@ -304,7 +317,14 @@ export const App: React.FC = () => {
           </section>
         )}
 
-        {/* Tab 2: Carry-Over Inbox & Periodic Reviews */}
+        {/* Tab 2: Habits & Fair Streak Ledger */}
+        {activeTab === 'habits' && (
+          <section>
+            <HabitsView />
+          </section>
+        )}
+
+        {/* Tab 3: Carry-Over Inbox & Periodic Reviews */}
         {activeTab === 'reviews' && (
           <section>
             <ReviewsView currentDateStr={new Date().toISOString().split('T')[0]} />

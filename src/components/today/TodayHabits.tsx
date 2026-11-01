@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { domainService } from '../../services/domainService';
 import { NotchRib, DayNotch } from '../NotchRib';
+import { isDateExcused } from '../../utils/habitMath';
 import { Sparkles, CheckCircle2, Circle } from 'lucide-react';
 
 interface TodayHabitsProps {
@@ -79,6 +80,7 @@ export const TodayHabits: React.FC<TodayHabitsProps> = ({ dateStr }) => {
               const isLogged = (logs || []).some(
                 (l) => l.entityId === habit.id && l.date === dStr && l.value > 0
               );
+              const isExcused = isDateExcused(habit, dStr, logs || []);
               const isToday = dStr === dateStr;
               const d = new Date(`${dStr}T00:00:00Z`);
               const dayLabel = dayNamesShort[d.getUTCDay()];
@@ -87,6 +89,7 @@ export const TodayHabits: React.FC<TodayHabitsProps> = ({ dateStr }) => {
                 dayLabel,
                 dateStr: dStr,
                 isCompleted: isLogged,
+                isSkipped: isExcused,
                 isToday,
               };
             });

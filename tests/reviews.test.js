@@ -56,3 +56,4 @@ test('PRD 6.6: Periodic Reviews and Reflection Ledger exist', () => {
   assert.ok(editorContent.includes('moodRating'), 'Must capture mood rating');
   assert.ok(editorContent.includes('topThreeTomorrow') || editorContent.includes('topThree'), 'Must capture top priorities');
 });
+
