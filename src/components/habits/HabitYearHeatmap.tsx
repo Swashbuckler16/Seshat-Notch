@@ -157,3 +157,4 @@ export const HabitYearHeatmap: React.FC<HabitYearHeatmapProps> = ({ habit, logs,
     </div>
   );
 };
+

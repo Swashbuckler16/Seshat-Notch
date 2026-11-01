@@ -186,3 +186,4 @@ test('PRD 6.4 UI: Habit components exist and adhere to Hallmark Design System', 
     assert.ok(!content.includes('transition: all'), `${f} must not contain transition: all`);
   }
 });
+

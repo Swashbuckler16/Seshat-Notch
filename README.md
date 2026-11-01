@@ -65,8 +65,8 @@ All UI components in `src/components/ui/` adhere strictly to Hallmark quality ga
 | **07** | **Today View & Rapid Execution Strip** | Morning dashboard (<5s scan), due targets & habits, planned vs logged time, day timeline | **Completed** |
 | **08** | **Carry-Over Inbox & Review Workflows** | Carry-over triage (reschedule, split, drop with reason), Daily/Weekly/Monthly reviews | **Completed** |
 | **09** | **Habit Tracker & Fair Streak Logic** | Flexible schedules, fair streak engine (excused pauses/skips), ledger-style year heatmap | **Completed** |
-| **10** | **Time Tracker & Deep Work Focus Mode** | Stopwatch timer, manual logger, focus intervals (work/break), session classification | *In Progress* |
-| **11** | **Pure Metric Engine & Formula Inspector** | Deterministic pure functions for Progress %, Schedule ratio, 14-day velocity forecast date | Queued |
+| **10** | **Time Tracker & Deep Work Focus Mode** | Stopwatch timer, manual logger, focus intervals (work/break), session classification | **Completed** |
+| **11** | **Pure Metric Engine & Formula Inspector** | Deterministic pure functions for Progress %, Schedule ratio, 14-day velocity forecast date | *In Progress* |
 | **12** | **Comprehensive Multi-Tab Dashboard & SVG Visualizations** | Overview, Execution, Projects, Goals, Habits, Time, Reviews, Insights tabs with custom SVG | Queued |
 | **13** | **Data Ownership, Export/Import & Recovery Bin** | Full export (JSON/CSV/Markdown), bulk plan import, soft-delete recovery bin, backups | Queued |
 | **14** | **Windows Desktop Shell Integration** | System tray icon, global quick-add shortcut, offline local notifications, release package | Queued |
@@ -87,7 +87,7 @@ npm.cmd run dev
 # Run automated Hallmark 58-gate design audit
 npm.cmd run audit
 
-# Run automated unit test suite (45 tests)
+# Run automated unit test suite (50 tests)
 npm.cmd test
 
 # Build production bundle

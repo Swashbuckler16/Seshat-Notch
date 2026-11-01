@@ -9,6 +9,8 @@ import { PlannerView } from './components/planner/PlannerView';
 import { TodayView } from './components/today/TodayView';
 import { ReviewsView } from './components/reviews/ReviewsView';
 import { HabitsView } from './components/habits/HabitsView';
+import { TimeView } from './components/time/TimeView';
+import { HeaderTimerPill } from './components/time/HeaderTimerPill';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
@@ -24,6 +26,7 @@ import {
   Sun,
   Inbox,
   Flame,
+  Clock,
 } from 'lucide-react';
 
 interface PhaseInfo {
@@ -103,14 +106,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Time tracking and focus sessions',
     scope: 'Track time with a timer or manual entries, and record focused work and breaks.',
     outcome: 'See where your time went',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 11,
     title: 'Progress calculations',
     scope: 'Calculate progress and pace from your plans, with an explanation for each figure.',
     outcome: 'Understand how each figure is calculated',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 12,
@@ -136,8 +139,8 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(9);
-  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'habits' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
+  const [selectedPhase, setSelectedPhase] = useState<number>(10);
+  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -190,6 +193,9 @@ export const App: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Active Floating Header Timer Pill */}
+          <HeaderTimerPill onNavigateToTime={() => setActiveTab('time')} />
+
           {/* Quick-Add Shortcut Button in Header */}
           <Button
             variant="secondary"
@@ -239,6 +245,17 @@ export const App: React.FC = () => {
             >
               <Flame className="w-3.5 h-3.5" />
               <span>Habits</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('time')}
+              aria-current={activeTab === 'time' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'time' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Time</span>
             </button>
             <button
               type="button"
@@ -324,7 +341,14 @@ export const App: React.FC = () => {
           </section>
         )}
 
-        {/* Tab 3: Carry-Over Inbox & Periodic Reviews */}
+        {/* Tab 3: Time Tracking & Focus Mode */}
+        {activeTab === 'time' && (
+          <section>
+            <TimeView />
+          </section>
+        )}
+
+        {/* Tab 4: Carry-Over Inbox & Periodic Reviews */}
         {activeTab === 'reviews' && (
           <section>
             <ReviewsView currentDateStr={new Date().toISOString().split('T')[0]} />

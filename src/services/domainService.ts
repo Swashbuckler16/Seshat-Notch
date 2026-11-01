@@ -653,6 +653,62 @@ export const domainService = {
     return session;
   },
 
+  async updateTimeSession(sessionId: EntityId, updates: Partial<TimeSession>): Promise<TimeSession> {
+    const session = await db.timeSessions.get(sessionId);
+    if (!session) throw new Error(`TimeSession ${sessionId} not found`);
+
+    const updated: TimeSession = {
+      ...session,
+      ...updates,
+    };
+
+    // If duration changed and was linked to a task, adjust task.actualMinutes difference
+    if (updates.durationMinutes !== undefined && updates.durationMinutes !== session.durationMinutes) {
+      if (session.entityType === 'task') {
+        const task = await db.tasks.get(session.entityId);
+        if (task) {
+          const diff = updates.durationMinutes - session.durationMinutes;
+          const newActual = Math.max(0, (task.actualMinutes || 0) + diff);
+          await db.tasks.update(task.id, { actualMinutes: newActual, updatedAt: getCurrentUTC() });
+        }
+      }
+    }
+
+    await db.timeSessions.put(updated);
+    await recordChange({
+      entityType: 'timeSession',
+      entityId: sessionId,
+      action: 'update',
+      fieldChanged: Object.keys(updates).join(', '),
+      oldValue: session,
+      newValue: updated,
+    });
+    return updated;
+  },
+
+  async deleteTimeSession(sessionId: EntityId, reason = 'Deleted session'): Promise<void> {
+    const session = await db.timeSessions.get(sessionId);
+    if (!session) throw new Error(`TimeSession ${sessionId} not found`);
+
+    // Deduct from task.actualMinutes if linked
+    if (session.entityType === 'task') {
+      const task = await db.tasks.get(session.entityId);
+      if (task) {
+        const newActual = Math.max(0, (task.actualMinutes || 0) - session.durationMinutes);
+        await db.tasks.update(task.id, { actualMinutes: newActual, updatedAt: getCurrentUTC() });
+      }
+    }
+
+    await db.timeSessions.delete(sessionId);
+    await recordChange({
+      entityType: 'timeSession',
+      entityId: sessionId,
+      action: 'hard_delete',
+      oldValue: session,
+      reason,
+    });
+  },
+
   /**
    * Toggles habit completion for a specific local date
    */
