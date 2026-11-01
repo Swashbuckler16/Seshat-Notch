@@ -63,7 +63,7 @@ All UI components in `src/components/ui/` adhere strictly to Hallmark quality ga
 | **05** | **Areas, Projects/Goals & Milestone Planner** | Area organizer, Project inspector (why, criteria, dates), finish-to-start dependencies | **Completed** |
 | **06** | **Multi-Horizon Planning & Cascade Engine** | Target authoring (Month/Week/Day), cascade distribution helper, copy-forward, re-plan tool | **Completed** |
 | **07** | **Today View & Rapid Execution Strip** | Morning dashboard (<5s scan), due targets & habits, planned vs logged time, day timeline | **Completed** |
-| **08** | **Carry-Over Inbox & Review Workflows** | Carry-over triage (reschedule, split, drop with reason), Daily/Weekly/Monthly reviews | *In Progress* |
+| **08** | **Carry-Over Inbox & Review Workflows** | Carry-over triage (reschedule, split, drop with reason), Daily/Weekly/Monthly reviews | **Completed** |
 | **09** | **Habit Tracker & Fair Streak Logic** | Flexible schedules, fair streak engine (excused pauses/skips), ledger-style year heatmap | Queued |
 | **10** | **Time Tracker & Deep Work Focus Mode** | Stopwatch timer, manual logger, focus intervals (work/break), session classification | Queued |
 | **11** | **Pure Metric Engine & Formula Inspector** | Deterministic pure functions for Progress %, Schedule ratio, 14-day velocity forecast date | Queued |
@@ -87,7 +87,7 @@ npm.cmd run dev
 # Run automated Hallmark 58-gate design audit
 npm.cmd run audit
 
-# Run automated unit test suite (34 tests)
+# Run automated unit test suite (38 tests)
 npm.cmd test
 
 # Build production bundle

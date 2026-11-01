@@ -11,6 +11,7 @@ import {
   Routine,
   ProgressLog,
   TimeSession,
+  Review,
   Status,
   EntityId,
 } from '../types';
@@ -753,6 +754,166 @@ export const domainService = {
       newValue: routine,
     });
     return routine;
+  },
+
+  // ==========================================
+  // CARRY-OVER INBOX OPERATIONS (PRD Section 6.5 & TR-3)
+  // ==========================================
+  async rescheduleTask(taskId: EntityId, newDate: string, reason?: string): Promise<Task> {
+    const existing = await db.tasks.get(taskId);
+    if (!existing) throw new Error(`Task ${taskId} not found`);
+
+    const now = getCurrentUTC();
+    const originalDate = existing.scheduleDate || existing.dueDate || 'backlog';
+    const updated: Task = {
+      ...existing,
+      scheduleDate: newDate,
+      dueDate: newDate,
+      carriedOverFromDate: existing.carriedOverFromDate || originalDate,
+      status: 'active',
+      updatedAt: now,
+    };
+    await db.tasks.put(updated);
+
+    await recordChange({
+      entityType: 'task',
+      entityId: taskId,
+      action: 'update',
+      fieldChanged: 'scheduleDate',
+      oldValue: originalDate,
+      newValue: newDate,
+      reason: reason || `Rescheduled from ${originalDate} to ${newDate}`,
+    });
+    return updated;
+  },
+
+  async splitTask(
+    taskId: EntityId,
+    newTasksData: { title: string; estimateMinutes?: number }[]
+  ): Promise<Task[]> {
+    const existing = await db.tasks.get(taskId);
+    if (!existing) throw new Error(`Task ${taskId} not found`);
+
+    const now = getCurrentUTC();
+    const createdTasks: Task[] = [];
+
+    // Mark original task as done with note
+    await db.tasks.update(taskId, {
+      status: 'done',
+      notes: (existing.notes ? `${existing.notes}\n` : '') + `[Split into ${newTasksData.length} smaller tasks]`,
+      updatedAt: now,
+    });
+
+    for (const item of newTasksData) {
+      const childTask: Task = {
+        id: generateId(),
+        projectId: existing.projectId,
+        milestoneId: existing.milestoneId,
+        targetId: existing.targetId,
+        title: item.title.trim(),
+        estimateMinutes: item.estimateMinutes || 30,
+        actualMinutes: 0,
+        priority: existing.priority,
+        status: 'active',
+        scheduleDate: existing.scheduleDate,
+        dueDate: existing.dueDate,
+        carriedOverFromDate: existing.carriedOverFromDate || existing.scheduleDate,
+        subtasks: [],
+        tags: [...existing.tags],
+        isDeleted: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await db.tasks.add(childTask);
+      createdTasks.push(childTask);
+    }
+
+    await recordChange({
+      entityType: 'task',
+      entityId: taskId,
+      action: 'update',
+      fieldChanged: 'split',
+      newValue: createdTasks.map((t) => t.id),
+      reason: `Split task into ${newTasksData.length} smaller pieces`,
+    });
+
+    return createdTasks;
+  },
+
+  async dropTask(taskId: EntityId, reason: string): Promise<void> {
+    if (!reason || reason.trim().length === 0) {
+      throw new Error('PRD Requirement TR-3: Dropping a task requires an explicit reason.');
+    }
+    await this.setTaskStatus(taskId, 'dropped', reason.trim());
+  },
+
+  async deferTaskToBacklog(taskId: EntityId, reason?: string): Promise<Task> {
+    const existing = await db.tasks.get(taskId);
+    if (!existing) throw new Error(`Task ${taskId} not found`);
+
+    const now = getCurrentUTC();
+    const updated: Task = {
+      ...existing,
+      scheduleDate: undefined,
+      dueDate: undefined,
+      updatedAt: now,
+    };
+    await db.tasks.put(updated);
+
+    await recordChange({
+      entityType: 'task',
+      entityId: taskId,
+      action: 'update',
+      fieldChanged: 'scheduleDate',
+      oldValue: existing.scheduleDate,
+      newValue: 'backlog',
+      reason: reason || 'Deferred to project backlog',
+    });
+    return updated;
+  },
+
+  async batchRescheduleTasks(taskIds: EntityId[], newDate: string): Promise<void> {
+    for (const id of taskIds) {
+      await this.rescheduleTask(id, newDate, 'Batch rescheduled from Carry-Over Inbox');
+    }
+  },
+
+  // ==========================================
+  // PERIODIC REVIEWS (PRD Section 6.6)
+  // ==========================================
+  async createReview(data: Omit<Review, 'id' | 'createdAt'>): Promise<Review> {
+    const now = getCurrentUTC();
+    const review: Review = {
+      ...data,
+      id: generateId(),
+      createdAt: now,
+    };
+    await db.reviews.add(review);
+
+    await recordChange({
+      entityType: 'review',
+      entityId: review.id,
+      action: 'create',
+      newValue: review,
+      reason: `${data.type} review for ${data.period}`,
+    });
+    return review;
+  },
+
+  async updateReview(id: EntityId, updates: Partial<Review>): Promise<void> {
+    const existing = await db.reviews.get(id);
+    if (!existing) throw new Error(`Review ${id} not found`);
+
+    const updated = { ...existing, ...updates };
+    await db.reviews.put(updated);
+
+    await recordChange({
+      entityType: 'review',
+      entityId: id,
+      action: 'update',
+      oldValue: existing,
+      newValue: updated,
+    });
   },
 };
 

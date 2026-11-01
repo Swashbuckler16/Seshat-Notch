@@ -7,6 +7,7 @@ import { QuickAddPlayground } from './components/QuickAddPlayground';
 import { QuickAddModal } from './components/QuickAddModal';
 import { PlannerView } from './components/planner/PlannerView';
 import { TodayView } from './components/today/TodayView';
+import { ReviewsView } from './components/reviews/ReviewsView';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
@@ -20,6 +21,7 @@ import {
   Command,
   Briefcase,
   Sun,
+  Inbox,
 } from 'lucide-react';
 
 interface PhaseInfo {
@@ -85,14 +87,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Carry-over and reviews',
     scope: 'Review unfinished work and decide whether to reschedule, split, or remove it.',
     outcome: 'Make a clear plan for what comes next',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 9,
     title: 'Habits and routines',
     scope: 'Track routines on flexible schedules, with rest days and pauses accounted for.',
     outcome: 'A record that reflects how you actually work',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 10,
@@ -132,8 +134,8 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(7);
-  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
+  const [selectedPhase, setSelectedPhase] = useState<number>(8);
+  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -227,6 +229,17 @@ export const App: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('reviews')}
+              aria-current={activeTab === 'reviews' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'reviews' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <Inbox className="w-3.5 h-3.5" />
+              <span>Reviews</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('quickadd')}
               aria-current={activeTab === 'quickadd' ? 'page' : undefined}
               className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
@@ -288,6 +301,13 @@ export const App: React.FC = () => {
         {activeTab === 'planner' && (
           <section>
             <PlannerView />
+          </section>
+        )}
+
+        {/* Tab 2: Carry-Over Inbox & Periodic Reviews */}
+        {activeTab === 'reviews' && (
+          <section>
+            <ReviewsView currentDateStr={new Date().toISOString().split('T')[0]} />
           </section>
         )}
 
