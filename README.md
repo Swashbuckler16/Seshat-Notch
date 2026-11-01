@@ -67,8 +67,8 @@ All UI components in `src/components/ui/` adhere strictly to Hallmark quality ga
 | **09** | **Habit Tracker & Fair Streak Logic** | Flexible schedules, fair streak engine (excused pauses/skips), ledger-style year heatmap | **Completed** |
 | **10** | **Time Tracker & Deep Work Focus Mode** | Stopwatch timer, manual logger, focus intervals (work/break), session classification | **Completed** |
 | **11** | **Pure Metric Engine & Formula Inspector** | Deterministic pure functions for Progress %, Schedule ratio, 14-day velocity forecast date | **Completed** |
-| **12** | **Comprehensive Multi-Tab Dashboard & SVG Visualizations** | Overview, Execution, Projects, Goals, Habits, Time, Reviews, Insights tabs with custom SVG | *In Progress* |
-| **13** | **Data Ownership, Export/Import & Recovery Bin** | Full export (JSON/CSV/Markdown), bulk plan import, soft-delete recovery bin, backups | Queued |
+| **12** | **Comprehensive Multi-Tab Dashboard & SVG Visualizations** | Overview, Execution, Projects, Goals, Habits, Time, Reviews, Insights tabs with custom SVG | **Completed** |
+| **13** | **Data Ownership, Export/Import & Recovery Bin** | Full export (JSON/CSV/Markdown), bulk plan import, soft-delete recovery bin, backups | *In Progress* |
 | **14** | **Windows Desktop Shell Integration** | System tray icon, global quick-add shortcut, offline local notifications, release package | Queued |
 
 ---

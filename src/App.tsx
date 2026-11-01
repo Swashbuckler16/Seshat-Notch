@@ -11,6 +11,7 @@ import { ReviewsView } from './components/reviews/ReviewsView';
 import { HabitsView } from './components/habits/HabitsView';
 import { TimeView } from './components/time/TimeView';
 import { HeaderTimerPill } from './components/time/HeaderTimerPill';
+import { DashboardView } from './components/dashboard/DashboardView';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
@@ -27,6 +28,7 @@ import {
   Inbox,
   Flame,
   Clock,
+  BarChart2,
 } from 'lucide-react';
 
 interface PhaseInfo {
@@ -120,14 +122,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Overview and reports',
     scope: 'Bring projects, goals, habits, time, and reviews into one place with clear charts.',
     outcome: 'A useful overview of your planning data',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 13,
     title: 'Import, export, and recovery',
     scope: 'Move your plans between formats, restore removed items, and save backups.',
     outcome: 'Keep control of your planning data',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 14,
@@ -139,8 +141,8 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(11);
-  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
+  const [selectedPhase, setSelectedPhase] = useState<number>(12);
+  const [activeTab, setActiveTab] = useState<'today' | 'dashboard' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -223,6 +225,17 @@ export const App: React.FC = () => {
             >
               <Sun className="w-3.5 h-3.5" />
               <span>Today</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('dashboard')}
+              aria-current={activeTab === 'dashboard' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'dashboard' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
             </button>
             <button
               type="button"
@@ -324,6 +337,20 @@ export const App: React.FC = () => {
         {activeTab === 'today' && (
           <section>
             <TodayView onOpenQuickAdd={() => setQuickAddModalOpen(true)} />
+          </section>
+        )}
+
+        {/* Tab 0.5: Executive Dashboard & Analytics */}
+        {activeTab === 'dashboard' && (
+          <section>
+            <DashboardView
+              onNavigateTab={(tab) => {
+                if (['today', 'planner', 'habits', 'time', 'reviews', 'quickadd', 'components', 'storage', 'roadmap'].includes(tab)) {
+                  setActiveTab(tab as any);
+                }
+              }}
+              onOpenProjectDetail={() => setActiveTab('planner')}
+            />
           </section>
         )}
 
