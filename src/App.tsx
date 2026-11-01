@@ -15,9 +15,6 @@ import { DashboardView } from './components/dashboard/DashboardView';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
-  CheckCircle2,
-  ArrowRight,
-  Layers,
   Terminal,
   Palette,
   Database,
@@ -31,118 +28,8 @@ import {
   BarChart2,
 } from 'lucide-react';
 
-interface PhaseInfo {
-  number: number;
-  title: string;
-  scope: string;
-  outcome: string;
-  status: 'completed' | 'in_progress' | 'queued';
-}
-
-const PHASES: PhaseInfo[] = [
-  {
-    number: 1,
-    title: 'Project foundation',
-    scope: 'Set up the app, its visual system, and the rules used to keep the interface consistent.',
-    outcome: 'A working foundation for the planner',
-    status: 'completed',
-  },
-  {
-    number: 2,
-    title: 'Local data and change history',
-    scope: 'Create the records the planner needs and keep a history of changes.',
-    outcome: 'Project data saved on this device',
-    status: 'completed',
-  },
-  {
-    number: 3,
-    title: 'Interface building blocks',
-    scope: 'Create the planner’s buttons, fields, progress marks, and tables.',
-    outcome: 'A consistent set of interface controls',
-    status: 'completed',
-  },
-  {
-    number: 4,
-    title: 'Quick add and keyboard shortcuts',
-    scope: 'Add tasks from a short command, with a live preview and a Ctrl+K shortcut.',
-    outcome: 'Create a task without leaving the planner',
-    status: 'completed',
-  },
-  {
-    number: 5,
-    title: 'Areas, projects, and milestones',
-    scope: 'Group projects by area, record what success means, and order milestones by dependency.',
-    outcome: 'Plan a project from first step to finish',
-    status: 'completed',
-  },
-  {
-    number: 6,
-    title: 'Planning across time periods',
-    scope: 'Set monthly, weekly, and daily targets; carry plans forward or adjust them.',
-    outcome: 'Connect longer plans to daily work',
-    status: 'completed',
-  },
-  {
-    number: 7,
-    title: 'Today view',
-    scope: 'See what is due, what you planned, and the time you have logged today.',
-    outcome: 'A focused view of today’s work',
-    status: 'completed',
-  },
-  {
-    number: 8,
-    title: 'Carry-over and reviews',
-    scope: 'Review unfinished work and decide whether to reschedule, split, or remove it.',
-    outcome: 'Make a clear plan for what comes next',
-    status: 'completed',
-  },
-  {
-    number: 9,
-    title: 'Habits and routines',
-    scope: 'Track routines on flexible schedules, with rest days and pauses accounted for.',
-    outcome: 'A record that reflects how you actually work',
-    status: 'completed',
-  },
-  {
-    number: 10,
-    title: 'Time tracking and focus sessions',
-    scope: 'Track time with a timer or manual entries, and record focused work and breaks.',
-    outcome: 'See where your time went',
-    status: 'completed',
-  },
-  {
-    number: 11,
-    title: 'Progress calculations',
-    scope: 'Calculate progress and pace from your plans, with an explanation for each figure.',
-    outcome: 'Understand how each figure is calculated',
-    status: 'completed',
-  },
-  {
-    number: 12,
-    title: 'Overview and reports',
-    scope: 'Bring projects, goals, habits, time, and reviews into one place with clear charts.',
-    outcome: 'A useful overview of your planning data',
-    status: 'completed',
-  },
-  {
-    number: 13,
-    title: 'Import, export, and recovery',
-    scope: 'Move your plans between formats, restore removed items, and save backups.',
-    outcome: 'Keep control of your planning data',
-    status: 'completed',
-  },
-  {
-    number: 14,
-    title: 'Windows app packaging',
-    scope: 'Prepare a desktop release with a system tray, quick-add shortcut, and local reminders.',
-    outcome: 'A planner that runs as a Windows app',
-    status: 'in_progress',
-  },
-];
-
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(13);
-  const [activeTab, setActiveTab] = useState<'today' | 'dashboard' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
+    const [activeTab, setActiveTab] = useState<'today' | 'dashboard' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' >('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -314,17 +201,7 @@ export const App: React.FC = () => {
               <Database className="w-3.5 h-3.5" />
               <span>Data</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('roadmap')}
-              aria-current={activeTab === 'roadmap' ? 'page' : undefined}
-              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
-                activeTab === 'roadmap' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Roadmap</span>
-            </button>
+            
           </nav>
 
           <ThemeToggle />
@@ -345,7 +222,7 @@ export const App: React.FC = () => {
           <section>
             <DashboardView
               onNavigateTab={(tab) => {
-                if (['today', 'planner', 'habits', 'time', 'reviews', 'quickadd', 'components', 'storage', 'roadmap'].includes(tab)) {
+                if (['today', 'planner', 'habits', 'time', 'reviews', 'quickadd', 'components', 'storage'].includes(tab)) {
                   setActiveTab(tab as any);
                 }
               }}
@@ -400,107 +277,6 @@ export const App: React.FC = () => {
         {activeTab === 'storage' && (
           <section>
             <DataManagementView />
-          </section>
-        )}
-
-        {/* Tab 4: 14-Phase Implementation Roadmap */}
-        {activeTab === 'roadmap' && (
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-[var(--color-accent)]" />
-                  <h2 className="text-sm font-semibold tracking-tight text-[var(--color-ink-muted)]">
-                  Development plan
-                </h2>
-              </div>
-              <span className="text-xs text-[var(--color-ink-muted)]">
-                Current phase: multi-period planning
-              </span>
-            </div>
-
-            <div className="border border-[var(--color-rule)] rounded-[var(--radius-sm)] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-[var(--color-paper-2)] hairline-b text-[var(--color-ink-muted)] font-medium">
-                      <th className="py-2.5 px-3 w-16">Phase</th>
-                      <th className="py-2.5 px-3">What is included</th>
-                      <th className="py-2.5 px-3 hidden md:table-cell">Result</th>
-                      <th className="py-2.5 px-3 w-28 text-right">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--color-rule)]">
-                    {PHASES.map((phase) => {
-                      const isSelected = selectedPhase === phase.number;
-                      return (
-                        <tr
-                          key={phase.number}
-                          className={`hover:bg-[var(--color-paper-2)] transition-opacity ${
-                            isSelected ? 'bg-[var(--color-paper-2)] font-medium' : ''
-                          }`}
-                        >
-                          <td className="py-2.5 px-3 font-mono text-[var(--color-ink-muted)]">
-                            #{phase.number.toString().padStart(2, '0')}
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <button
-                              type="button"
-                              aria-pressed={isSelected}
-                              onClick={() => setSelectedPhase(phase.number)}
-                              className="font-semibold text-left text-[var(--color-ink)] hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus)]"
-                            >{phase.title}</button>
-                            <div className="text-[11px] text-[var(--color-ink-muted)] mt-0.5 line-clamp-1">
-                              {phase.scope}
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-3 hidden md:table-cell text-[var(--color-ink-muted)] text-xs">
-                            {phase.outcome}
-                          </td>
-                          <td className="py-2.5 px-3 text-right">
-                            {phase.status === 'completed' && (
-                              <span className="inline-flex items-center gap-1 text-[var(--color-status-on-track)] font-medium">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>Done</span>
-                              </span>
-                            )}
-                            {phase.status === 'in_progress' && (
-                              <span className="inline-flex items-center gap-1 text-[var(--color-status-at-risk)] font-medium">
-                                <ArrowRight className="w-3.5 h-3.5" />
-                                <span>Active</span>
-                              </span>
-                            )}
-                            {phase.status === 'queued' && (
-                              <span className="text-[var(--color-ink-subtle)] text-[11px]">
-                                Queued
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {selectedPhase && (
-              <section className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-2">
-                <div className="flex items-center justify-between hairline-b pb-2">
-                  <span className="text-xs font-semibold text-[var(--color-accent)]">
-                    Phase {selectedPhase.toString().padStart(2, '0')}: {PHASES[selectedPhase - 1].title}
-                  </span>
-                  <span className="text-xs text-[var(--color-ink-muted)]">
-                    {PHASES[selectedPhase - 1].status === 'in_progress' ? 'In progress' : PHASES[selectedPhase - 1].status === 'completed' ? 'Complete' : 'Planned'}
-                  </span>
-                </div>
-                <p className="text-xs text-[var(--color-ink)] leading-relaxed">
-                  {PHASES[selectedPhase - 1].scope}
-                </p>
-                <div className="text-xs text-[var(--color-ink-muted)]">
-                  Result: {PHASES[selectedPhase - 1].outcome}
-                </div>
-              </section>
-            )}
           </section>
         )}
 
