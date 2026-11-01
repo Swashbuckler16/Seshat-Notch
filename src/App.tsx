@@ -6,6 +6,7 @@ import { ComponentShowcase } from './components/ComponentShowcase';
 import { QuickAddPlayground } from './components/QuickAddPlayground';
 import { QuickAddModal } from './components/QuickAddModal';
 import { PlannerView } from './components/planner/PlannerView';
+import { TodayView } from './components/today/TodayView';
 import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
@@ -18,6 +19,7 @@ import {
   Sparkles,
   Command,
   Briefcase,
+  Sun,
 } from 'lucide-react';
 
 interface PhaseInfo {
@@ -76,14 +78,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Today view',
     scope: 'See what is due, what you planned, and the time you have logged today.',
     outcome: 'A focused view of today’s work',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 8,
     title: 'Carry-over and reviews',
     scope: 'Review unfinished work and decide whether to reschedule, split, or remove it.',
     outcome: 'Make a clear plan for what comes next',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 9,
@@ -130,8 +132,8 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(6);
-  const [activeTab, setActiveTab] = useState<'planner' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('planner');
+  const [selectedPhase, setSelectedPhase] = useState<number>(7);
+  const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
   useEffect(() => {
@@ -203,6 +205,17 @@ export const App: React.FC = () => {
           <nav className="app-primary-nav flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs" aria-label="Main navigation">
             <button
               type="button"
+              onClick={() => setActiveTab('today')}
+              aria-current={activeTab === 'today' ? 'page' : undefined}
+              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
+                activeTab === 'today' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
+              }`}
+            >
+              <Sun className="w-3.5 h-3.5" />
+              <span>Today</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('planner')}
               aria-current={activeTab === 'planner' ? 'page' : undefined}
               className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
@@ -264,6 +277,13 @@ export const App: React.FC = () => {
 
       {/* Main Container */}
       <main className="app-main flex-1 max-w-6xl w-full mx-auto px-6 py-6 flex flex-col gap-8">
+        {/* Tab 0: Today View */}
+        {activeTab === 'today' && (
+          <section>
+            <TodayView onOpenQuickAdd={() => setQuickAddModalOpen(true)} />
+          </section>
+        )}
+
         {/* Tab 1: Areas, Projects & Milestone Planner */}
         {activeTab === 'planner' && (
           <section>

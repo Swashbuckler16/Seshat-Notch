@@ -10,6 +10,7 @@ import {
   Habit,
   Routine,
   ProgressLog,
+  TimeSession,
   Status,
   EntityId,
 } from '../types';
@@ -555,6 +556,130 @@ export const domainService = {
       newValue: status,
       reason,
     });
+  },
+
+  async toggleTaskStatus(id: EntityId): Promise<Status> {
+    const existing = await db.tasks.get(id);
+    if (!existing) throw new Error(`Task ${id} not found`);
+
+    const newStatus: Status = existing.status === 'done' ? 'active' : 'done';
+    const now = getCurrentUTC();
+    await db.tasks.update(id, { status: newStatus, updatedAt: now });
+
+    await recordChange({
+      entityType: 'task',
+      entityId: id,
+      action: 'update',
+      fieldChanged: 'status',
+      oldValue: existing.status,
+      newValue: newStatus,
+    });
+    return newStatus;
+  },
+
+  async updateTask(id: EntityId, updates: Partial<Task>): Promise<Task> {
+    const existing = await db.tasks.get(id);
+    if (!existing) throw new Error(`Task ${id} not found`);
+
+    const now = getCurrentUTC();
+    const updated: Task = { ...existing, ...updates, updatedAt: now };
+    await db.tasks.put(updated);
+
+    await recordChange({
+      entityType: 'task',
+      entityId: id,
+      action: 'update',
+      oldValue: existing,
+      newValue: updated,
+    });
+    return updated;
+  },
+
+  async softDeleteTask(id: EntityId, reason?: string): Promise<void> {
+    const existing = await db.tasks.get(id);
+    if (!existing) throw new Error(`Task ${id} not found`);
+
+    const now = getCurrentUTC();
+    await db.tasks.update(id, { isDeleted: true, updatedAt: now });
+
+    await recordChange({
+      entityType: 'task',
+      entityId: id,
+      action: 'soft_delete',
+      reason,
+    });
+  },
+
+  // ==========================================
+  // TIME SESSIONS (PRD Section 6.4 & 10)
+  // ==========================================
+  async logTimeSession(data: {
+    entityType: 'task' | 'target' | 'project';
+    entityId: EntityId;
+    durationMinutes: number;
+    kind: 'deep' | 'shallow' | 'learning';
+    note?: string;
+  }): Promise<TimeSession> {
+    const now = getCurrentUTC();
+    const session: TimeSession = {
+      id: generateId(),
+      entityType: data.entityType,
+      entityId: data.entityId,
+      startTime: now,
+      durationMinutes: data.durationMinutes,
+      kind: data.kind,
+      note: data.note,
+      createdAt: now,
+    };
+    await db.timeSessions.add(session);
+
+    // If task, increment actualMinutes
+    if (data.entityType === 'task') {
+      const task = await db.tasks.get(data.entityId);
+      if (task) {
+        const newActual = (task.actualMinutes || 0) + data.durationMinutes;
+        await db.tasks.update(task.id, { actualMinutes: newActual, updatedAt: now });
+      }
+    }
+
+    await recordChange({
+      entityType: 'timeSession',
+      entityId: session.id,
+      action: 'create',
+      newValue: session,
+      reason: data.note,
+    });
+    return session;
+  },
+
+  /**
+   * Toggles habit completion for a specific local date
+   */
+  async toggleHabitForDate(habitId: EntityId, dateStr: string): Promise<boolean> {
+    const habit = await db.habits.get(habitId);
+    if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+    const existingLog = await db.progressLogs
+      .where('entityId')
+      .equals(habitId)
+      .filter((l) => !l.isDeleted && l.entityType === 'habit' && l.date === dateStr)
+      .first();
+
+    if (existingLog) {
+      await db.progressLogs.delete(existingLog.id);
+      await recordChange({
+        entityType: 'habit',
+        entityId: habitId,
+        action: 'hard_delete',
+        fieldChanged: 'progressLog',
+        oldValue: existingLog,
+        reason: `Removed completion for ${dateStr}`,
+      });
+      return false; // Now uncompleted
+    } else {
+      await this.logHabitCompletion(habitId, dateStr, habit.targetValue || 1);
+      return true; // Now completed
+    }
   },
 
   // ==========================================
