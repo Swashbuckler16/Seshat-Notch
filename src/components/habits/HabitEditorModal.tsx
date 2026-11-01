@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Habit, HabitScheduleType } from '../../types';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Sparkles, Target as TargetIcon } from 'lucide-react';
 
 interface HabitEditorModalProps {
@@ -19,7 +20,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
   onClose,
   habitToEdit,
 }) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
 
   const goals = useLiveQuery(
     () => db.projects.filter((p) => !p.isDeleted && p.isGoal).toArray(),

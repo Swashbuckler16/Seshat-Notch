@@ -1,4 +1,5 @@
 import type { Priority } from '../types/index.ts';
+import { getLocalDateString, parseLocalDate, shiftDateString } from './dateUtils.ts';
 
 export interface ParsedTargetMetric {
   unit: string;
@@ -24,7 +25,7 @@ export interface ParsedQuickAdd {
 }
 
 /**
- * Calculates YYYY-MM-DD for a day of week relative to today (default refDate: 2026-10-31)
+ * Calculates YYYY-MM-DD for a day of week relative to today in local time
  */
 function resolveWeekdayDate(dayCode: string, refDate = new Date()): { dateStr: string; label: string } {
   const dayMap: Record<string, number> = {
@@ -37,20 +38,20 @@ function resolveWeekdayDate(dayCode: string, refDate = new Date()): { dateStr: s
     sat: 6,
   };
 
+  const baseDateStr = getLocalDateString(refDate);
   const targetDay = dayMap[dayCode.toLowerCase()];
   if (targetDay === undefined) {
-    return { dateStr: refDate.toISOString().split('T')[0], label: 'Today' };
+    return { dateStr: baseDateStr, label: 'Today' };
   }
 
-  const currentDay = refDate.getDay();
+  const localBase = parseLocalDate(baseDateStr);
+  const currentDay = localBase.getDay();
   let diff = targetDay - currentDay;
   if (diff <= 0) {
     diff += 7; // Next upcoming occurrence
   }
 
-  const result = new Date(refDate);
-  result.setDate(refDate.getDate() + diff);
-  const dateStr = result.toISOString().split('T')[0];
+  const dateStr = shiftDateString(baseDateStr, diff);
 
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return { dateStr, label: `Next ${days[targetDay]} (${dateStr})` };
@@ -61,16 +62,14 @@ function resolveWeekdayDate(dayCode: string, refDate = new Date()): { dateStr: s
  */
 export function resolveDateToken(tokenVal: string, refDate = new Date()): { dateStr: string; label: string } {
   const clean = tokenVal.toLowerCase().trim();
+  const baseDateStr = getLocalDateString(refDate);
 
   if (clean === 'today') {
-    const dateStr = refDate.toISOString().split('T')[0];
-    return { dateStr, label: `Today (${dateStr})` };
+    return { dateStr: baseDateStr, label: `Today (${baseDateStr})` };
   }
 
   if (clean === 'tomorrow') {
-    const tom = new Date(refDate);
-    tom.setDate(refDate.getDate() + 1);
-    const dateStr = tom.toISOString().split('T')[0];
+    const dateStr = shiftDateString(baseDateStr, 1);
     return { dateStr, label: `Tomorrow (${dateStr})` };
   }
 
@@ -84,8 +83,7 @@ export function resolveDateToken(tokenVal: string, refDate = new Date()): { date
   }
 
   // Fallback to today
-  const fallback = refDate.toISOString().split('T')[0];
-  return { dateStr: fallback, label: fallback };
+  return { dateStr: baseDateStr, label: baseDateStr };
 }
 
 /**
@@ -117,18 +115,18 @@ export function parsePriorityToken(raw: string): Priority | undefined {
 }
 
 /**
- * Parses target metric tokens like +rules:2 or +pages:25 or +3
+ * Parses target metric tokens like +pages:25 or +3
  */
 export function parseMetricToken(raw: string): ParsedTargetMetric | undefined {
   const clean = raw.replace(/^\+/, '');
 
-  // Form: unit:value e.g. rules:2
+  // Form: unit:value e.g. pages:25
   const unitFirst = clean.match(/^([a-zA-Z_-]+):(\d+(?:\.\d+)?)$/);
   if (unitFirst) {
     return { unit: unitFirst[1], value: parseFloat(unitFirst[2]) };
   }
 
-  // Form: value:unit e.g. 2:rules
+  // Form: value:unit e.g. 25:pages
   const valueFirst = clean.match(/^(\d+(?:\.\d+)?):([a-zA-Z_-]+)$/);
   if (valueFirst) {
     return { unit: valueFirst[2], value: parseFloat(valueFirst[1]) };
@@ -145,8 +143,6 @@ export function parseMetricToken(raw: string): ParsedTargetMetric | undefined {
 
 /**
  * Main Quick-Add Grammar Parser
- * Strictly adheres to PRD Section 6.9 specification:
- * Example: "Write Kerberoasting detection card #heimdall >week3 ~90m !high @fri +rules:2"
  */
 export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickAdd {
   const tokens: ParsedQuickAdd['tokens'] = [];
@@ -214,7 +210,7 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
       continue;
     }
 
-    // 6. +metric:value (e.g. +rules:2)
+    // 6. +metric:value (e.g. +pages:10)
     if (word.startsWith('+') && word.length > 1) {
       const metric = parseMetricToken(word);
       if (metric !== undefined) {
@@ -237,7 +233,7 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
     milestoneQuery,
     estimateMinutes,
     priority: priority || 'medium',
-    scheduleDate: scheduleDate || refDate.toISOString().split('T')[0],
+    scheduleDate: scheduleDate || getLocalDateString(refDate),
     scheduleDateLabel: scheduleDateLabel || 'Today',
     targetMetric,
     tags,

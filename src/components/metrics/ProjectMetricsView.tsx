@@ -3,10 +3,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { ProjectHealthCard } from './ProjectHealthCard';
 import { StatTile } from '../ui/StatTile';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Calculator } from 'lucide-react';
 
 export const ProjectMetricsView: React.FC = () => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
 
   const projects = useLiveQuery(
     () => db.projects.filter((p) => !p.isDeleted).toArray(),

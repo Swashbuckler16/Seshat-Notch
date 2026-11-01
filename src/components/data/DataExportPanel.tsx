@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { dataOwnershipService } from '../../services/dataOwnershipService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import {
   Download,
   FileJson,
@@ -33,10 +34,10 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
   const handleExportJson = async () => {
     try {
       setDownloading('json');
-      const json = await dataOwnershipService.exportAllToJson();
-      const dateStr = new Date().toISOString().slice(0, 10);
-      triggerDownload(json, `seshat-notch-backup-${dateStr}.json`, 'application/json');
-      onNotify('Full JSON backup downloaded successfully.');
+      const result = await dataOwnershipService.saveBackupToLocalFile();
+      if (result.saved) {
+        onNotify(`Full JSON backup saved (${result.filename}).`);
+      }
     } catch (err: unknown) {
       onNotify(`Export error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
@@ -50,7 +51,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
     try {
       setDownloading(`csv-${table}`);
       const csv = await dataOwnershipService.exportTableToCsv(table);
-      const dateStr = new Date().toISOString().slice(0, 10);
+      const dateStr = getLocalDateString();
       triggerDownload(csv, `seshat-${table}-${dateStr}.csv`, 'text/csv');
       onNotify(`${table}.csv downloaded successfully.`);
     } catch (err: unknown) {
@@ -64,7 +65,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
     try {
       setDownloading('markdown');
       const md = await dataOwnershipService.exportAllToMarkdown();
-      const dateStr = new Date().toISOString().slice(0, 10);
+      const dateStr = getLocalDateString();
       triggerDownload(md, `seshat-field-ledger-${dateStr}.md`, 'text/markdown');
       onNotify('Markdown field ledger downloaded.');
     } catch (err: unknown) {
@@ -108,10 +109,10 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-ink)]">
               <FileJson className="w-4 h-4 text-[var(--color-accent)]" />
-              <span>Full JSON Database Snapshot</span>
+              <span>Full JSON Database File</span>
             </div>
-            <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
-              Complete, lossless export of all 12 tables, entity relationships, immutable change logs, reviews, and settings. Ideal for full device transfer.
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
+              Complete, lossless export of all tables, entity relationships, change logs, reviews, and settings to a local `.json` file on disk.
             </p>
           </div>
 
@@ -122,7 +123,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
             className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50 min-h-11"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>{downloading === 'json' ? 'Generating…' : 'Download Complete JSON'}</span>
+            <span>{downloading === 'json' ? 'Saving…' : 'Save JSON Backup to Disk'}</span>
           </button>
         </div>
 
@@ -133,7 +134,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
               <FileText className="w-4 h-4 text-[var(--color-emerald)]" />
               <span>Markdown Field Ledger</span>
             </div>
-            <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
               Human-readable executive plan document. Outlines projects, why/success criteria, targets, scheduled tasks, and habits in clean Markdown.
             </p>
           </div>
@@ -167,12 +168,12 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
               <FileSpreadsheet className="w-4 h-4 text-[var(--color-amber)]" />
               <span>Table-by-Table CSV</span>
             </div>
-            <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
               Standard RFC 4180 CSV files suitable for spreadsheet analysis in Excel, LibreOffice, or data science pipelines in Python/R.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+          <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
             {(
               [
                 ['tasks', 'Tasks'],

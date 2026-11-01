@@ -1,4 +1,5 @@
 import type { Habit, ProgressLog } from '../types/index.ts';
+import { shiftDateString } from './dateUtils.ts';
 
 export interface HabitStreakResult {
   currentStreak: number;
@@ -111,12 +112,13 @@ export function isRelapseLog(log: ProgressLog): boolean {
  */
 export function getDateRangeArray(startDateStr: string, endDateStr: string): string[] {
   const dates: string[] = [];
-  const curr = new Date(`${startDateStr}T00:00:00Z`);
-  const end = new Date(`${endDateStr}T00:00:00Z`);
+  let curr = startDateStr;
+  let guard = 0;
 
-  while (curr <= end) {
-    dates.push(curr.toISOString().split('T')[0]);
-    curr.setUTCDate(curr.getUTCDate() + 1);
+  while (curr <= endDateStr && guard < 10000) {
+    dates.push(curr);
+    curr = shiftDateString(curr, 1);
+    guard++;
   }
   return dates;
 }
@@ -280,9 +282,7 @@ export function calculateHabitMetrics(
   // --- Consistency % over 7, 30, and 90 days (PRD 7.3) ---
   // Consistency % = completions / scheduled occurrences (excluding declared skip and pause days)
   const calcConsistency = (windowDays: number): number => {
-    const cutoffDate = new Date(`${todayStr}T00:00:00Z`);
-    cutoffDate.setUTCDate(cutoffDate.getUTCDate() - (windowDays - 1));
-    const cutoffStr = cutoffDate.toISOString().split('T')[0];
+    const cutoffStr = shiftDateString(todayStr, -(windowDays - 1));
 
     const windowRecords = dayRecords.filter((dr) => dr.date >= cutoffStr && dr.date <= todayStr);
     let sched = 0;
@@ -394,9 +394,7 @@ function calculateAvoidanceMetrics(
 
   // Avoidance consistency: % of days without relapse over 7, 30, 90 days
   const calcCleanRate = (windowDays: number): number => {
-    const cutoff = new Date(`${todayStr}T00:00:00Z`);
-    cutoff.setUTCDate(cutoff.getUTCDate() - (windowDays - 1));
-    const cutoffStr = cutoff.toISOString().split('T')[0];
+    const cutoffStr = shiftDateString(todayStr, -(windowDays - 1));
 
     const windowRelapses = relapses.filter((r) => r.date >= cutoffStr && r.date <= todayStr).length;
     const cleanDays = Math.max(0, windowDays - windowRelapses);
@@ -440,21 +438,18 @@ export function buildYearHeatmapMatrix(
   const dayOfWeek = today.getUTCDay(); // 0 = Sun, 1 = Mon ...
   // Calculate Sunday of current week
   const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
-  const endSunday = new Date(today.getTime());
-  endSunday.setUTCDate(endSunday.getUTCDate() + daysUntilSunday);
+  const endSundayStr = shiftDateString(todayStr, daysUntilSunday);
 
   // 52 weeks back from Monday of that week
-  const startDate = new Date(endSunday.getTime());
-  startDate.setUTCDate(startDate.getUTCDate() - (52 * 7 - 1)); // 364 days
+  let currStr = shiftDateString(endSundayStr, -(52 * 7 - 1)); // 364 days
 
   const weeks: HabitDayCell[][] = [];
-  const curr = new Date(startDate.getTime());
 
   for (let w = 0; w < 52; w++) {
     const weekCells: HabitDayCell[] = [];
     for (let d = 0; d < 7; d++) {
-      const dateStr = curr.toISOString().split('T')[0];
-      const dOfWeek = curr.getUTCDay();
+      const dateStr = currStr;
+      const dOfWeek = new Date(`${dateStr}T00:00:00Z`).getUTCDay();
       const isToday = dateStr === todayStr;
       const isFuture = dateStr > todayStr;
 
@@ -493,7 +488,7 @@ export function buildYearHeatmapMatrix(
         intensity: isFuture ? 0 : intensity,
       });
 
-      curr.setUTCDate(curr.getUTCDate() + 1);
+      currStr = shiftDateString(currStr, 1);
     }
     weeks.push(weekCells);
   }

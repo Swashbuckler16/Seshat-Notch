@@ -6,6 +6,7 @@ import {
   Camera,
   RotateCcw,
   Trash2,
+  HardDriveDownload,
 } from 'lucide-react';
 
 interface SnapshotsPanelProps {
@@ -17,7 +18,11 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
   const [snapshots, setSnapshots] = useState<BackupSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [savingToFile, setSavingToFile] = useState(false);
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [lastFileBackup, setLastFileBackup] = useState<string | null>(() =>
+    dataOwnershipService.getLastFileBackupDate()
+  );
 
   const loadSnapshots = async () => {
     try {
@@ -34,6 +39,21 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
   useEffect(() => {
     loadSnapshots();
   }, []);
+
+  const handleSaveBackupFile = async () => {
+    try {
+      setSavingToFile(true);
+      const res = await dataOwnershipService.saveBackupToLocalFile();
+      if (res.saved) {
+        setLastFileBackup(dataOwnershipService.getLastFileBackupDate());
+        onNotify(`Saved local backup file: ${res.filename}`);
+      }
+    } catch (err: unknown) {
+      onNotify(`File backup error: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setSavingToFile(false);
+    }
+  };
 
   const handleCreateSnapshot = async () => {
     try {
@@ -85,16 +105,42 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Top Banner */}
+      {/* Daily Local Disk File Backup Card */}
+      <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <HardDriveDownload className="w-4 h-4 text-[var(--color-accent)]" />
+          <div className="flex flex-col">
+            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+              Daily Backup to Local File (.json)
+            </h3>
+            <span className="text-xs text-[var(--color-ink-muted)]">
+              Save a complete JSON backup directly to your Windows filesystem so your data survives browser resets.
+              {lastFileBackup ? ` Last saved to disk: ${lastFileBackup}.` : ' No disk backup saved yet.'}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={savingToFile}
+          onClick={handleSaveBackupFile}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50 min-h-9 whitespace-nowrap"
+        >
+          <HardDriveDownload className="w-3.5 h-3.5" />
+          <span>{savingToFile ? 'Saving…' : 'Save Backup to File…'}</span>
+        </button>
+      </div>
+
+      {/* Top Banner for In-Browser Snapshots */}
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
           <div className="flex flex-col">
             <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-              Local Snapshot Backups
+              In-App Restore Points
             </h3>
-            <span className="text-[11px] text-[var(--color-ink-muted)]">
-              Automated and manual snapshots stored securely in offline IndexedDB storage.
+            <span className="text-xs text-[var(--color-ink-muted)]">
+              Automated and manual snapshots stored in local IndexedDB storage (up to 10 automatic safety points).
             </span>
           </div>
         </div>
@@ -103,9 +149,9 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
           type="button"
           disabled={creating}
           onClick={handleCreateSnapshot}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50 min-h-11"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink)] text-xs font-medium transition-colors disabled:opacity-50 min-h-9 whitespace-nowrap"
         >
-          <Camera className="w-3.5 h-3.5" />
+          <Camera className="w-3.5 h-3.5 text-[var(--color-accent)]" />
           <span>{creating ? 'Saving…' : 'Take Manual Snapshot'}</span>
         </button>
       </div>
@@ -122,7 +168,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
             <span className="text-xs font-semibold text-[var(--color-ink)]">
               No snapshots saved yet
             </span>
-            <span className="text-[11px] text-[var(--color-ink-muted)] max-w-sm">
+            <span className="text-xs text-[var(--color-ink-muted)] max-w-sm">
               Take a manual snapshot or import data to create your first automatic safety restore point.
             </span>
           </div>
@@ -130,7 +176,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="hairline-b bg-[var(--color-paper-2)] text-[11px] font-mono text-[var(--color-ink-muted)]">
+                <tr className="hairline-b bg-[var(--color-paper-2)] text-xs font-mono text-[var(--color-ink-muted)]">
                   <th className="py-2.5 px-3">Snapshot Name</th>
                   <th className="py-2.5 px-3">Timestamp</th>
                   <th className="py-2.5 px-3">Type</th>
@@ -138,7 +184,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
                   <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--color-rule)] text-[11px]">
+              <tbody className="divide-y divide-[var(--color-rule)] text-xs">
                 {snapshots.map((snap) => {
                   const isRestoring = restoringId === snap.id;
                   return (
@@ -151,7 +197,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
                       </td>
                       <td className="py-2.5 px-3 font-mono">
                         <span
-                          className={`px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[10px] uppercase border ${
+                          className={`px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[11px] uppercase border ${
                             snap.isAutomated
                               ? 'bg-[var(--color-paper-3)] border-[var(--color-rule)] text-[var(--color-ink-muted)]'
                               : 'bg-[var(--color-accent)]/10 border-[var(--color-accent)]/30 text-[var(--color-accent)]'

@@ -113,7 +113,7 @@ export const FocusTimerWidget: React.FC = () => {
                 : 'border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-rule-strong)]'
             }`}
           >
-            90m Lab block
+            90m Deep block
           </button>
         </div>
 
@@ -271,7 +271,7 @@ export const FocusTimerWidget: React.FC = () => {
             className="input-field px-3 py-1.5 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
             value={state.note}
             onChange={(e) => setConfig({ note: e.target.value })}
-            placeholder="e.g. Synthesize Sysmon event ID 10 alerts in Splunk SPL"
+            placeholder="e.g. Complete architecture specification without context switching"
           />
         </div>
       </div>

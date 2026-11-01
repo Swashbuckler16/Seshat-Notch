@@ -1,4 +1,5 @@
 import type { TimeSession, Task, ProjectGoal, Area, EntityId } from '../types/index.ts';
+import { getLocalDateString, parseLocalDate, shiftDateString } from './dateUtils.ts';
 
 export interface TimeKindBreakdown {
   kind: 'deep' | 'shallow' | 'learning';
@@ -159,13 +160,11 @@ export function calculateTimeMetrics(
   // 3. Daily trend (past 7 days)
   const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const dailyTrend: DailyTimeRecord[] = [];
-  const today = new Date();
+  const todayStr = getLocalDateString();
 
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(today.getTime());
-    d.setUTCDate(d.getUTCDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    const dayLabel = dayNamesShort[d.getUTCDay()];
+    const dateStr = shiftDateString(todayStr, -i);
+    const dayLabel = dayNamesShort[parseLocalDate(dateStr).getDay()];
 
     const daySessions = activeSessions.filter((s) => s.startTime.startsWith(dateStr));
     const dayTotal = daySessions.reduce((acc, s) => acc + s.durationMinutes, 0);

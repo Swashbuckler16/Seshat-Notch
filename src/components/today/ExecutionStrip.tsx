@@ -90,7 +90,7 @@ export const ExecutionStrip: React.FC<ExecutionStripProps> = ({ tasks, dateStr }
             { label: '+15m', mins: 15 },
             { label: '+25m Pomodoro', mins: 25 },
             { label: '+45m Deep work', mins: 45 },
-            { label: '+90m Lab block', mins: 90 },
+            { label: '+90m Deep block', mins: 90 },
           ].map((preset) => (
             <button
               key={preset.mins}

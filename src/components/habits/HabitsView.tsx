@@ -6,10 +6,11 @@ import { HabitEditorModal } from './HabitEditorModal';
 import { StatTile } from '../ui/StatTile';
 import { Button } from '../ui/Button';
 import { calculateHabitMetrics } from '../../utils/habitMath';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Sparkles, Plus, Flame, Activity } from 'lucide-react';
 
 export const HabitsView: React.FC = () => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
 
   const [filter, setFilter] = useState<'all' | 'daily' | 'flexible' | 'avoidance' | 'archived'>('all');
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);

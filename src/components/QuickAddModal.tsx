@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { parseQuickAdd, ParsedQuickAdd } from '../utils/quickAddParser';
+import { getLocalDateString } from '../utils/dateUtils';
 import { domainService } from '../services/domainService';
 import { Button } from './ui/Button';
 import { StatusBadge } from './StatusBadge';
@@ -70,6 +71,14 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Derive dynamic example tokens from user's actual projects/milestones or generic defaults
+  const sampleProjectToken = projects && projects.length > 0
+    ? `#${projects[0].title.trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'project'}`
+    : '#project';
+  const sampleMilestoneToken = milestones && milestones.length > 0
+    ? `>${milestones[0].title.trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z0-9_-]/g, '') || 'phase1'}`
+    : '>phase1';
+
   // Resolve matching project
   const matchedProject = projects?.find((p) => {
     if (!parsed.projectQuery) return false;
@@ -108,7 +117,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
         const newTarget = await domainService.createTarget({
           projectId: matchedProject?.id,
           horizon: 'day',
-          period: parsed.scheduleDate || new Date().toISOString().split('T')[0],
+          period: parsed.scheduleDate || getLocalDateString(),
           title: parsed.title,
           metricType: 'numeric',
           targetValue: parsed.targetMetric.value,
@@ -150,6 +159,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
+      aria-label="Quick Add Task"
       className="fixed inset-0 z-[400] flex items-start justify-center pt-20 px-4 bg-[var(--color-scrim)] backdrop-contrast-125"
     >
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
@@ -164,7 +174,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Write Kerberoasting card #heimdall >baseline ~90m !high @fri +rules:2"
+              placeholder={`Draft project brief ${sampleProjectToken} ${sampleMilestoneToken} ~45m !high @today +pages:5`}
               className="w-full bg-transparent text-sm font-normal text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] focus:outline-none"
             />
             <button
@@ -178,28 +188,28 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
           </div>
 
           {/* Grammar Token Helper Chips */}
-          <div className="px-4 py-2 bg-[var(--color-paper)] hairline-b flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--color-ink-muted)]">
-            <span className="text-[11px] text-[var(--color-ink-subtle)] mr-1">Add:</span>
+          <div className="px-4 py-2 bg-[var(--color-paper)] hairline-b flex flex-wrap items-center gap-1.5 text-xs text-[var(--color-ink-muted)]">
+            <span className="text-xs text-[var(--color-ink-subtle)] mr-1 font-medium">Examples:</span>
             <button
               type="button"
-              onClick={() => handleAppendToken('#heimdall')}
+              onClick={() => handleAppendToken(sampleProjectToken)}
               className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
-              #heimdall
+              {sampleProjectToken}
             </button>
             <button
               type="button"
-              onClick={() => handleAppendToken('>baseline')}
+              onClick={() => handleAppendToken(sampleMilestoneToken)}
               className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
-              &gt;baseline
+              {sampleMilestoneToken}
             </button>
             <button
               type="button"
-              onClick={() => handleAppendToken('~90m')}
+              onClick={() => handleAppendToken('~45m')}
               className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
             >
-              ~90m
+              ~45m
             </button>
             <button
               type="button"
@@ -217,16 +227,16 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => handleAppendToken('+rules:2')}
+              onClick={() => handleAppendToken('+pages:5')}
               className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
-              +rules:2
+              +pages:5
             </button>
 
             <button
               type="button"
               onClick={() => setShowCheatSheet(!showCheatSheet)}
-              className="ml-auto inline-flex items-center gap-1 text-[11px] text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
+              className="ml-auto inline-flex items-center gap-1 text-xs text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
             >
               <HelpCircle className="w-3.5 h-3.5" />
               <span>How quick add works</span>
@@ -235,22 +245,22 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
           {/* Grammar Cheat Sheet Modal Dropdown */}
           {showCheatSheet && (
-            <div className="p-3 bg-[var(--color-paper-2)] hairline-b text-xs text-[var(--color-ink-muted)] flex flex-col gap-1.5 font-mono text-[11px]">
+            <div className="p-3 bg-[var(--color-paper-2)] hairline-b text-xs text-[var(--color-ink-muted)] flex flex-col gap-1.5 font-mono">
               <div className="font-bold text-[var(--color-ink)] mb-0.5">Add details with these shortcuts:</div>
-              <div><strong className="text-[var(--color-accent)]">#name</strong> Project, goal, or area (e.g. #heimdall, #secplus)</div>
-              <div><strong className="text-[var(--color-accent)]">&gt;name</strong> Phase, milestone, or week (e.g. &gt;baseline, &gt;week3)</div>
-              <div><strong className="text-[var(--color-ink)]">~time</strong> Time estimate in minutes or hours (e.g. ~90m, ~1.5h)</div>
+              <div><strong className="text-[var(--color-accent)]">#name</strong> Project or goal (e.g. {sampleProjectToken})</div>
+              <div><strong className="text-[var(--color-accent)]">&gt;name</strong> Phase, milestone, or week (e.g. {sampleMilestoneToken}, &gt;week3)</div>
+              <div><strong className="text-[var(--color-ink)]">~time</strong> Time estimate in minutes or hours (e.g. ~45m, ~1.5h)</div>
               <div><strong className="text-[var(--color-status-at-risk)]">!prio</strong> Priority: !urgent, !high, !med, !low</div>
               <div><strong className="text-[var(--color-ink)]">@date</strong> Date: @today, @tomorrow, @fri, @2026-11-14</div>
-              <div><strong className="text-[var(--color-accent)]">+unit:val</strong> Measurable target (e.g. +rules:2, +pages:20)</div>
+              <div><strong className="text-[var(--color-accent)]">+unit:val</strong> Measurable target (e.g. +pages:20, +chapters:2)</div>
             </div>
           )}
 
-          {/* Live Decomposition & Preview Card (PRD 6.9: Live preview before saving) */}
+          {/* Live Decomposition & Preview Card */}
           <div className="p-4 flex flex-col gap-3">
             <div className="text-xs text-[var(--color-ink-muted)] font-semibold flex items-center justify-between">
               <span>Preview</span>
-              <span className="text-[11px] text-[var(--color-ink-subtle)]">
+              <span className="text-xs text-[var(--color-ink-subtle)]">
                 {parsed.tokens.length} details found
               </span>
             </div>
@@ -354,4 +364,3 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     </div>
   );
 };
-

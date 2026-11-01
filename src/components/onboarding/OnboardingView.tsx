@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { domainService } from '../../services/domainService';
 import { seedDatabase } from '../../db/seedData';
+import { getLocalDateString } from '../../utils/dateUtils';
 import {
   Compass,
   Briefcase,
@@ -39,6 +40,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
       });
 
       // 2. Create Project
+      const todayStr = getLocalDateString();
       const project = await domainService.createProject({
         areaId: area.id,
         title: projectTitle.trim(),
@@ -46,7 +48,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
         status: 'active',
         priority: 'high',
         isGoal: false,
-        startDate: new Date().toISOString().split('T')[0],
+        startDate: todayStr,
         tags: [],
         weightType: 'equal',
       });
@@ -57,7 +59,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
         scheduleType: habitFrequency,
         isAvoidance: false,
         linkedGoalId: project.id,
-        startDate: new Date().toISOString().split('T')[0],
+        startDate: todayStr,
         metricType: 'boolean',
         targetValue: 1,
       });
@@ -315,7 +317,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
             className="min-h-11 px-4 py-1.5 text-xs font-medium text-[var(--color-accent)] hover:bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] inline-flex items-center gap-2 transition-colors"
           >
             <BookOpen className="w-4 h-4" />
-            <span>Load Example Plan (Heimdall SOC Lab & Habits)</span>
+            <span>Load example plan</span>
           </button>
         </div>
       </div>

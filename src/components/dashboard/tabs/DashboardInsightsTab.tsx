@@ -52,7 +52,8 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
   progressLogs.forEach((l) => { if (l.date) allDates.add(l.date); });
   timeSessions.forEach((s) => { if (s.startTime) allDates.add(s.startTime.slice(0, 10)); });
 
-  const hasEnoughData = allDates.size >= 14 && tasks.filter((t) => t.status === 'done').length >= 10;
+  const completedTasksCount = tasks.filter((t) => t.status === 'done').length;
+  const hasEnoughData = allDates.size >= 14 && completedTasksCount >= 10;
 
   // 1. Evaluate Rule: Weekday Velocity Anomaly
   const insights: RuleInsight[] = [];
@@ -259,7 +260,7 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
           </div>
           <h3 className="font-semibold text-xs text-[var(--color-ink)]">Needs more data</h3>
           <p className="text-xs text-[var(--color-ink-muted)] max-w-md">
-            Pattern analysis requires at least 14 days of logged activity to detect genuine trends without false assumptions. You currently have {allDates.size} day{allDates.size === 1 ? '' : 's'} recorded.
+            Pattern analysis requires at least 14 days of logged activity and 10 completed tasks to detect genuine trends without false assumptions. You currently have {allDates.size} of 14 active day{allDates.size === 1 ? '' : 's'} and {completedTasksCount} of 10 completed task{completedTasksCount === 1 ? '' : 's'} recorded.
           </p>
         </div>
       ) : insights.length === 0 ? (

@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Habit } from '../../types';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Coffee, ShieldCheck } from 'lucide-react';
 
 interface HabitSkipModalProps {
@@ -19,7 +20,7 @@ export const HabitSkipModal: React.FC<HabitSkipModalProps> = ({
   habit,
   defaultDate,
 }) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const [date, setDate] = useState(defaultDate || todayStr);
   const [reason, setReason] = useState('Planned rest day');
   const [isSubmitting, setIsSubmitting] = useState(false);

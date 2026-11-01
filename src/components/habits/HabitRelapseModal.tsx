@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Habit } from '../../types';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { AlertCircle, RotateCcw } from 'lucide-react';
 
 interface HabitRelapseModalProps {
@@ -17,7 +18,7 @@ export const HabitRelapseModal: React.FC<HabitRelapseModalProps> = ({
   onClose,
   habit,
 }) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const [date, setDate] = useState(todayStr);
   const [trigger, setTrigger] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

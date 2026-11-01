@@ -4,6 +4,7 @@ import { db } from '../../db';
 import { Habit, ProjectGoal } from '../../types';
 import { domainService } from '../../services/domainService';
 import { calculateHabitMetrics, isDateExcused } from '../../utils/habitMath';
+import { shiftDateString } from '../../utils/dateUtils';
 
 import { Button } from '../ui/Button';
 import { NotchRib, DayNotch } from '../NotchRib';
@@ -69,11 +70,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
 
   // Construct 14-day window for NotchRib preview
   const past14Days: string[] = [];
-  const baseDate = new Date(`${todayStr}T00:00:00Z`);
   for (let i = 13; i >= 0; i--) {
-    const d = new Date(baseDate.getTime());
-    d.setUTCDate(d.getUTCDate() - i);
-    past14Days.push(d.toISOString().split('T')[0]);
+    past14Days.push(shiftDateString(todayStr, -i));
   }
 
   const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

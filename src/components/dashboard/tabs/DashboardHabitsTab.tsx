@@ -1,6 +1,7 @@
 import React from 'react';
 import { Habit, ProgressLog } from '../../../types';
 import { calculateHabitMetrics } from '../../../utils/habitMath';
+import { shiftDateString } from '../../../utils/dateUtils';
 import { SvgSparkline } from '../charts/SvgSparkline';
 import {
   Flame,
@@ -28,13 +29,10 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
     const stats = calculateHabitMetrics(habit, progressLogs, todayStr);
 
     // Compute last 14 days values for sparkline
-    const todayD = new Date(`${todayStr}T00:00:00Z`);
     const sparklineData: number[] = [];
 
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(todayD);
-      d.setUTCDate(todayD.getUTCDate() - i);
-      const dStr = d.toISOString().slice(0, 10);
+      const dStr = shiftDateString(todayStr, -i);
 
       const logsOnDay = progressLogs.filter(
         (l) => l.entityId === habit.id && l.date === dStr && !l.isDeleted

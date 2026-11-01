@@ -12,6 +12,7 @@ import { DashboardReviewsTab } from './tabs/DashboardReviewsTab';
 import { DashboardInsightsTab } from './tabs/DashboardInsightsTab';
 import { calculateProjectProgress } from '../../utils/metricEngine';
 import { calculateHabitMetrics } from '../../utils/habitMath';
+import { getLocalDateString } from '../../utils/dateUtils';
 import {
   LayoutDashboard,
   Activity,
@@ -47,8 +48,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [activeSubTab, setActiveSubTab] = useState<DashboardSubTab>('overview');
 
-  // Derive today ISO string YYYY-MM-DD
-  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // Derive today local date string YYYY-MM-DD
+  const todayStr = useMemo(() => getLocalDateString(), []);
 
   // Live queries from Dexie database
   const areas = useLiveQuery(() => db.areas.filter((a) => !a.isArchived).sortBy('order'), []) || [];
@@ -124,16 +125,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const subTabs: { id: DashboardSubTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'execution', label: 'Activity', icon: Activity },
     { id: 'projects', label: 'Projects', icon: Briefcase },
     { id: 'goals', label: 'Goals', icon: Compass },
     { id: 'habits', label: 'Habits', icon: Flame },
     { id: 'time', label: 'Focus time', icon: Clock },
+    { id: 'execution', label: 'Activity', icon: Activity },
     { id: 'reviews', label: 'Reviews', icon: BookOpen },
     { id: 'insights', label: 'Insights', icon: Lightbulb },
   ];
-  const primaryTabs = subTabs.filter((tab) => ['overview', 'projects', 'habits', 'time'].includes(tab.id));
-  const moreTabs = subTabs.filter((tab) => ['execution', 'goals', 'reviews', 'insights'].includes(tab.id));
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-16">
@@ -154,8 +153,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       />
 
       {/* 2. Sub-Tab Navigation Bar */}
-      <div className="dashboard-tabs flex items-center gap-1 overflow-x-auto p-1 surface-card rounded-[var(--radius-sm)] border border-[var(--color-rule)] select-none" role="group" aria-label="Progress views">
-        {primaryTabs.map((tab) => {
+      <div className="dashboard-tabs flex flex-wrap items-center gap-1 overflow-x-auto p-1 surface-card rounded-[var(--radius-sm)] border border-[var(--color-rule)] select-none" role="group" aria-label="Progress views">
+        {subTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
           return (
@@ -175,19 +174,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           );
         })}
-        <label className="dashboard-more-label">
-          <span className="sr-only">More dashboard views</span>
-          <select
-            className="dashboard-more-select"
-            value={moreTabs.some((tab) => tab.id === activeSubTab) ? activeSubTab : ''}
-            onChange={(event) => {
-              if (event.target.value) setActiveSubTab(event.target.value as DashboardSubTab);
-            }}
-          >
-            <option value="">More</option>
-            {moreTabs.map((tab) => <option key={tab.id} value={tab.id}>{tab.label}</option>)}
-          </select>
-        </label>
       </div>
 
       {/* 3. Sub-Tab Content */}

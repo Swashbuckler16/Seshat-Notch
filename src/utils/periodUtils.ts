@@ -1,4 +1,5 @@
 import type { TargetHorizon } from '../types/index.ts';
+import { getLocalDateString, parseLocalDate, shiftDateString } from './dateUtils.ts';
 
 /**
  * Multi-Horizon Period Utilities (PRD Section 6.2 & 6.3)
@@ -6,20 +7,19 @@ import type { TargetHorizon } from '../types/index.ts';
  */
 
 export function getCurrentPeriod(horizon: TargetHorizon, date = new Date()): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
+  const localDayStr = getLocalDateString(date);
+  const [y, m] = localDayStr.split('-');
 
   if (horizon === 'month') {
     return `${y}-${m}`;
   }
 
   if (horizon === 'day') {
-    return `${y}-${m}-${d}`;
+    return localDayStr;
   }
 
   // Week horizon (YYYY-Www)
-  return getISOWeekString(date);
+  return getISOWeekString(parseLocalDate(localDayStr));
 }
 
 /**
@@ -146,9 +146,7 @@ export function getAdjacentPeriod(
   }
 
   // Day horizon
-  const d = new Date(`${period}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + delta);
-  return d.toISOString().split('T')[0];
+  return shiftDateString(period, delta);
 }
 
 /**
@@ -194,7 +192,10 @@ export function getSubPeriods(
     for (let i = 0; i < 7; i++) {
       const dayDate = new Date(range.start.getTime());
       dayDate.setUTCDate(range.start.getUTCDate() + i);
-      const isoDay = dayDate.toISOString().split('T')[0];
+      const y = dayDate.getUTCFullYear();
+      const m = String(dayDate.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dayDate.getUTCDate()).padStart(2, '0');
+      const isoDay = `${y}-${m}-${d}`;
       const monthShort = dayDate.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
       days.push({
         period: isoDay,

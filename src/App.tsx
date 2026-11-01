@@ -1,18 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
 import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
-import { DataManagementView } from './components/data/DataManagementView';
 import { QuickAddModal } from './components/QuickAddModal';
-import { PlannerView } from './components/planner/PlannerView';
 import { TodayView } from './components/today/TodayView';
-import { ReviewsView } from './components/reviews/ReviewsView';
-import { HabitsView } from './components/habits/HabitsView';
 import { HeaderTimerPill } from './components/time/HeaderTimerPill';
-import { DashboardView } from './components/dashboard/DashboardView';
 import { OnboardingView } from './components/onboarding/OnboardingView';
 import { Button } from './components/ui/Button';
+import { getLocalDateString } from './utils/dateUtils';
+import { reminderService } from './services/reminderService';
 import {
   Terminal,
   Sparkles,
@@ -21,13 +18,32 @@ import {
   Flame,
   BarChart2,
   Settings,
+  Bell,
+  X,
 } from 'lucide-react';
+
+const PlannerView = lazy(() =>
+  import('./components/planner/PlannerView').then((m) => ({ default: m.PlannerView }))
+);
+const HabitsView = lazy(() =>
+  import('./components/habits/HabitsView').then((m) => ({ default: m.HabitsView }))
+);
+const DashboardView = lazy(() =>
+  import('./components/dashboard/DashboardView').then((m) => ({ default: m.DashboardView }))
+);
+const DataManagementView = lazy(() =>
+  import('./components/data/DataManagementView').then((m) => ({ default: m.DataManagementView }))
+);
+const ReviewsView = lazy(() =>
+  import('./components/reviews/ReviewsView').then((m) => ({ default: m.ReviewsView }))
+);
 
 export type AppTab = 'today' | 'planner' | 'habits' | 'progress' | 'settings' | 'reviews';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
+  const [activeReminder, setActiveReminder] = useState<{ title: string; body: string } | null>(null);
 
   // Check if database has any areas or projects
   const hasData = useLiveQuery(
@@ -39,10 +55,22 @@ export const App: React.FC = () => {
     []
   );
 
-  // Global Keyboard Shortcuts (Ctrl+K and single key 'N')
+  // Active local reminder scheduler check
+  useEffect(() => {
+    const checkReminders = () => {
+      const due = reminderService.checkDueReminders();
+      if (due) {
+        setActiveReminder(due);
+      }
+    };
+    checkReminders();
+    const interval = window.setInterval(checkReminders, 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  // Global Keyboard Shortcuts (Ctrl+K, single key 'N', and Alt+1..Alt+5 for tabs)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if focus is in an input or textarea
       const target = e.target as HTMLElement;
       const isInput =
         target.tagName === 'INPUT' ||
@@ -55,6 +83,22 @@ export const App: React.FC = () => {
         e.preventDefault();
         setQuickAddModalOpen((prev) => !prev);
         return;
+      }
+
+      // Alt+1..Alt+5 for switching top-level tabs
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        const tabMap: Record<string, AppTab> = {
+          '1': 'today',
+          '2': 'planner',
+          '3': 'habits',
+          '4': 'progress',
+          '5': 'settings',
+        };
+        if (tabMap[e.key]) {
+          e.preventDefault();
+          setActiveTab(tabMap[e.key]);
+          return;
+        }
       }
 
       // Single-key 'n' or 'N' opens Quick Add
@@ -74,20 +118,22 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="app-shell min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] flex flex-col pb-20 md:pb-0">
-      {/* Friendly app header */}
-      <header className="app-header hairline-b bg-[var(--color-paper)] sticky top-0 z-50 px-4 sm:px-6 py-2.5 flex items-center justify-between">
+    <div className="app-shell min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] flex flex-col">
+      {/* App Header */}
+      <header className="app-header hairline-b bg-[var(--color-paper)] sticky top-0 z-50 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 sm:gap-3">
           <BrandLogo size={26} />
           <div className="flex flex-col">
-            <span className="font-semibold text-sm sm:text-base tracking-tight">Seshat Notch</span>
-            <span className="hidden sm:inline text-[11px] text-[var(--color-ink-muted)]">
+            <h1 className="font-semibold text-sm sm:text-base tracking-tight m-0 leading-tight">
+              Seshat Notch
+            </h1>
+            <span className="hidden sm:inline text-xs text-[var(--color-ink-muted)]">
               Every day, a notch. Every goal, measured.
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Header Timer Pill */}
           <HeaderTimerPill onNavigateToTime={() => setActiveTab('today')} />
 
@@ -96,24 +142,30 @@ export const App: React.FC = () => {
             variant="secondary"
             size="sm"
             onClick={() => setQuickAddModalOpen(true)}
-            className="hidden sm:inline-flex min-h-11 sm:min-h-8"
+            className="inline-flex min-h-8"
             title="Press Ctrl+K or N to open Quick Add"
           >
             <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
             <span className="text-xs">Quick Add</span>
-            <kbd className="ml-1 px-1 py-0.2 text-[10px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">
+            <kbd className="ml-1 px-1 py-0.2 text-[11px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">
               Ctrl+K
             </kbd>
           </Button>
 
-          {/* Desktop Top Navigation (5 primary tabs) */}
-          <nav className="hidden md:flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs" aria-label="Main navigation">
+          {/* Top Navigation (5 primary tabs, always visible on laptop/desktop) */}
+          <nav
+            className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs"
+            aria-label="Main navigation"
+          >
             <button
               type="button"
               onClick={() => setActiveTab('today')}
               aria-current={activeTab === 'today' ? 'page' : undefined}
+              title="Today (Alt+1)"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'today' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold' : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                activeTab === 'today'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
               <Sun className="w-3.5 h-3.5 text-[var(--color-accent)]" />
@@ -123,8 +175,11 @@ export const App: React.FC = () => {
               type="button"
               onClick={() => setActiveTab('planner')}
               aria-current={activeTab === 'planner' ? 'page' : undefined}
+              title="Plan (Alt+2)"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'planner' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold' : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                activeTab === 'planner'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
@@ -134,8 +189,11 @@ export const App: React.FC = () => {
               type="button"
               onClick={() => setActiveTab('habits')}
               aria-current={activeTab === 'habits' ? 'page' : undefined}
+              title="Habits (Alt+3)"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'habits' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold' : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                activeTab === 'habits'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
               <Flame className="w-3.5 h-3.5 text-[var(--color-amber)]" />
@@ -145,8 +203,11 @@ export const App: React.FC = () => {
               type="button"
               onClick={() => setActiveTab('progress')}
               aria-current={activeTab === 'progress' ? 'page' : undefined}
+              title="Progress (Alt+4)"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'progress' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold' : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                activeTab === 'progress'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
               <BarChart2 className="w-3.5 h-3.5" />
@@ -156,8 +217,11 @@ export const App: React.FC = () => {
               type="button"
               onClick={() => setActiveTab('settings')}
               aria-current={activeTab === 'settings' ? 'page' : undefined}
+              title="Settings (Alt+5)"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'settings' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold' : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                activeTab === 'settings'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
               <Settings className="w-3.5 h-3.5" />
@@ -171,7 +235,28 @@ export const App: React.FC = () => {
 
       {/* Main Container */}
       <main className="app-main flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-6">
-        {/* Tab 1: Today View (Morning summary, focus timer, tasks, habits, and Sunday review prompt) */}
+        {/* Scheduled Reminder Banner */}
+        {activeReminder && (
+          <div className="surface-card rounded-[var(--radius-sm)] p-3.5 border border-[var(--color-accent)]/50 bg-[var(--color-paper-2)] flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <Bell className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
+              <div>
+                <strong className="font-semibold text-[var(--color-ink)]">{activeReminder.title}: </strong>
+                <span className="text-[var(--color-ink-muted)]">{activeReminder.body}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveReminder(null)}
+              className="p-1 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] rounded"
+              aria-label="Dismiss reminder"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Tab 1: Today View */}
         {activeTab === 'today' && (
           <section>
             <TodayView
@@ -181,148 +266,87 @@ export const App: React.FC = () => {
           </section>
         )}
 
-        {/* Tab 2: Areas, Projects & Multi-Horizon Plan */}
-        {activeTab === 'planner' && (
-          <section>
-            <PlannerView />
-          </section>
-        )}
-
-        {/* Tab 3: Habits & Fair Streak Tracking */}
-        {activeTab === 'habits' && (
-          <section>
-            <HabitsView />
-          </section>
-        )}
-
-        {/* Tab 4: Progress & Executive Dashboard */}
-        {activeTab === 'progress' && (
-          <section>
-            <DashboardView
-              onNavigateTab={(tab) => {
-                if (tab === 'reviews') {
-                  setActiveTab('reviews');
-                } else if (['today', 'planner', 'habits', 'progress', 'settings'].includes(tab)) {
-                  setActiveTab(tab as AppTab);
-                }
-              }}
-              onOpenProjectDetail={() => setActiveTab('planner')}
-            />
-          </section>
-        )}
-
-        {/* Tab 5: Settings, Export, Import, Backups, Recovery Bin */}
-        {activeTab === 'settings' && (
-          <section>
-            <DataManagementView />
-          </section>
-        )}
-
-        {/* Contextual Tab: Periodic Review Flow */}
-        {activeTab === 'reviews' && (
-          <section>
-            <div className="mb-4">
-              <button
-                type="button"
-                onClick={() => setActiveTab('today')}
-                className="text-xs text-[var(--color-accent)] hover:underline flex items-center gap-1 font-medium"
-              >
-                ← Back to Today
-              </button>
+        {/* Lazy-loaded tabs */}
+        <Suspense
+          fallback={
+            <div role="status" className="surface-card p-6 text-xs text-[var(--color-ink-muted)] font-mono">
+              Loading view…
             </div>
-            <ReviewsView currentDateStr={new Date().toISOString().split('T')[0]} />
-          </section>
-        )}
+          }
+        >
+          {activeTab === 'planner' && (
+            <section>
+              <PlannerView />
+            </section>
+          )}
 
-        <aside aria-label="Keyboard shortcuts" className="app-shortcuts hairline-t pt-3 hidden sm:flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
+          {activeTab === 'habits' && (
+            <section>
+              <HabitsView />
+            </section>
+          )}
+
+          {activeTab === 'progress' && (
+            <section>
+              <DashboardView
+                onNavigateTab={(tab) => {
+                  if (tab === 'reviews') {
+                    setActiveTab('reviews');
+                  } else if (['today', 'planner', 'habits', 'progress', 'settings'].includes(tab)) {
+                    setActiveTab(tab as AppTab);
+                  }
+                }}
+                onOpenProjectDetail={() => setActiveTab('planner')}
+              />
+            </section>
+          )}
+
+          {activeTab === 'settings' && (
+            <section>
+              <DataManagementView />
+            </section>
+          )}
+
+          {activeTab === 'reviews' && (
+            <section>
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('today')}
+                  className="text-xs text-[var(--color-accent)] hover:underline flex items-center gap-1 font-medium"
+                >
+                  ← Back to Today
+                </button>
+              </div>
+              <ReviewsView currentDateStr={getLocalDateString()} />
+            </section>
+          )}
+        </Suspense>
+
+        <aside
+          aria-label="Keyboard shortcuts"
+          className="app-shortcuts hairline-t pt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-ink-muted)]"
+        >
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-[var(--color-accent)]" />
-            <span>Open quick add from anywhere</span>
+            <span>Desktop keyboard shortcuts</span>
           </div>
           <div className="flex items-center gap-2">
-            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[10px]">Ctrl+K</kbd>
-            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[10px]">N</kbd>
-            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[10px]">Esc</kbd>
+            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
+              Ctrl+K
+            </kbd>
+            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
+              N
+            </kbd>
+            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
+              Alt+1..5
+            </kbd>
+            <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
+              Esc
+            </kbd>
           </div>
         </aside>
       </main>
-
-      {/* Mobile Fixed Bottom Navigation Bar (48px tap targets) */}
-      <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-paper)] hairline-t px-2 py-1 flex items-center justify-around shadow-lg"
-        aria-label="Mobile navigation"
-      >
-        <button
-          type="button"
-          onClick={() => setActiveTab('today')}
-          aria-current={activeTab === 'today' ? 'page' : undefined}
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 px-2 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'today' ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-ink-muted)]'
-          }`}
-        >
-          <Sun className="w-4 h-4" />
-          <span>Today</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('planner')}
-          aria-current={activeTab === 'planner' ? 'page' : undefined}
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 px-2 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'planner' ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-ink-muted)]'
-          }`}
-        >
-          <Briefcase className="w-4 h-4" />
-          <span>Plan</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setQuickAddModalOpen(true)}
-          className="flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 px-2 text-[var(--color-accent)]"
-          aria-label="Quick add task"
-        >
-          <div className="w-9 h-9 rounded-full bg-[var(--color-accent)] text-[var(--color-accent-ink)] flex items-center justify-center shadow-sm">
-            <Sparkles className="w-4 h-4" />
-          </div>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('habits')}
-          aria-current={activeTab === 'habits' ? 'page' : undefined}
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 px-2 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'habits' ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-ink-muted)]'
-          }`}
-        >
-          <Flame className="w-4 h-4" />
-          <span>Habits</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('progress')}
-          aria-current={activeTab === 'progress' ? 'page' : undefined}
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 px-2 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'progress' ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-ink-muted)]'
-          }`}
-        >
-          <BarChart2 className="w-4 h-4" />
-          <span>Progress</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('settings')}
-          aria-current={activeTab === 'settings' ? 'page' : undefined}
-          className={`flex flex-col items-center justify-center min-h-[48px] min-w-[48px] py-1 px-2 rounded text-[11px] font-medium transition-colors ${
-            activeTab === 'settings' ? 'text-[var(--color-accent)] font-semibold' : 'text-[var(--color-ink-muted)]'
-          }`}
-        >
-          <Settings className="w-4 h-4" />
-          <span>Settings</span>
-        </button>
-      </nav>
 
       {/* Quick Add Command Palette Modal */}
       <QuickAddModal
@@ -331,7 +355,7 @@ export const App: React.FC = () => {
       />
 
       {/* Desktop Footer */}
-      <footer className="app-footer hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto hidden md:flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
+      <footer className="app-footer hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
         <div>Seshat Notch — Every day, a notch. Every goal, measured.</div>
         <div>All data stays offline on your machine</div>
       </footer>

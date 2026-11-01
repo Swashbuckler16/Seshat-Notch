@@ -15,7 +15,6 @@ test('Hallmark UI Primitives exist and are implemented', () => {
     'src/components/CordBar.tsx',
     'src/components/BrandLogo.tsx',
     'src/components/StatusBadge.tsx',
-    'src/components/ComponentShowcase.tsx',
   ];
 
   for (const comp of components) {

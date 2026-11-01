@@ -234,9 +234,9 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
             value={markdownText}
             onChange={(e) => setMarkdownText(e.target.value)}
             placeholder={`Example:
-- [ ] Write Kerberoasting detection card #heimdall ~90m !high @2026-11-06 +rules:2
-- [ ] Configure Sysmon Event ID 1 telemetry pipeline #heimdall ~45m !med @today
-- [x] Initial SOC lab network architecture diagram #heimdall ~120m`}
+- [ ] Draft architecture specification #roadmap ~60m !high @today +pages:4
+- [ ] Review milestone deliverables #roadmap ~45m !med @tomorrow
+- [x] Initial system design diagram #roadmap ~90m`}
             rows={7}
             className="w-full text-xs font-mono p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] placeholder-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)]"
           />

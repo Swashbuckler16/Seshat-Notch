@@ -4,6 +4,7 @@ import { db } from '../../db';
 import { domainService } from '../../services/domainService';
 import { NotchRib, DayNotch } from '../NotchRib';
 import { isDateExcused } from '../../utils/habitMath';
+import { shiftDateString } from '../../utils/dateUtils';
 import { Sparkles, CheckCircle2, Circle } from 'lucide-react';
 
 interface TodayHabitsProps {
@@ -18,12 +19,9 @@ export const TodayHabits: React.FC<TodayHabitsProps> = ({ dateStr }) => {
 
   // Generate 7-day window dates ending at dateStr
   const past7Days: string[] = [];
-  const baseDate = new Date(`${dateStr}T00:00:00Z`);
 
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(baseDate.getTime());
-    d.setUTCDate(d.getUTCDate() - i);
-    past7Days.push(d.toISOString().split('T')[0]);
+    past7Days.push(shiftDateString(dateStr, -i));
   }
 
   // Query progress logs for these 7 days

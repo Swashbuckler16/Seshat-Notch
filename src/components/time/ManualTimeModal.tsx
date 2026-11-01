@@ -5,6 +5,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Clock } from 'lucide-react';
 
 interface ManualTimeModalProps {
@@ -18,7 +19,7 @@ export const ManualTimeModal: React.FC<ManualTimeModalProps> = ({
   onClose,
   defaultDate,
 }) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
 
   const activeTasks = useLiveQuery(
     () => db.tasks.filter((t) => !t.isDeleted).toArray(),
@@ -176,7 +177,7 @@ export const ManualTimeModal: React.FC<ManualTimeModalProps> = ({
             className="input-field px-3 py-1.5 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g. Documented 3 Sigma rules for Kerberoasting attack patterns"
+            placeholder="e.g. Completed milestone draft and reviewed test cases"
           />
         </div>
 

@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Habit } from '../../types';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Plane, Plus, Trash2, Calendar } from 'lucide-react';
 
 interface HabitPauseModalProps {
@@ -13,7 +14,7 @@ interface HabitPauseModalProps {
 }
 
 export const HabitPauseModal: React.FC<HabitPauseModalProps> = ({ isOpen, onClose, habit }) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(todayStr);
   const [reason, setReason] = useState('Vacation / Travel');

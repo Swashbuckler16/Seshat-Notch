@@ -167,7 +167,7 @@ export const ReviewEditor: React.FC<ReviewEditorProps> = ({
               ? 'What were the key wins this week?'
               : 'What major milestones were completed this month?'
           }
-          placeholder="e.g. Cleared Kerberoasting card and kept focus uninterrupted"
+          placeholder="e.g. Completed key milestone and kept focus uninterrupted"
           value={wentWell}
           onChange={(e) => setWentWell(e.target.value)}
         />
@@ -180,7 +180,7 @@ export const ReviewEditor: React.FC<ReviewEditorProps> = ({
               ? 'What slowed progress or caused friction?'
               : 'What systemic blockers need adjustment?'
           }
-          placeholder="e.g. Sysmon parsing rule took longer than expected"
+          placeholder="e.g. Integration testing took longer than expected"
           value={difficulties}
           onChange={(e) => setDifficulties(e.target.value)}
         />

@@ -7,6 +7,7 @@ import { TodayTasks } from './TodayTasks';
 import { TodayTargets } from './TodayTargets';
 import { TodayHabits } from './TodayHabits';
 import { getISOWeekString } from '../../utils/periodUtils';
+import { getLocalDateString, shiftDateString } from '../../utils/dateUtils';
 import { Inbox, ArrowRight } from 'lucide-react';
 
 interface TodayViewProps {
@@ -17,23 +18,19 @@ interface TodayViewProps {
 export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigateTab }) => {
   // Default to today's local date YYYY-MM-DD
   const [dateStr, setDateStr] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0];
+    return getLocalDateString();
   });
 
   const handlePrevDay = () => {
-    const d = new Date(`${dateStr}T00:00:00Z`);
-    d.setUTCDate(d.getUTCDate() - 1);
-    setDateStr(d.toISOString().split('T')[0]);
+    setDateStr(shiftDateString(dateStr, -1));
   };
 
   const handleNextDay = () => {
-    const d = new Date(`${dateStr}T00:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + 1);
-    setDateStr(d.toISOString().split('T')[0]);
+    setDateStr(shiftDateString(dateStr, 1));
   };
 
   const handleToday = () => {
-    setDateStr(new Date().toISOString().split('T')[0]);
+    setDateStr(getLocalDateString());
   };
 
   // Query tasks for dateStr (scheduled on or due on this date)

@@ -8,6 +8,7 @@ import { MilestoneTimeline } from './MilestoneTimeline';
 import { HorizonPlanner } from './HorizonPlanner';
 
 import { EntityId, Priority } from '../../types';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
@@ -32,7 +33,7 @@ export const PlannerView: React.FC = () => {
   const [areaId, setAreaId] = useState<string>('');
   const [why, setWhy] = useState('');
   const [successCriteria, setSuccessCriteria] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(() => getLocalDateString());
   const [endDate, setEndDate] = useState('');
   const [priority, setPriority] = useState<Priority>('high');
   const [tagsInput, setTagsInput] = useState('');
@@ -72,7 +73,7 @@ export const PlannerView: React.FC = () => {
       isGoal,
       why: why.trim() || undefined,
       successCriteria: successCriteria.trim() || undefined,
-      startDate: startDate || new Date().toISOString().split('T')[0],
+      startDate: startDate || getLocalDateString(),
       endDate: endDate || undefined,
       priority,
       status: 'active',
@@ -275,7 +276,7 @@ export const PlannerView: React.FC = () => {
         <form onSubmit={handleCreateProject} className="flex flex-col gap-3.5">
           <Input
             label="Title"
-            placeholder="e.g. Heimdall SOC Lab, CompTIA Security+ Prep"
+            placeholder="e.g. Q4 Product Launch, Annual Reading Goal"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -357,7 +358,7 @@ export const PlannerView: React.FC = () => {
 
           <Input
             label="Tags"
-            placeholder="e.g. soc, detection, splunk, active-directory"
+            placeholder="e.g. roadmap, design, writing, research"
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
             helperText="Separate tags with commas or spaces."

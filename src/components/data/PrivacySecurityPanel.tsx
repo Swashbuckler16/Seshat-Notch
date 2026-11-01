@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { dataOwnershipService } from '../../services/dataOwnershipService';
+import { reminderService, ReminderSettings } from '../../services/reminderService';
+import { getDayBoundaryHour, setDayBoundaryHour } from '../../utils/dateUtils';
 import {
   Lock,
   Shield,
   CheckCircle2,
   Key,
   Bell,
+  Clock,
 } from 'lucide-react';
 
 interface PrivacySecurityPanelProps {
@@ -18,6 +21,11 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
   const [confirmPinInput, setConfirmPinInput] = useState('');
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+
+  const [reminderConfig, setReminderConfig] = useState<ReminderSettings>(() =>
+    reminderService.getSettings()
+  );
+  const [boundaryHour, setBoundaryHourState] = useState<number>(() => getDayBoundaryHour());
 
   const loadSettings = async () => {
     try {
@@ -61,24 +69,21 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
     return typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default';
   });
 
-  const handleRequestNotifications = async () => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      try {
-        const res = await Notification.requestPermission();
-        setNotificationPermission(res);
-        if (res === 'granted') {
-          onNotify('Notifications enabled for morning reminders and weekly reviews.');
-          new Notification('Seshat Notch', {
-            body: 'Reminders enabled. Every day, a notch. Every goal, measured.',
-            icon: '/logo.svg',
-          });
-        } else {
-          onNotify('Notification permission was not granted.');
-        }
-      } catch {
-        onNotify('Could not request notification permission.');
-      }
+  const handleUpdateReminders = async (updates: Partial<ReminderSettings>) => {
+    const next = { ...reminderConfig, ...updates };
+    if (updates.enabled && notificationPermission !== 'granted') {
+      const perm = await reminderService.requestPermission();
+      setNotificationPermission(perm);
     }
+    setReminderConfig(next);
+    reminderService.saveSettings(next);
+    onNotify('Reminder schedule updated.');
+  };
+
+  const handleBoundaryChange = (hour: number) => {
+    setBoundaryHourState(hour);
+    setDayBoundaryHour(hour);
+    onNotify(`Day rollover boundary set to ${hour === 0 ? 'Midnight (00:00)' : `0${hour}:00 AM`}.`);
   };
 
   const handleDisableLock = async () => {
@@ -100,7 +105,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
 
   return (
     <div className="flex flex-col gap-5">
-      {/* 1. Zero Telemetry & Privacy Certification (PRD DT-7) */}
+      {/* 1. Zero Telemetry & Privacy Certification */}
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
         <div className="flex items-center gap-2.5 hairline-b pb-2.5">
           <Shield className="w-4 h-4 text-[var(--color-emerald)]" />
@@ -115,7 +120,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-emerald)]" />
               <span>Zero Telemetry</span>
             </div>
-            <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
               No tracking pixels, third-party analytics, or external logging SDKs.
             </p>
           </div>
@@ -125,8 +130,8 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-emerald)]" />
               <span>100% Local-First</span>
             </div>
-            <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
-              All plans, change history, and metrics reside on your device in local storage.
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
+              All plans, change history, and metrics reside on your machine in local storage.
             </p>
           </div>
 
@@ -135,14 +140,111 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-emerald)]" />
               <span>Total Data Export</span>
             </div>
-            <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
+            <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
               One-click export to JSON, CSV, and Markdown anytime without lock-in.
             </p>
           </div>
         </div>
       </div>
 
-      {/* 2. Optional App Lock PIN (PRD DT-6) */}
+      {/* 2. Late-Night Day Boundary Configuration */}
+      <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
+        <div className="flex items-center justify-between hairline-b pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <Clock className="w-4 h-4 text-[var(--color-accent)]" />
+            <div className="flex flex-col">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+                Local Day Rollover Boundary
+              </h3>
+              <span className="text-xs text-[var(--color-ink-muted)]">
+                Choose when a new planning day starts in your local timezone (helpful for late-night sessions).
+              </span>
+            </div>
+          </div>
+
+          <select
+            aria-label="Day rollover boundary hour"
+            value={boundaryHour}
+            onChange={(e) => handleBoundaryChange(Number(e.target.value))}
+            className="h-8 px-2.5 text-xs font-mono bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
+          >
+            <option value={0}>00:00 (Midnight)</option>
+            <option value={1}>01:00 AM</option>
+            <option value={2}>02:00 AM</option>
+            <option value={3}>03:00 AM</option>
+            <option value={4}>04:00 AM</option>
+            <option value={5}>05:00 AM</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 3. Daily & Weekly Notification Reminders */}
+      <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
+        <div className="flex items-center justify-between hairline-b pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <Bell className="w-4 h-4 text-[var(--color-accent)]" />
+            <div className="flex flex-col">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+                Reminders & Scheduled Prompts
+              </h3>
+              <span className="text-xs text-[var(--color-ink-muted)]">
+                Schedule local desktop reminders for morning planning, evening check-in, and Sunday review.
+              </span>
+            </div>
+          </div>
+          <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer">
+            <input
+              type="checkbox"
+              checked={reminderConfig.enabled}
+              onChange={(e) => handleUpdateReminders({ enabled: e.target.checked })}
+              className="accent-[var(--color-accent)]"
+            />
+            <span>{reminderConfig.enabled ? 'Enabled' : 'Disabled'}</span>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-xs">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="morning-reminder-time" className="font-medium text-[var(--color-ink)]">
+              Morning Plan Reminder
+            </label>
+            <input
+              id="morning-reminder-time"
+              type="time"
+              value={reminderConfig.morningTime}
+              onChange={(e) => handleUpdateReminders({ morningTime: e.target.value })}
+              className="h-8 px-2 font-mono text-xs bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-ink)]"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="evening-reminder-time" className="font-medium text-[var(--color-ink)]">
+              Evening Check-In Reminder
+            </label>
+            <input
+              id="evening-reminder-time"
+              type="time"
+              value={reminderConfig.eveningTime}
+              onChange={(e) => handleUpdateReminders({ eveningTime: e.target.value })}
+              className="h-8 px-2 font-mono text-xs bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-ink)]"
+            />
+          </div>
+
+          <div className="flex flex-col justify-center gap-1">
+            <label className="inline-flex items-center gap-2 font-medium text-[var(--color-ink)] cursor-pointer mt-2 sm:mt-4">
+              <input
+                type="checkbox"
+                checked={reminderConfig.sundayReviewReminder}
+                onChange={(e) => handleUpdateReminders({ sundayReviewReminder: e.target.checked })}
+                className="accent-[var(--color-accent)]"
+              />
+              <span>Sunday 17:00 Review Prompt</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Optional App Lock PIN */}
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
         <div className="flex items-center justify-between hairline-b pb-2.5">
           <div className="flex items-center gap-2.5">
@@ -151,14 +253,14 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
               <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
                 Local App Lock
               </h3>
-              <span className="text-[11px] text-[var(--color-ink-muted)]">
+              <span className="text-xs text-[var(--color-ink-muted)]">
                 Protect your personal plans and reviews with an offline PIN.
               </span>
             </div>
           </div>
 
           <span
-            className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[10px] font-mono border uppercase tracking-wider ${
+            className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[11px] font-mono border uppercase tracking-wider ${
               appLockEnabled
                 ? 'bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30 text-[var(--color-emerald)]'
                 : 'bg-[var(--color-paper-3)] border-[var(--color-rule)] text-[var(--color-ink-muted)]'
@@ -173,7 +275,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
             <div className="flex items-center justify-between p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
               <div className="flex items-center gap-2">
                 <Key className="w-4 h-4 text-[var(--color-accent)]" />
-                <span className="text-[11px] text-[var(--color-ink)] font-medium">
+                <span className="text-xs text-[var(--color-ink)] font-medium">
                   App lock PIN is configured and active.
                 </span>
               </div>
@@ -230,7 +332,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
             </div>
           ) : (
             <div className="flex items-center justify-between p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-              <span className="text-[11px] text-[var(--color-ink-muted)]">
+              <span className="text-xs text-[var(--color-ink-muted)]">
                 Require a PIN before opening personal daily reviews and sensitive project goals.
               </span>
               <button
@@ -241,47 +343,6 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
                 Set Up PIN
               </button>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* 3. Daily & Weekly Notification Reminders */}
-      <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
-        <div className="flex items-center justify-between hairline-b pb-2.5">
-          <div className="flex items-center gap-2.5">
-            <Bell className="w-4 h-4 text-[var(--color-accent)]" />
-            <div className="flex flex-col">
-              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-                Reminders & Prompts
-              </h3>
-              <span className="text-[11px] text-[var(--color-ink-muted)]">
-                Receive local browser notifications for morning planning and Sunday weekly reviews.
-              </span>
-            </div>
-          </div>
-          <span
-            className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[10px] font-mono border uppercase tracking-wider ${
-              notificationPermission === 'granted'
-                ? 'bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30 text-[var(--color-emerald)]'
-                : 'bg-[var(--color-paper-3)] border-[var(--color-rule)] text-[var(--color-ink-muted)]'
-            }`}
-          >
-            {notificationPermission === 'granted' ? 'Enabled' : notificationPermission === 'denied' ? 'Blocked' : 'Off'}
-          </span>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-          <span className="text-xs text-[var(--color-ink-muted)]">
-            Local browser notifications respect your privacy and never transmit notifications to external push servers.
-          </span>
-          {notificationPermission !== 'granted' && (
-            <button
-              type="button"
-              onClick={handleRequestNotifications}
-              className="px-3 py-1.5 text-xs font-medium rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] hover:opacity-90 min-h-11 sm:min-h-8 whitespace-nowrap self-start sm:self-auto"
-            >
-              Enable Notifications
-            </button>
           )}
         </div>
       </div>

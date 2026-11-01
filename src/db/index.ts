@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
-import {
+import type {
   Area,
   ProjectGoal,
   MilestonePhase,
@@ -13,7 +13,7 @@ import {
   Blocker,
   ChangeLogEntry,
   BackupSnapshot,
-} from '../types';
+} from '../types/index.ts';
 
 export interface AppSetting {
   key: string;

@@ -24,21 +24,41 @@ export async function seedDatabase(force = false): Promise<void> {
 
   // Clear existing if force
   if (force) {
-    await Promise.all([
-      db.areas.clear(),
-      db.projects.clear(),
-      db.milestones.clear(),
-      db.targets.clear(),
-      db.tasks.clear(),
-      db.habits.clear(),
-      db.routines.clear(),
-      db.progressLogs.clear(),
-      db.timeSessions.clear(),
-      db.reviews.clear(),
-      db.blockers.clear(),
-      db.changeLogs.clear(),
-      db.settings.clear(),
-    ]);
+    await db.transaction(
+      'rw',
+      [
+        db.areas,
+        db.projects,
+        db.milestones,
+        db.targets,
+        db.tasks,
+        db.habits,
+        db.routines,
+        db.progressLogs,
+        db.timeSessions,
+        db.reviews,
+        db.blockers,
+        db.changeLogs,
+        db.settings,
+      ],
+      async () => {
+        await Promise.all([
+          db.areas.clear(),
+          db.projects.clear(),
+          db.milestones.clear(),
+          db.targets.clear(),
+          db.tasks.clear(),
+          db.habits.clear(),
+          db.routines.clear(),
+          db.progressLogs.clear(),
+          db.timeSessions.clear(),
+          db.reviews.clear(),
+          db.blockers.clear(),
+          db.changeLogs.clear(),
+          db.settings.clear(),
+        ]);
+      }
+    );
   }
 
   const now = '2026-10-31T09:00:00.000Z';
@@ -598,18 +618,35 @@ export async function seedDatabase(force = false): Promise<void> {
     },
   ];
 
-  // Bulk add to Dexie tables
-  await Promise.all([
-    db.areas.bulkAdd(areas),
-    db.projects.bulkAdd(projects),
-    db.milestones.bulkAdd(milestones),
-    db.targets.bulkAdd(targets),
-    db.tasks.bulkAdd(tasks),
-    db.habits.bulkAdd(habits),
-    db.routines.bulkAdd(routines),
-    db.progressLogs.bulkAdd(progressLogs),
-    db.blockers.bulkAdd(blockers),
-    db.changeLogs.bulkAdd(changeLogs),
-  ]);
+  // Bulk add to Dexie tables inside a single transaction
+  await db.transaction(
+    'rw',
+    [
+      db.areas,
+      db.projects,
+      db.milestones,
+      db.targets,
+      db.tasks,
+      db.habits,
+      db.routines,
+      db.progressLogs,
+      db.blockers,
+      db.changeLogs,
+    ],
+    async () => {
+      await Promise.all([
+        db.areas.bulkAdd(areas),
+        db.projects.bulkAdd(projects),
+        db.milestones.bulkAdd(milestones),
+        db.targets.bulkAdd(targets),
+        db.tasks.bulkAdd(tasks),
+        db.habits.bulkAdd(habits),
+        db.routines.bulkAdd(routines),
+        db.progressLogs.bulkAdd(progressLogs),
+        db.blockers.bulkAdd(blockers),
+        db.changeLogs.bulkAdd(changeLogs),
+      ]);
+    }
+  );
 }
 

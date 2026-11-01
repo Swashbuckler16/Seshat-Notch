@@ -1,5 +1,5 @@
-import { db } from '../db';
-import {
+import { db } from '../db/index.ts';
+import type {
   EntityId,
   RecoveryBinItem,
   BackupSnapshot,
@@ -15,9 +15,10 @@ import {
   Review,
   Blocker,
   ChangeLogEntry,
-} from '../types';
-import { recordChange } from '../db/changeLogService';
-import { parseQuickAdd } from '../utils/quickAddParser';
+} from '../types/index.ts';
+import { recordChange } from '../db/changeLogService.ts';
+import { parseQuickAdd } from '../utils/quickAddParser.ts';
+import { getLocalDateString } from '../utils/dateUtils.ts';
 
 function getCurrentUTC(): string {
   return new Date().toISOString();
@@ -59,9 +60,11 @@ export interface FullBackupPayload {
   };
 }
 
+const LAST_FILE_BACKUP_KEY = 'seshat_last_file_backup_date';
+
 export const dataOwnershipService = {
   // =========================================================================
-  // 1. RECOVERY BIN (DT-5: Soft delete with recovery bin; plan history retained)
+  // 1. RECOVERY BIN (Soft delete with recovery bin; plan history retained)
   // =========================================================================
 
   async getRecoveryBinItems(): Promise<RecoveryBinItem[]> {
@@ -174,82 +177,100 @@ export const dataOwnershipService = {
   async restoreItem(entityType: string, id: EntityId): Promise<void> {
     const now = getCurrentUTC();
 
-    switch (entityType) {
-      case 'project':
-        await db.projects.update(id, { isDeleted: false, updatedAt: now });
-        break;
-      case 'milestone':
-        await db.milestones.update(id, { isDeleted: false, updatedAt: now });
-        break;
-      case 'target':
-        await db.targets.update(id, { isDeleted: false, updatedAt: now });
-        break;
-      case 'task':
-        await db.tasks.update(id, { isDeleted: false, updatedAt: now });
-        break;
-      case 'habit':
-        await db.habits.update(id, { isDeleted: false, updatedAt: now });
-        break;
-      case 'routine':
-        await db.routines.update(id, { isDeleted: false, updatedAt: now });
-        break;
-      default:
-        throw new Error(`Unknown entity type: ${entityType}`);
-    }
+    await db.transaction(
+      'rw',
+      [db.projects, db.milestones, db.targets, db.tasks, db.habits, db.routines, db.changeLogs],
+      async () => {
+        switch (entityType) {
+          case 'project':
+            await db.projects.update(id, { isDeleted: false, updatedAt: now });
+            break;
+          case 'milestone':
+            await db.milestones.update(id, { isDeleted: false, updatedAt: now });
+            break;
+          case 'target':
+            await db.targets.update(id, { isDeleted: false, updatedAt: now });
+            break;
+          case 'task':
+            await db.tasks.update(id, { isDeleted: false, updatedAt: now });
+            break;
+          case 'habit':
+            await db.habits.update(id, { isDeleted: false, updatedAt: now });
+            break;
+          case 'routine':
+            await db.routines.update(id, { isDeleted: false, updatedAt: now });
+            break;
+          default:
+            throw new Error(`Unknown entity type: ${entityType}`);
+        }
 
-    await recordChange({
-      entityType,
-      entityId: id,
-      action: 'update',
-      fieldChanged: 'isDeleted',
-      oldValue: true,
-      newValue: false,
-      reason: 'Restored from recovery bin',
-    });
+        await recordChange({
+          entityType,
+          entityId: id,
+          action: 'update',
+          fieldChanged: 'isDeleted',
+          oldValue: true,
+          newValue: false,
+          reason: 'Restored from recovery bin',
+        });
+      }
+    );
   },
 
   async permanentDeleteItem(entityType: string, id: EntityId): Promise<void> {
-    switch (entityType) {
-      case 'project':
-        await db.projects.delete(id);
-        break;
-      case 'milestone':
-        await db.milestones.delete(id);
-        break;
-      case 'target':
-        await db.targets.delete(id);
-        break;
-      case 'task':
-        await db.tasks.delete(id);
-        break;
-      case 'habit':
-        await db.habits.delete(id);
-        break;
-      case 'routine':
-        await db.routines.delete(id);
-        break;
-      default:
-        throw new Error(`Unknown entity type: ${entityType}`);
-    }
+    await db.transaction(
+      'rw',
+      [db.projects, db.milestones, db.targets, db.tasks, db.habits, db.routines, db.changeLogs],
+      async () => {
+        switch (entityType) {
+          case 'project':
+            await db.projects.delete(id);
+            break;
+          case 'milestone':
+            await db.milestones.delete(id);
+            break;
+          case 'target':
+            await db.targets.delete(id);
+            break;
+          case 'task':
+            await db.tasks.delete(id);
+            break;
+          case 'habit':
+            await db.habits.delete(id);
+            break;
+          case 'routine':
+            await db.routines.delete(id);
+            break;
+          default:
+            throw new Error(`Unknown entity type: ${entityType}`);
+        }
 
-    await recordChange({
-      entityType,
-      entityId: id,
-      action: 'hard_delete',
-      reason: 'Permanently purged from recovery bin',
-    });
+        await recordChange({
+          entityType,
+          entityId: id,
+          action: 'hard_delete',
+          reason: 'Permanently purged from recovery bin',
+        });
+      }
+    );
   },
 
   async emptyRecoveryBin(): Promise<number> {
     const items = await this.getRecoveryBinItems();
-    for (const item of items) {
-      await this.permanentDeleteItem(item.entityType, item.id);
-    }
+    await db.transaction(
+      'rw',
+      [db.projects, db.milestones, db.targets, db.tasks, db.habits, db.routines, db.changeLogs],
+      async () => {
+        for (const item of items) {
+          await this.permanentDeleteItem(item.entityType, item.id);
+        }
+      }
+    );
     return items.length;
   },
 
   // =========================================================================
-  // 2. DATA EXPORT (DT-3: JSON, CSV, Markdown)
+  // 2. DATA EXPORT (JSON, CSV, Markdown & Local File System Backup)
   // =========================================================================
 
   async exportAllToJson(): Promise<string> {
@@ -303,6 +324,66 @@ export const dataOwnershipService = {
     };
 
     return JSON.stringify(payload, null, 2);
+  },
+
+  /**
+   * Saves a full JSON backup directly to a local file on disk (Windows File System Access API
+   * or standard browser download fallback) and records the backup date.
+   */
+  async saveBackupToLocalFile(): Promise<{ saved: boolean; filename: string }> {
+    const jsonString = await this.exportAllToJson();
+    const todayStr = getLocalDateString();
+    const filename = `seshat-notch-backup-${todayStr}.json`;
+
+    const win = typeof window !== 'undefined' ? (window as unknown as { showSaveFilePicker?: (opts: unknown) => Promise<{ createWritable: () => Promise<{ write: (data: string) => Promise<void>; close: () => Promise<void> }> }> }) : undefined;
+
+    if (win && typeof win.showSaveFilePicker === 'function') {
+      try {
+        const handle = await win.showSaveFilePicker({
+          suggestedName: filename,
+          types: [
+            {
+              description: 'Seshat Notch JSON Backup',
+              accept: { 'application/json': ['.json'] },
+            },
+          ],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(jsonString);
+        await writable.close();
+        localStorage.setItem(LAST_FILE_BACKUP_KEY, todayStr);
+        return { saved: true, filename };
+      } catch (err) {
+        if ((err as { name?: string })?.name === 'AbortError') {
+          return { saved: false, filename };
+        }
+        // Fallback to download if picker fails
+      }
+    }
+
+    if (typeof document !== 'undefined') {
+      const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      localStorage.setItem(LAST_FILE_BACKUP_KEY, todayStr);
+      return { saved: true, filename };
+    }
+
+    return { saved: false, filename };
+  },
+
+  getLastFileBackupDate(): string | null {
+    try {
+      return typeof localStorage !== 'undefined' ? localStorage.getItem(LAST_FILE_BACKUP_KEY) : null;
+    } catch {
+      return null;
+    }
   },
 
   async exportTableToCsv(
@@ -432,7 +513,7 @@ export const dataOwnershipService = {
 
     const lines: string[] = [];
     lines.push('# Seshat Notch — Master Planning Field Ledger');
-    lines.push(`Generated: ${getCurrentUTC()} | User Data Export (PRD Section 6.8 DT-3)\n`);
+    lines.push(`Generated: ${getCurrentUTC()}\n`);
 
     lines.push('## 1. Life Areas & Projects\n');
     for (const area of areas) {
@@ -482,7 +563,7 @@ export const dataOwnershipService = {
   },
 
   // =========================================================================
-  // 3. BULK PLAN IMPORT (PL-9 & DT-2)
+  // 3. BULK PLAN IMPORT
   // =========================================================================
 
   async importFromJson(
@@ -521,52 +602,68 @@ export const dataOwnershipService = {
     let totalImported = 0;
     const tablesUpdated: string[] = [];
 
-    if (mode === 'replace') {
-      // Clear all and overwrite
-      for (const tbl of tables) {
-        const records = parsed.data[tbl] || [];
-        if (records.length > 0) {
-          const tableRef = (db as any)[tbl];
-          await tableRef.clear();
-          await tableRef.bulkAdd(records);
-          totalImported += records.length;
-          tablesUpdated.push(tbl);
-        }
-      }
-    } else {
-      // Deterministic Last-Writer-Wins Merge per PRD DT-2
-      for (const tbl of tables) {
-        const incoming = parsed.data[tbl] || [];
-        if (incoming.length === 0) continue;
+    await db.transaction(
+      'rw',
+      [
+        db.areas,
+        db.projects,
+        db.milestones,
+        db.targets,
+        db.tasks,
+        db.habits,
+        db.routines,
+        db.progressLogs,
+        db.timeSessions,
+        db.reviews,
+        db.blockers,
+        db.changeLogs,
+      ],
+      async () => {
+        if (mode === 'replace') {
+          for (const tbl of tables) {
+            const records = parsed.data[tbl] || [];
+            const tableRef = (db as unknown as Record<string, { clear: () => Promise<void>; bulkAdd: (items: unknown[]) => Promise<void> }>)[tbl];
+            await tableRef.clear();
+            if (records.length > 0) {
+              await tableRef.bulkAdd(records);
+              totalImported += records.length;
+              tablesUpdated.push(tbl);
+            }
+          }
+        } else {
+          for (const tbl of tables) {
+            const incoming = parsed.data[tbl] || [];
+            if (incoming.length === 0) continue;
 
-        const tableRef = (db as any)[tbl];
-        const existingRecords = await tableRef.toArray();
-        const existingMap = new Map<string, { updatedAt?: string; [key: string]: unknown }>(
-          existingRecords.map((r: { id: string }) => [r.id, r])
-        );
+            const tableRef = (db as unknown as Record<string, { toArray: () => Promise<Array<{ id: string; updatedAt?: string }>>; bulkPut: (items: unknown[]) => Promise<void> }>)[tbl];
+            const existingRecords = await tableRef.toArray();
+            const existingMap = new Map<string, { updatedAt?: string; [key: string]: unknown }>(
+              existingRecords.map((r) => [r.id, r])
+            );
 
-        const toPut: unknown[] = [];
-        for (const item of incoming as Array<{ id: string; updatedAt?: string }>) {
-          const existing = existingMap.get(item.id);
-          if (!existing) {
-            toPut.push(item);
-          } else {
-            // Compare updatedAt if present, otherwise overwrite with incoming
-            const incomingTime = item.updatedAt || '0';
-            const existingTime = existing.updatedAt || '0';
-            if (incomingTime >= existingTime) {
-              toPut.push(item);
+            const toPut: unknown[] = [];
+            for (const item of incoming as Array<{ id: string; updatedAt?: string }>) {
+              const existing = existingMap.get(item.id);
+              if (!existing) {
+                toPut.push(item);
+              } else {
+                const incomingTime = item.updatedAt || '0';
+                const existingTime = existing.updatedAt || '0';
+                if (incomingTime >= existingTime) {
+                  toPut.push(item);
+                }
+              }
+            }
+
+            if (toPut.length > 0) {
+              await tableRef.bulkPut(toPut);
+              totalImported += toPut.length;
+              tablesUpdated.push(tbl);
             }
           }
         }
-
-        if (toPut.length > 0) {
-          await tableRef.bulkPut(toPut);
-          totalImported += toPut.length;
-          tablesUpdated.push(tbl);
-        }
       }
-    }
+    );
 
     return { importedCount: totalImported, tablesUpdated };
   },
@@ -579,51 +676,51 @@ export const dataOwnershipService = {
     let createdTasksCount = 0;
     const now = getCurrentUTC();
 
-    for (const rawLine of lines) {
-      const line = rawLine.trim();
-      // Match markdown checklist items: - [ ] or - [x] or * [ ]
-      const checklistMatch = line.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
-      if (!checklistMatch) continue;
+    await db.transaction('rw', [db.tasks, db.changeLogs], async () => {
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        const checklistMatch = line.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
+        if (!checklistMatch) continue;
 
-      const isDone = checklistMatch[1].toLowerCase() === 'x';
-      const text = checklistMatch[2].trim();
-      if (!text) continue;
+        const isDone = checklistMatch[1].toLowerCase() === 'x';
+        const text = checklistMatch[2].trim();
+        if (!text) continue;
 
-      // Parse grammar tokens using quickAddParser
-      const parsed = parseQuickAdd(text);
+        const parsed = parseQuickAdd(text);
 
-      const taskId = `tsk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      const task: Task = {
-        id: taskId,
-        projectId: defaultProjectId,
-        title: parsed.title,
-        status: isDone ? 'done' : 'active',
-        priority: parsed.priority || 'medium',
-        estimateMinutes: parsed.estimateMinutes,
-        scheduleDate: parsed.scheduleDate,
-        subtasks: [],
-        tags: parsed.tags || [],
-        isDeleted: false,
-        createdAt: now,
-        updatedAt: now,
-      };
+        const taskId = `tsk_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        const task: Task = {
+          id: taskId,
+          projectId: defaultProjectId,
+          title: parsed.title,
+          status: isDone ? 'done' : 'active',
+          priority: parsed.priority || 'medium',
+          estimateMinutes: parsed.estimateMinutes,
+          scheduleDate: parsed.scheduleDate,
+          subtasks: [],
+          tags: parsed.tags || [],
+          isDeleted: false,
+          createdAt: now,
+          updatedAt: now,
+        };
 
-      await db.tasks.add(task);
-      await recordChange({
-        entityType: 'task',
-        entityId: taskId,
-        action: 'create',
-        newValue: task,
-        reason: 'Imported from Markdown checklist',
-      });
-      createdTasksCount++;
-    }
+        await db.tasks.add(task);
+        await recordChange({
+          entityType: 'task',
+          entityId: taskId,
+          action: 'create',
+          newValue: task,
+          reason: 'Imported from Markdown checklist',
+        });
+        createdTasksCount++;
+      }
+    });
 
     return { createdTasksCount };
   },
 
   // =========================================================================
-  // 4. SNAPSHOT BACKUPS (DT-4: Automated snapshots & 1-tap restore)
+  // 4. SNAPSHOT BACKUPS
   // =========================================================================
 
   async createSnapshotBackup(name?: string, isAutomated = false): Promise<BackupSnapshot> {
@@ -646,20 +743,21 @@ export const dataOwnershipService = {
       sizeBytes: new Blob([jsonString]).size,
     };
 
-    await db.backups.add(backup);
+    await db.transaction('rw', [db.backups], async () => {
+      await db.backups.add(backup);
 
-    // Enforce rotation: retain up to 10 automated snapshots
-    if (isAutomated) {
-      const autoBackups = await db.backups
-        .filter((b) => Boolean(b.isAutomated))
-        .sortBy('timestamp');
-      if (autoBackups.length > 10) {
-        const toDelete = autoBackups.slice(0, autoBackups.length - 10);
-        for (const old of toDelete) {
-          await db.backups.delete(old.id);
+      if (isAutomated) {
+        const autoBackups = await db.backups
+          .filter((b) => Boolean(b.isAutomated))
+          .sortBy('timestamp');
+        if (autoBackups.length > 10) {
+          const toDelete = autoBackups.slice(0, autoBackups.length - 10);
+          for (const old of toDelete) {
+            await db.backups.delete(old.id);
+          }
         }
       }
-    }
+    });
 
     return backup;
   },
@@ -680,7 +778,7 @@ export const dataOwnershipService = {
   },
 
   // =========================================================================
-  // 5. PRIVACY & LOCAL APP LOCK (DT-6 & DT-7)
+  // 5. PRIVACY & LOCAL APP LOCK
   // =========================================================================
 
   async getPrivacySettings(): Promise<{ appLockEnabled: boolean; telemetryEnabled: boolean; hasPin: boolean }> {
@@ -691,7 +789,7 @@ export const dataOwnershipService = {
 
     return {
       appLockEnabled: lockSetting?.value === 'true',
-      telemetryEnabled: false, // strictly zero telemetry by default
+      telemetryEnabled: false,
       hasPin: Boolean(pinSetting?.value),
     };
   },
@@ -699,26 +797,30 @@ export const dataOwnershipService = {
   async setAppLockPin(pin: string): Promise<void> {
     const hashed = hashPin(pin);
     const now = getCurrentUTC();
-    await db.settings.put({ key: 'app_lock_pin_hash', value: hashed, updatedAt: now });
-    await db.settings.put({ key: 'app_lock_enabled', value: 'true', updatedAt: now });
+    await db.transaction('rw', [db.settings], async () => {
+      await db.settings.put({ key: 'app_lock_pin_hash', value: hashed, updatedAt: now });
+      await db.settings.put({ key: 'app_lock_enabled', value: 'true', updatedAt: now });
+    });
   },
 
   async disableAppLock(currentPin: string): Promise<boolean> {
-    const pinSetting = await db.settings.get('app_lock_pin_hash');
-    if (!pinSetting) {
-      await db.settings.put({ key: 'app_lock_enabled', value: 'false', updatedAt: getCurrentUTC() });
+    return await db.transaction('rw', [db.settings], async () => {
+      const pinSetting = await db.settings.get('app_lock_pin_hash');
+      if (!pinSetting) {
+        await db.settings.put({ key: 'app_lock_enabled', value: 'false', updatedAt: getCurrentUTC() });
+        return true;
+      }
+
+      const hashedInput = hashPin(currentPin);
+      if (hashedInput !== pinSetting.value) {
+        return false;
+      }
+
+      const now = getCurrentUTC();
+      await db.settings.put({ key: 'app_lock_enabled', value: 'false', updatedAt: now });
+      await db.settings.delete('app_lock_pin_hash');
       return true;
-    }
-
-    const hashedInput = hashPin(currentPin);
-    if (hashedInput !== pinSetting.value) {
-      return false;
-    }
-
-    const now = getCurrentUTC();
-    await db.settings.put({ key: 'app_lock_enabled', value: 'false', updatedAt: now });
-    await db.settings.delete('app_lock_pin_hash');
-    return true;
+    });
   },
 
   async verifyAppLockPin(pin: string): Promise<boolean> {

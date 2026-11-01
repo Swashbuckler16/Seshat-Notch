@@ -41,7 +41,7 @@ export const DataManagementView: React.FC = () => {
   };
 
   const handleSeed = async () => {
-    if (!window.confirm('This will load the example Heimdall SOC Lab plan into your database. Continue?')) return;
+    if (!window.confirm('This will load the example workspace plan into your database. Continue?')) return;
     try {
       await seedDatabase(true);
       notify('Example plan successfully loaded.');

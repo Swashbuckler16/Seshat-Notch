@@ -102,22 +102,37 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
             <p>Based on your logged focus sessions</p>
           </div>
         </div>
-        <div className="overview-charts">
-          <figure className="overview-chart-block" aria-labelledby="focus-type-heading">
-            <figcaption className="overview-chart-caption">
-              <h4 id="focus-type-heading">Focus by type</h4>
-              <span>{formatMinutesToHuman(timeMetrics.totalMinutes)} logged</span>
-            </figcaption>
-            <SvgTimePieChart items={timeMetrics.kindBreakdown} />
-          </figure>
-          <figure className="overview-chart-block" aria-labelledby="weekly-focus-heading">
-            <figcaption className="overview-chart-caption">
-              <h4 id="weekly-focus-heading">This week</h4>
-              <span>Minutes focused each day</span>
-            </figcaption>
-            <SvgWeeklyFocusChart days={timeMetrics.dailyTrend} />
-          </figure>
-        </div>
+        {timeMetrics.totalMinutes === 0 ? (
+          <div className="py-5 px-4 rounded-[var(--radius-xs)] bg-[var(--color-paper-2)] border border-[var(--color-rule)] flex items-center justify-between gap-4 text-xs text-[var(--color-ink-muted)]">
+            <span>No focus sessions logged yet. Start a focus timer or log a deep work block on Today to see your weekly focus breakdown.</span>
+            {onNavigateTab && (
+              <button
+                type="button"
+                onClick={() => onNavigateTab('today')}
+                className="px-2.5 py-1 rounded-[var(--radius-xs)] bg-[var(--color-paper)] border border-[var(--color-rule)] text-[var(--color-ink)] font-medium hover:bg-[var(--color-paper-3)] whitespace-nowrap"
+              >
+                Go to Today
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="overview-charts">
+            <figure className="overview-chart-block" aria-labelledby="focus-type-heading">
+              <figcaption className="overview-chart-caption">
+                <h4 id="focus-type-heading">Focus by type</h4>
+                <span>{formatMinutesToHuman(timeMetrics.totalMinutes)} logged</span>
+              </figcaption>
+              <SvgTimePieChart items={timeMetrics.kindBreakdown} />
+            </figure>
+            <figure className="overview-chart-block" aria-labelledby="weekly-focus-heading">
+              <figcaption className="overview-chart-caption">
+                <h4 id="weekly-focus-heading">This week</h4>
+                <span>Minutes focused each day</span>
+              </figcaption>
+              <SvgWeeklyFocusChart days={timeMetrics.dailyTrend} />
+            </figure>
+          </div>
+        )}
       </section>
 
       {/* 2. Weekly and monthly goals */}

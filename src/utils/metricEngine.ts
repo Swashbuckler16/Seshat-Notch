@@ -8,6 +8,7 @@ import type {
   ScheduleStatus,
   EntityId,
 } from '../types/index.ts';
+import { shiftDateString } from './dateUtils.ts';
 function getISOWeekString(date: Date): string {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
@@ -489,10 +490,7 @@ export function calculateVelocityAndForecast(
   const variables: FormulaVariable[] = [];
 
   // Cutoff date for recent window
-  const today = new Date(`${todayStr}T00:00:00Z`);
-  const cutoff = new Date(today.getTime());
-  cutoff.setUTCDate(cutoff.getUTCDate() - windowDays);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const cutoffStr = shiftDateString(todayStr, -windowDays);
 
   // Filter progress logs in the last 14 days for this project or its targets
   const targetIds = new Set(targets.filter((t) => t.projectId === project.id).map((t) => t.id));
@@ -590,15 +588,9 @@ export function calculateVelocityAndForecast(
   const daysOptimistic = Math.max(1, Math.round(remainingPercent / (recentVelocityPerDay * 1.25)));
   const daysPessimistic = Math.round(remainingPercent / (recentVelocityPerDay * 0.75));
 
-  const addDaysToDate = (baseDate: Date, days: number): string => {
-    const d = new Date(baseDate.getTime());
-    d.setUTCDate(d.getUTCDate() + days);
-    return d.toISOString().split('T')[0];
-  };
-
-  const forecastDateOptimistic = addDaysToDate(today, daysOptimistic);
-  const forecastDateExpected = addDaysToDate(today, daysExpected);
-  const forecastDatePessimistic = addDaysToDate(today, daysPessimistic);
+  const forecastDateOptimistic = shiftDateString(todayStr, daysOptimistic);
+  const forecastDateExpected = shiftDateString(todayStr, daysExpected);
+  const forecastDatePessimistic = shiftDateString(todayStr, daysPessimistic);
 
   // Slippage against project.endDate
   let slippageDays: number | undefined = undefined;

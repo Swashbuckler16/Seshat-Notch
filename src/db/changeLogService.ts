@@ -1,5 +1,5 @@
-import { db } from './index';
-import { ChangeLogEntry, EntityId } from '../types';
+import { db } from './index.ts';
+import type { ChangeLogEntry, EntityId } from '../types/index.ts';
 
 /**
  * Generates a unique crypto UUID or fallback timestamp-based ID

@@ -1,9 +1,10 @@
-// Service Worker for Seshat Notch Offline PWA
-const CACHE_NAME = 'seshat-notch-v1';
+// Service Worker for Seshat Notch Offline Desktop App
+const CACHE_NAME = 'seshat-notch-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './logo.svg',
+  './favicon.svg',
+  './icon-256.png',
   './manifest.webmanifest'
 ];
 
@@ -30,17 +31,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
 
-  // Cache-first for static shell assets, fonts and icons
-  if (
-    url.origin === self.location.origin ||
-    url.hostname === 'fonts.googleapis.com' ||
-    url.hostname === 'fonts.gstatic.com'
-  ) {
+  // Cache-first for static same-origin shell assets, bundled self-hosted fonts, and icons
+  if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
@@ -62,4 +58,3 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
-
