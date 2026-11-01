@@ -23,6 +23,19 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
   const [lastFileBackup, setLastFileBackup] = useState<string | null>(() =>
     dataOwnershipService.getLastFileBackupDate()
   );
+  const [dailyPromptEnabled, setDailyPromptEnabled] = useState<boolean>(() =>
+    dataOwnershipService.isDailyBackupPromptEnabled()
+  );
+
+  const handleToggleDailyPrompt = (enabled: boolean) => {
+    setDailyPromptEnabled(enabled);
+    dataOwnershipService.setDailyBackupPromptEnabled(enabled);
+    onNotify(
+      enabled
+        ? 'Daily backup prompt on Today enabled.'
+        : 'Daily backup prompt on Today disabled.'
+    );
+  };
 
   const loadSnapshots = async () => {
     try {
@@ -109,14 +122,23 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <HardDriveDownload className="w-4 h-4 text-[var(--color-accent)]" />
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1">
             <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
               Daily Backup to Local File (.json)
             </h3>
             <span className="text-xs text-[var(--color-ink-muted)]">
-              Save a complete JSON backup directly to your Windows filesystem so your data survives browser resets.
+              Saves all plans, logs, and settings (including day rollover and reminder preferences) to disk.
               {lastFileBackup ? ` Last saved to disk: ${lastFileBackup}.` : ' No disk backup saved yet.'}
             </span>
+            <label className="inline-flex items-center gap-2 text-xs text-[var(--color-ink)] cursor-pointer mt-0.5">
+              <input
+                type="checkbox"
+                checked={dailyPromptEnabled}
+                onChange={(e) => handleToggleDailyPrompt(e.target.checked)}
+                className="accent-[var(--color-accent)]"
+              />
+              <span>Show daily &ldquo;Backup due&rdquo; prompt on Today when not yet saved</span>
+            </label>
           </div>
         </div>
 

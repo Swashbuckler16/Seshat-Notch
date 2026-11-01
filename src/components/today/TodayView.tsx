@@ -8,7 +8,8 @@ import { TodayTargets } from './TodayTargets';
 import { TodayHabits } from './TodayHabits';
 import { getISOWeekString } from '../../utils/periodUtils';
 import { getLocalDateString, shiftDateString } from '../../utils/dateUtils';
-import { Inbox, ArrowRight } from 'lucide-react';
+import { dataOwnershipService } from '../../services/dataOwnershipService';
+import { Inbox, ArrowRight, HardDriveDownload, X } from 'lucide-react';
 
 interface TodayViewProps {
   onOpenQuickAdd: () => void;
@@ -20,6 +21,30 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
   const [dateStr, setDateStr] = useState<string>(() => {
     return getLocalDateString();
   });
+  const [backupDue, setBackupDue] = useState<boolean>(() =>
+    dataOwnershipService.isBackupDueToday()
+  );
+  const [savingBackup, setSavingBackup] = useState<boolean>(false);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const lastBackupDate = dataOwnershipService.getLastFileBackupDate();
+
+  const handleSaveDailyBackup = async () => {
+    try {
+      setSavingBackup(true);
+      const res = await dataOwnershipService.saveBackupToLocalFile();
+      if (res.saved) {
+        setBackupDue(false);
+        setBackupMessage(`Saved backup to ${res.path || res.filename}`);
+      }
+    } finally {
+      setSavingBackup(false);
+    }
+  };
+
+  const handleSnoozeBackup = () => {
+    dataOwnershipService.snoozeBackupPromptForToday();
+    setBackupDue(false);
+  };
 
   const handlePrevDay = () => {
     setDateStr(shiftDateString(dateStr, -1));
@@ -118,6 +143,64 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
         minutesLogged={minutesLogged}
         minutesEstimated={minutesEstimated}
       />
+
+      {/* Daily Backup Due Banner */}
+      {backupDue && (
+        <div
+          role="region"
+          aria-label="Backup due prompt"
+          className="surface-card rounded-[var(--radius-sm)] p-3.5 border border-[var(--color-rule)] bg-[var(--color-paper-2)] flex flex-wrap items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 flex items-center justify-center text-[var(--color-accent)] shrink-0">
+              <HardDriveDownload className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-xs text-[var(--color-ink)]">
+                Daily backup due
+              </h3>
+              <p className="text-xs text-[var(--color-ink-muted)]">
+                Save a local .json backup of your plans, logs, and settings to disk.
+                {lastBackupDate ? ` Last saved: ${lastBackupDate}.` : ' No disk backup saved yet.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={savingBackup}
+              onClick={handleSaveDailyBackup}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-accent)] text-[var(--color-accent-ink)] rounded-[var(--radius-xs)] hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              <HardDriveDownload className="w-3.5 h-3.5" />
+              <span>{savingBackup ? 'Saving…' : 'Save backup (.json)'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleSnoozeBackup}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] border border-[var(--color-rule)] bg-[var(--color-paper)] rounded-[var(--radius-xs)]"
+              title="Remind me tomorrow"
+            >
+              <span>Later</span>
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {backupMessage && (
+        <div className="surface-card rounded-[var(--radius-sm)] px-3.5 py-2.5 border border-[var(--color-emerald)]/40 bg-[var(--color-paper-2)] flex items-center justify-between text-xs text-[var(--color-ink)]">
+          <span>{backupMessage}</span>
+          <button
+            type="button"
+            onClick={() => setBackupMessage(null)}
+            className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+            aria-label="Dismiss backup confirmation"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Sunday Weekly Review & Triage Prompt */}
       {isSunday && (

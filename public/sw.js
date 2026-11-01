@@ -1,17 +1,33 @@
 // Service Worker for Seshat Notch Offline Desktop App
-const CACHE_NAME = 'seshat-notch-v2';
+const CACHE_NAME = 'seshat-notch-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './favicon.svg',
+  './logo.svg',
+  './icon-192.png',
   './icon-256.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
   './manifest.webmanifest'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Cache each file individually so a single missing or transient asset cannot fail the whole install
+      await Promise.allSettled(
+        ASSETS_TO_CACHE.map(async (assetUrl) => {
+          try {
+            const response = await fetch(assetUrl, { cache: 'no-cache' });
+            if (response && response.ok) {
+              await cache.put(assetUrl, response);
+            }
+          } catch (err) {
+            console.warn('[Seshat SW] Skipped caching asset during install:', assetUrl, err);
+          }
+        })
+      );
     }).then(() => self.skipWaiting())
   );
 });

@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" width="1120" height="680" fill="none">
+  <style>
+    .sans { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .mono { font-family: 'IBM Plex Mono', 'Consolas', monospace; font-variant-numeric: tabular-nums; }
+  </style>
+
+  <!-- Window Frame -->
+  <rect width="1120" height="680" rx="12" fill="#faf7ee" stroke="#dcd5c6" stroke-width="1.5"/>
+
+  <!-- Top App Header -->
+  <rect x="1" y="1" width="1118" height="56" rx="11" fill="#faf7ee"/>
+  <line x1="0" y1="57" x2="1120" y2="57" stroke="#e2dccd" stroke-width="1"/>
+
+  <!-- Brand Mark -->
+  <circle cx="34" cy="29" r="13" fill="#0d9488" fill-opacity="0.14" stroke="#0d9488" stroke-width="1.5"/>
+  <circle cx="34" cy="29" r="2.5" fill="#0d9488"/>
+  <text x="56" y="26" class="sans" font-size="15" font-weight="700" fill="#2c2219">Seshat Notch</text>
+  <text x="56" y="42" class="sans" font-size="11.5" fill="#6b5e50">Every day, a notch. Every goal, measured.</text>
+
+  <!-- Header Right Controls -->
+  <rect x="520" y="14" width="128" height="30" rx="6" fill="#f3eee0" stroke="#dfd8c8"/>
+  <text x="534" y="33" class="sans" font-size="12" font-weight="600" fill="#0d9488">✦ Quick Add</text>
+  <rect x="606" y="19" width="34" height="20" rx="4" fill="#ebe4d4" stroke="#d8d0be"/>
+  <text x="611" y="33" class="mono" font-size="10" fill="#4f4438">Ctrl+K</text>
+
+  <!-- Top Navigation Bar (5 Tabs) -->
+  <rect x="660" y="13" width="398" height="32" rx="6" fill="#f3eee0" stroke="#dfd8c8"/>
+  <rect x="664" y="16" width="76" height="26" rx="5" fill="#faf7ee" stroke="#dfd8c8"/>
+  <text x="684" y="33" class="sans" font-size="12" font-weight="600" fill="#2c2219">Today</text>
+  <text x="762" y="33" class="sans" font-size="12" font-weight="500" fill="#6b5e50">Plan</text>
+  <text x="828" y="33" class="sans" font-size="12" font-weight="500" fill="#6b5e50">Habits</text>
+  <text x="902" y="33" class="sans" font-size="12" font-weight="500" fill="#6b5e50">Progress</text>
+  <text x="986" y="33" class="sans" font-size="12" font-weight="500" fill="#6b5e50">Settings</text>
+
+  <!-- Morning Summary Strip -->
+  <rect x="32" y="76" width="1056" height="96" rx="10" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="52" y="102" class="sans" font-size="12" font-weight="600" fill="#0d9488">TODAY&apos;S OVERVIEW</text>
+  <text x="52" y="128" class="sans" font-size="22" font-weight="700" fill="#2c2219">Sunday, Nov 1, 2026</text>
+  <text x="52" y="150" class="sans" font-size="12.5" fill="#6b5e50">5 of 7 items completed today (71%) · Day boundary: 00:00 local</text>
+
+  <!-- Summary Stat Pills -->
+  <text x="640" y="104" class="sans" font-size="11.5" font-weight="600" fill="#6b5e50">Tasks</text>
+  <text x="640" y="130" class="mono" font-size="22" font-weight="700" fill="#2c2219">2 / 3</text>
+  <text x="760" y="104" class="sans" font-size="11.5" font-weight="600" fill="#6b5e50">Goals</text>
+  <text x="760" y="130" class="mono" font-size="22" font-weight="700" fill="#2c2219">1 / 1</text>
+  <text x="880" y="104" class="sans" font-size="11.5" font-weight="600" fill="#6b5e50">Habits</text>
+  <text x="880" y="130" class="mono" font-size="22" font-weight="700" fill="#0d9488">2 / 3</text>
+  <text x="990" y="104" class="sans" font-size="11.5" font-weight="600" fill="#6b5e50">Focus</text>
+  <text x="990" y="130" class="mono" font-size="22" font-weight="700" fill="#2c2219">1h 30m</text>
+
+  <!-- Measuring Cord Bar -->
+  <rect x="640" y="144" width="424" height="10" rx="5" fill="#e6dfd0"/>
+  <rect x="640" y="144" width="302" height="10" rx="5" fill="#0d9488"/>
+
+  <!-- Daily Backup Due Prompt Banner -->
+  <rect x="32" y="186" width="1056" height="52" rx="8" fill="#f4efe2" stroke="#dfd8c8"/>
+  <rect x="48" y="198" width="28" height="28" rx="6" fill="#0d9488" fill-opacity="0.12" stroke="#0d9488" stroke-opacity="0.35"/>
+  <text x="57" y="217" class="mono" font-size="13" font-weight="700" fill="#0d9488">↓</text>
+  <text x="88" y="208" class="sans" font-size="13" font-weight="600" fill="#2c2219">Daily backup due</text>
+  <text x="88" y="226" class="sans" font-size="12" fill="#6b5e50">Save a local .json backup of your plans, logs, and settings to disk. Last saved: 2026-10-31.</text>
+  <rect x="876" y="197" width="136" height="30" rx="6" fill="#0d9488"/>
+  <text x="893" y="216" class="sans" font-size="12" font-weight="600" fill="#ffffff">Save backup (.json)</text>
+  <rect x="1020" y="197" width="54" height="30" rx="6" fill="#faf7ee" stroke="#dfd8c8"/>
+  <text x="1033" y="216" class="sans" font-size="12" fill="#6b5e50">Later</text>
+
+  <!-- Focus Timer & Quick Log Strip -->
+  <rect x="32" y="252" width="1056" height="56" rx="8" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="52" y="285" class="sans" font-size="13" font-weight="600" fill="#2c2219">Focus Session</text>
+  <rect x="164" y="265" width="96" height="30" rx="6" fill="#0d9488"/>
+  <text x="180" y="284" class="sans" font-size="12" font-weight="600" fill="#ffffff">▶ 25m Focus</text>
+  <rect x="268" y="265" width="96" height="30" rx="6" fill="#faf7ee" stroke="#dfd8c8"/>
+  <text x="284" y="284" class="sans" font-size="12" font-weight="500" fill="#2c2219">▶ 50m Deep</text>
+  <text x="690" y="284" class="sans" font-size="12" fill="#6b5e50">Quick log:</text>
+  <rect x="758" y="266" width="84" height="28" rx="5" fill="#faf7ee" stroke="#dfd8c8"/>
+  <text x="772" y="284" class="mono" font-size="11.5" fill="#2c2219">+25m Focus</text>
+  <rect x="850" y="266" width="84" height="28" rx="5" fill="#faf7ee" stroke="#dfd8c8"/>
+  <text x="864" y="284" class="mono" font-size="11.5" fill="#2c2219">+50m Deep</text>
+  <rect x="942" y="266" width="130" height="28" rx="5" fill="#faf7ee" stroke="#dfd8c8"/>
+  <text x="956" y="284" class="mono" font-size="11.5" fill="#2c2219">+90m Deep work</text>
+
+  <!-- Left Column: Today's Tasks -->
+  <rect x="32" y="324" width="680" height="316" rx="10" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="52" y="354" class="sans" font-size="15" font-weight="600" fill="#2c2219">Today&apos;s Tasks</text>
+  <text x="630" y="354" class="mono" font-size="12" fill="#6b5e50">2 of 3 done</text>
+  <line x1="32" y1="368" x2="712" y2="368" stroke="#e2dccd"/>
+
+  <!-- Task Row 1 -->
+  <rect x="52" y="386" width="18" height="18" rx="4" fill="#0d9488"/>
+  <text x="57" y="399" class="sans" font-size="12" font-weight="700" fill="#ffffff">✓</text>
+  <text x="82" y="399" class="sans" font-size="14" fill="#6b5e50" text-decoration="line-through">Configure Windows event forwarding baseline</text>
+  <rect x="580" y="383" width="54" height="22" rx="4" fill="#ebe4d4"/>
+  <text x="592" y="398" class="mono" font-size="11" fill="#4f4438">~90m</text>
+  <rect x="642" y="383" width="50" height="22" rx="4" fill="#0d9488" fill-opacity="0.14"/>
+  <text x="652" y="398" class="mono" font-size="11" font-weight="600" fill="#0d9488">!high</text>
+  <line x1="52" y1="418" x2="692" y2="418" stroke="#e6dfd0"/>
+
+  <!-- Task Row 2 -->
+  <rect x="52" y="434" width="18" height="18" rx="4" fill="#0d9488"/>
+  <text x="57" y="447" class="sans" font-size="12" font-weight="700" fill="#ffffff">✓</text>
+  <text x="82" y="447" class="sans" font-size="14" fill="#6b5e50" text-decoration="line-through">Write detection rule notes and verify alert fields</text>
+  <rect x="580" y="431" width="54" height="22" rx="4" fill="#ebe4d4"/>
+  <text x="592" y="446" class="mono" font-size="11" fill="#4f4438">~45m</text>
+  <rect x="642" y="431" width="50" height="22" rx="4" fill="#ebe4d4"/>
+  <text x="652" y="446" class="mono" font-size="11" fill="#4f4438">!med</text>
+  <line x1="52" y1="466" x2="692" y2="466" stroke="#e6dfd0"/>
+
+  <!-- Task Row 3 -->
+  <rect x="52" y="482" width="18" height="18" rx="4" fill="#faf7ee" stroke="#8c7f70" stroke-width="1.5"/>
+  <text x="82" y="495" class="sans" font-size="14" font-weight="500" fill="#2c2219">Review weekly milestone pacing and update progress</text>
+  <rect x="580" y="479" width="54" height="22" rx="4" fill="#ebe4d4"/>
+  <text x="592" y="494" class="mono" font-size="11" fill="#4f4438">~30m</text>
+  <rect x="642" y="479" width="50" height="22" rx="4" fill="#0d9488" fill-opacity="0.14"/>
+  <text x="652" y="494" class="mono" font-size="11" font-weight="600" fill="#0d9488">!high</text>
+
+  <!-- Inline Quick-Add Grammar Preview Bar -->
+  <rect x="52" y="546" width="640" height="72" rx="8" fill="#faf7ee" stroke="#0d9488" stroke-width="1.5"/>
+  <text x="68" y="572" class="mono" font-size="13" fill="#2c2219">Draft architecture notes #project &gt;milestone ~45m !high @today</text>
+  <text x="68" y="598" class="sans" font-size="11.5" font-weight="600" fill="#6b5e50">Examples:</text>
+  <rect x="134" y="584" width="68" height="20" rx="4" fill="#ebe4d4"/>
+  <text x="142" y="598" class="mono" font-size="11" fill="#0d9488">#project</text>
+  <rect x="210" y="584" width="82" height="20" rx="4" fill="#ebe4d4"/>
+  <text x="218" y="598" class="mono" font-size="11" fill="#4f4438">&gt;milestone</text>
+  <rect x="300" y="584" width="50" height="20" rx="4" fill="#ebe4d4"/>
+  <text x="308" y="598" class="mono" font-size="11" fill="#4f4438">~45m</text>
+  <rect x="358" y="584" width="48" height="20" rx="4" fill="#ebe4d4"/>
+  <text x="366" y="598" class="mono" font-size="11" fill="#4f4438">!high</text>
+  <rect x="414" y="584" width="56" height="20" rx="4" fill="#ebe4d4"/>
+  <text x="422" y="598" class="mono" font-size="11" fill="#4f4438">@today</text>
+
+  <!-- Right Column: Habits & 7-Day Notch Rib -->
+  <rect x="728" y="324" width="360" height="316" rx="10" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="748" y="354" class="sans" font-size="15" font-weight="600" fill="#2c2219">Today&apos;s Habits</text>
+  <text x="1005" y="354" class="mono" font-size="12" fill="#0d9488">Fair Streaks</text>
+  <line x1="728" y1="368" x2="1088" y2="368" stroke="#e2dccd"/>
+
+  <!-- Habit 1 -->
+  <rect x="748" y="384" width="320" height="72" rx="8" fill="#faf7ee" stroke="#e2dccd"/>
+  <text x="764" y="408" class="sans" font-size="13.5" font-weight="600" fill="#2c2219">Deep work block (90m)</text>
+  <text x="1004" y="408" class="mono" font-size="12" font-weight="700" fill="#0d9488">12d ●</text>
+  <!-- 7-day Notch Rib ticks -->
+  <rect x="764" y="422" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="804" y="422" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="844" y="422" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="884" y="422" width="34" height="20" rx="4" fill="#ebe4d4" stroke="#b5a995" stroke-dasharray="2 2"/>
+  <rect x="924" y="422" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="964" y="422" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="1004" y="422" width="46" height="20" rx="4" fill="#0d9488"/>
+  <text x="1014" y="436" class="mono" font-size="10.5" font-weight="700" fill="#ffffff">DONE</text>
+
+  <!-- Habit 2 -->
+  <rect x="748" y="468" width="320" height="72" rx="8" fill="#faf7ee" stroke="#e2dccd"/>
+  <text x="764" y="492" class="sans" font-size="13.5" font-weight="600" fill="#2c2219">Daily technical reading</text>
+  <text x="1004" y="492" class="mono" font-size="12" font-weight="700" fill="#0d9488">8d ●</text>
+  <rect x="764" y="506" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="804" y="506" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="844" y="506" width="34" height="20" rx="4" fill="#ebe4d4" stroke="#b5a995" stroke-dasharray="2 2"/>
+  <rect x="884" y="506" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="924" y="506" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="964" y="506" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="1004" y="506" width="46" height="20" rx="4" fill="#0d9488"/>
+  <text x="1014" y="520" class="mono" font-size="10.5" font-weight="700" fill="#ffffff">DONE</text>
+
+  <!-- Habit 3 -->
+  <rect x="748" y="552" width="320" height="72" rx="8" fill="#faf7ee" stroke="#e2dccd"/>
+  <text x="764" y="576" class="sans" font-size="13.5" font-weight="600" fill="#2c2219">Evening plan &amp; shutdown</text>
+  <text x="984" y="576" class="mono" font-size="11.5" font-weight="600" fill="#6b5e50">Excused ◆</text>
+  <rect x="764" y="590" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="804" y="590" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="844" y="590" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="884" y="590" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="924" y="590" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="964" y="590" width="34" height="20" rx="4" fill="#0d9488"/>
+  <rect x="1004" y="590" width="46" height="20" rx="4" fill="#ebe4d4" stroke="#8c7f70"/>
+  <text x="1013" y="604" class="mono" font-size="10.5" font-weight="600" fill="#4f4438">SKIP</text>
+</svg>

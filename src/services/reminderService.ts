@@ -8,6 +8,7 @@
  */
 
 import { getLocalDateString } from '../utils/dateUtils.ts';
+import { desktopShellService } from './desktopShellService.ts';
 
 export interface ReminderSettings {
   enabled: boolean;
@@ -84,17 +85,7 @@ export const reminderService = {
   },
 
   dispatchDesktopNotification(title: string, body: string): void {
-    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification(title, {
-          body,
-          icon: './favicon.svg',
-          tag: `seshat-${title}`,
-        });
-      } catch {
-        // Ignore notification errors in restricted contexts
-      }
-    }
+    void desktopShellService.dispatchNotification(title, body);
   },
 
   /**
@@ -155,3 +146,4 @@ export const reminderService = {
     return null;
   },
 };
+

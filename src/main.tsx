@@ -21,8 +21,12 @@ if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.p
   });
 }
 
-// Register offline Service Worker
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+// Register offline Service Worker (registers on deployed sites and local static servers; skips Vite HMR dev server)
+if (
+  typeof window !== 'undefined' &&
+  'serviceWorker' in navigator &&
+  !document.querySelector('script[src*="/@vite/client"]')
+) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch((err) => {
       console.warn('Service worker registration failed:', err);

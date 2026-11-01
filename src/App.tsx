@@ -10,6 +10,8 @@ import { OnboardingView } from './components/onboarding/OnboardingView';
 import { Button } from './components/ui/Button';
 import { getLocalDateString } from './utils/dateUtils';
 import { reminderService } from './services/reminderService';
+import { desktopShellService, isTauriDesktop } from './services/desktopShellService';
+import { dataOwnershipService } from './services/dataOwnershipService';
 import {
   Terminal,
   Sparkles,
@@ -55,7 +57,7 @@ export const App: React.FC = () => {
     []
   );
 
-  // Active local reminder scheduler check
+  // Active local reminder scheduler check & Tauri desktop shell event wiring
   useEffect(() => {
     const checkReminders = () => {
       const due = reminderService.checkDueReminders();
@@ -65,7 +67,36 @@ export const App: React.FC = () => {
     };
     checkReminders();
     const interval = window.setInterval(checkReminders, 60_000);
-    return () => window.clearInterval(interval);
+
+    // Subscribe to Windows Desktop Shell global shortcut (Ctrl+Shift+K) and tray menu events
+    const unsubscribeShell = desktopShellService.subscribeToShellEvents({
+      onQuickAdd: () => setQuickAddModalOpen(true),
+      onTriggerBackup: () => {
+        void dataOwnershipService.saveBackupToLocalFile().then((res) => {
+          if (res.saved) {
+            setActiveReminder({
+              title: 'Backup Saved to Disk',
+              body: `Saved ${res.path || res.filename}`,
+            });
+          }
+        });
+      },
+      onNavigateTab: (tab) => {
+        if (['today', 'planner', 'habits', 'progress', 'settings', 'reviews'].includes(tab)) {
+          setActiveTab(tab as AppTab);
+        }
+      },
+    });
+
+    // If running inside the Tauri Windows Desktop Shell and daily backup is due, write it silently
+    if (isTauriDesktop() && dataOwnershipService.isBackupDueToday()) {
+      void dataOwnershipService.saveBackupToLocalFile();
+    }
+
+    return () => {
+      window.clearInterval(interval);
+      unsubscribeShell();
+    };
   }, []);
 
   // Global Keyboard Shortcuts (Ctrl+K, single key 'N', and Alt+1..Alt+5 for tabs)

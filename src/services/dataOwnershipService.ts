@@ -18,7 +18,9 @@ import type {
 } from '../types/index.ts';
 import { recordChange } from '../db/changeLogService.ts';
 import { parseQuickAdd } from '../utils/quickAddParser.ts';
-import { getLocalDateString } from '../utils/dateUtils.ts';
+import { getLocalDateString, getDayBoundaryHour, setDayBoundaryHour } from '../utils/dateUtils.ts';
+import { reminderService, type ReminderSettings } from './reminderService.ts';
+import { desktopShellService } from './desktopShellService.ts';
 
 function getCurrentUTC(): string {
   return new Date().toISOString();
@@ -39,11 +41,19 @@ function hashPin(pin: string): string {
   return `sn_pin_${Math.abs(hash).toString(16)}`;
 }
 
+export interface BackupPreferencesPayload {
+  dayBoundaryHour?: number;
+  reminderSettings?: ReminderSettings;
+  dailyBackupPromptEnabled?: boolean;
+  theme?: string | null;
+}
+
 export interface FullBackupPayload {
   app: string;
   version: string;
   exportedAt: string;
   schemaVersion: number;
+  preferences?: BackupPreferencesPayload;
   data: {
     areas: Area[];
     projects: ProjectGoal[];
@@ -57,10 +67,13 @@ export interface FullBackupPayload {
     reviews: Review[];
     blockers: Blocker[];
     changeLogs: ChangeLogEntry[];
+    settings?: Array<{ key: string; value: string; updatedAt: string }>;
   };
 }
 
 const LAST_FILE_BACKUP_KEY = 'seshat_last_file_backup_date';
+const DAILY_BACKUP_PROMPT_KEY = 'seshat_daily_backup_prompt_enabled';
+const BACKUP_SNOOZED_DATE_KEY = 'seshat_backup_snoozed_date';
 
 export const dataOwnershipService = {
   // =========================================================================
@@ -287,6 +300,7 @@ export const dataOwnershipService = {
       reviews,
       blockers,
       changeLogs,
+      settings,
     ] = await Promise.all([
       db.areas.toArray(),
       db.projects.toArray(),
@@ -300,13 +314,29 @@ export const dataOwnershipService = {
       db.reviews.toArray(),
       db.blockers.toArray(),
       db.changeLogs.toArray(),
+      db.settings.toArray(),
     ]);
+
+    let currentTheme: string | null = null;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        currentTheme = localStorage.getItem('seshat-theme');
+      }
+    } catch {
+      // Ignore storage access errors
+    }
 
     const payload: FullBackupPayload = {
       app: 'Seshat Notch',
       version: '1.0.0',
       exportedAt: getCurrentUTC(),
       schemaVersion: 2,
+      preferences: {
+        dayBoundaryHour: getDayBoundaryHour(),
+        reminderSettings: reminderService.getSettings(),
+        dailyBackupPromptEnabled: this.isDailyBackupPromptEnabled(),
+        theme: currentTheme,
+      },
       data: {
         areas,
         projects,
@@ -320,6 +350,7 @@ export const dataOwnershipService = {
         reviews,
         blockers,
         changeLogs,
+        settings,
       },
     };
 
@@ -327,14 +358,28 @@ export const dataOwnershipService = {
   },
 
   /**
-   * Saves a full JSON backup directly to a local file on disk (Windows File System Access API
-   * or standard browser download fallback) and records the backup date.
+   * Saves a full JSON backup directly to a local file on disk (Tauri Windows desktop shell,
+   * Windows File System Access API, or standard browser download fallback) and records the backup date.
    */
-  async saveBackupToLocalFile(): Promise<{ saved: boolean; filename: string }> {
+  async saveBackupToLocalFile(): Promise<{ saved: boolean; filename: string; path?: string }> {
     const jsonString = await this.exportAllToJson();
     const todayStr = getLocalDateString();
     const filename = `seshat-notch-backup-${todayStr}.json`;
 
+    // 1. Try silent native disk write when running inside the Tauri Windows Desktop Shell
+    const tauriRes = await desktopShellService.writeSilentDesktopBackup(filename, jsonString);
+    if (tauriRes.saved) {
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(LAST_FILE_BACKUP_KEY, todayStr);
+        }
+      } catch {
+        // Ignore
+      }
+      return { saved: true, filename, path: tauriRes.path };
+    }
+
+    // 2. Try Windows File System Access API picker
     const win = typeof window !== 'undefined' ? (window as unknown as { showSaveFilePicker?: (opts: unknown) => Promise<{ createWritable: () => Promise<{ write: (data: string) => Promise<void>; close: () => Promise<void> }> }> }) : undefined;
 
     if (win && typeof win.showSaveFilePicker === 'function') {
@@ -384,6 +429,53 @@ export const dataOwnershipService = {
     } catch {
       return null;
     }
+  },
+
+  isDailyBackupPromptEnabled(): boolean {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const raw = localStorage.getItem(DAILY_BACKUP_PROMPT_KEY);
+        return raw === null ? true : raw === 'true';
+      }
+    } catch {
+      // Ignore
+    }
+    return true;
+  },
+
+  setDailyBackupPromptEnabled(enabled: boolean): void {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(DAILY_BACKUP_PROMPT_KEY, enabled ? 'true' : 'false');
+      }
+    } catch {
+      // Ignore
+    }
+  },
+
+  snoozeBackupPromptForToday(): void {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(BACKUP_SNOOZED_DATE_KEY, getLocalDateString());
+      }
+    } catch {
+      // Ignore
+    }
+  },
+
+  isBackupDueToday(todayStr = getLocalDateString()): boolean {
+    if (!this.isDailyBackupPromptEnabled()) return false;
+    const lastBackup = this.getLastFileBackupDate();
+    if (lastBackup === todayStr) return false;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const snoozed = localStorage.getItem(BACKUP_SNOOZED_DATE_KEY);
+        if (snoozed === todayStr) return false;
+      }
+    } catch {
+      // Ignore
+    }
+    return true;
   },
 
   async exportTableToCsv(
@@ -617,6 +709,7 @@ export const dataOwnershipService = {
         db.reviews,
         db.blockers,
         db.changeLogs,
+        db.settings,
       ],
       async () => {
         if (mode === 'replace') {
@@ -628,6 +721,14 @@ export const dataOwnershipService = {
               await tableRef.bulkAdd(records);
               totalImported += records.length;
               tablesUpdated.push(tbl);
+            }
+          }
+          if (Array.isArray(parsed.data.settings)) {
+            await db.settings.clear();
+            if (parsed.data.settings.length > 0) {
+              await db.settings.bulkAdd(parsed.data.settings);
+              totalImported += parsed.data.settings.length;
+              tablesUpdated.push('settings');
             }
           }
         } else {
@@ -661,9 +762,34 @@ export const dataOwnershipService = {
               tablesUpdated.push(tbl);
             }
           }
+          if (Array.isArray(parsed.data.settings) && parsed.data.settings.length > 0) {
+            await db.settings.bulkPut(parsed.data.settings);
+            totalImported += parsed.data.settings.length;
+            tablesUpdated.push('settings');
+          }
         }
       }
     );
+
+    // Restore user preferences (day rollover boundary, reminder schedule, daily backup prompt, theme)
+    if (parsed.preferences) {
+      if (typeof parsed.preferences.dayBoundaryHour === 'number') {
+        setDayBoundaryHour(parsed.preferences.dayBoundaryHour);
+      }
+      if (parsed.preferences.reminderSettings) {
+        reminderService.saveSettings(parsed.preferences.reminderSettings);
+      }
+      if (typeof parsed.preferences.dailyBackupPromptEnabled === 'boolean') {
+        this.setDailyBackupPromptEnabled(parsed.preferences.dailyBackupPromptEnabled);
+      }
+      if (parsed.preferences.theme && typeof localStorage !== 'undefined') {
+        try {
+          localStorage.setItem('seshat-theme', parsed.preferences.theme);
+        } catch {
+          // Ignore
+        }
+      }
+    }
 
     return { importedCount: totalImported, tablesUpdated };
   },

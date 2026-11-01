@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 600" width="1120" height="600" fill="none">
+  <style>
+    .sans { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .mono { font-family: 'IBM Plex Mono', 'Consolas', monospace; font-variant-numeric: tabular-nums; }
+  </style>
+
+  <!-- Window Frame -->
+  <rect width="1120" height="600" rx="12" fill="#faf7ee" stroke="#dcd5c6" stroke-width="1.5"/>
+
+  <!-- Sub-tab Bar (All 7 Dashboard Views Visible, No Hidden 'More' Dropdown) -->
+  <rect x="32" y="24" width="1056" height="44" rx="8" fill="#f4efe2" stroke="#e2dccd"/>
+  <rect x="40" y="30" width="96" height="32" rx="6" fill="#0d9488"/>
+  <text x="61" y="50" class="sans" font-size="12.5" font-weight="600" fill="#ffffff">Overview</text>
+  <text x="164" y="50" class="sans" font-size="12.5" font-weight="500" fill="#4f4438">Projects</text>
+  <text x="252" y="50" class="sans" font-size="12.5" font-weight="500" fill="#4f4438">Habits</text>
+  <text x="330" y="50" class="sans" font-size="12.5" font-weight="500" fill="#4f4438">Activity</text>
+  <text x="414" y="50" class="sans" font-size="12.5" font-weight="500" fill="#4f4438">Goals</text>
+  <text x="488" y="50" class="sans" font-size="12.5" font-weight="500" fill="#4f4438">Reviews</text>
+  <text x="574" y="50" class="sans" font-size="12.5" font-weight="500" fill="#4f4438">Insights</text>
+
+  <!-- 4 Hero Stat Tiles with Traceable Formula Popover Buttons -->
+  <rect x="32" y="86" width="252" height="106" rx="8" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="48" y="110" class="sans" font-size="12" font-weight="600" fill="#6b5e50">Active Projects Progress</text>
+  <text x="48" y="148" class="mono" font-size="28" font-weight="700" fill="#2c2219">68%</text>
+  <text x="48" y="172" class="sans" font-size="12" fill="#0d9488">● On track (1.04x ratio)</text>
+
+  <rect x="300" y="86" width="252" height="106" rx="8" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="316" y="110" class="sans" font-size="12" font-weight="600" fill="#6b5e50">Weekly Goals</text>
+  <text x="316" y="148" class="mono" font-size="28" font-weight="700" fill="#2c2219">100%</text>
+  <text x="316" y="172" class="sans" font-size="12" fill="#6b5e50">3 of 3 targets met</text>
+
+  <rect x="568" y="86" width="252" height="106" rx="8" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="584" y="110" class="sans" font-size="12" font-weight="600" fill="#6b5e50">Habit Consistency</text>
+  <text x="584" y="148" class="mono" font-size="28" font-weight="700" fill="#0d9488">92%</text>
+  <text x="584" y="172" class="sans" font-size="12" fill="#6b5e50">Excused skips preserved</text>
+
+  <rect x="836" y="86" width="252" height="106" rx="8" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="852" y="110" class="sans" font-size="12" font-weight="600" fill="#6b5e50">Focus Logged</text>
+  <text x="852" y="148" class="mono" font-size="28" font-weight="700" fill="#2c2219">14h 20m</text>
+  <text x="852" y="172" class="sans" font-size="12" fill="#6b5e50">78% deep work ratio</text>
+
+  <!-- Project Pacing & Milestone Cord Bars -->
+  <rect x="32" y="210" width="640" height="360" rx="10" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="52" y="242" class="sans" font-size="15" font-weight="600" fill="#2c2219">Project Health &amp; Pacing</text>
+  <text x="52" y="262" class="sans" font-size="12" fill="#6b5e50">Actual progress vs. scheduled milestone weight</text>
+  <line x1="32" y1="276" x2="672" y2="276" stroke="#e2dccd"/>
+
+  <!-- Project 1 -->
+  <text x="52" y="308" class="sans" font-size="14" font-weight="600" fill="#2c2219">Heimdall Detection Lab &amp; SIEM Pipeline</text>
+  <text x="546" y="308" class="mono" font-size="12" font-weight="600" fill="#0d9488">● On track · 75%</text>
+  <rect x="52" y="320" width="596" height="12" rx="6" fill="#e6dfd0"/>
+  <rect x="52" y="320" width="447" height="12" rx="6" fill="#0d9488"/>
+  <text x="52" y="348" class="mono" font-size="11.5" fill="#6b5e50">6 of 8 milestones complete · Velocity forecast: Nov 12 – Nov 15</text>
+
+  <!-- Project 2 -->
+  <text x="52" y="396" class="sans" font-size="14" font-weight="600" fill="#2c2219">Windows Systems Engineering &amp; Rust Tooling</text>
+  <text x="546" y="396" class="mono" font-size="12" font-weight="600" fill="#b45309">▲ At risk · 54%</text>
+  <rect x="52" y="408" width="596" height="12" rx="6" fill="#e6dfd0"/>
+  <rect x="52" y="408" width="322" height="12" rx="6" fill="#d97706"/>
+  <text x="52" y="436" class="mono" font-size="11.5" fill="#6b5e50">Expected by today: 62% · Schedule ratio: 0.87</text>
+
+  <!-- Horizontal Time Breakdown (No Empty Donut) -->
+  <rect x="692" y="210" width="396" height="360" rx="10" fill="#f4efe2" stroke="#e2dccd"/>
+  <text x="712" y="242" class="sans" font-size="15" font-weight="600" fill="#2c2219">Your Time at a Glance</text>
+  <text x="712" y="262" class="sans" font-size="12" fill="#6b5e50">Horizontal proportion bar by session kind</text>
+  <line x1="692" y1="276" x2="1088" y2="276" stroke="#e2dccd"/>
+
+  <!-- Stacked Horizontal Bar -->
+  <rect x="712" y="302" width="248" height="22" rx="4" fill="#0d9488"/>
+  <rect x="962" y="302" width="68" height="22" rx="4" fill="#d97706"/>
+  <rect x="1032" y="302" width="36" height="22" rx="4" fill="#6b5e50"/>
+
+  <!-- Legend Rows -->
+  <circle cx="720" cy="356" r="5" fill="#0d9488"/>
+  <text x="734" y="360" class="sans" font-size="13" font-weight="500" fill="#2c2219">Deep Work</text>
+  <text x="980" y="360" class="mono" font-size="13" font-weight="600" fill="#2c2219">10h 15m (71%)</text>
+
+  <circle cx="720" cy="392" r="5" fill="#d97706"/>
+  <text x="734" y="396" class="sans" font-size="13" font-weight="500" fill="#2c2219">Learning &amp; Lab</text>
+  <text x="988" y="396" class="mono" font-size="13" font-weight="600" fill="#2c2219">2h 50m (20%)</text>
+
+  <circle cx="720" cy="428" r="5" fill="#6b5e50"/>
+  <text x="734" y="432" class="sans" font-size="13" font-weight="500" fill="#2c2219">Planning &amp; Admin</text>
+  <text x="996" y="432" class="mono" font-size="13" font-weight="600" fill="#2c2219">1h 15m (9%)</text>
+</svg>

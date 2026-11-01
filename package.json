@@ -1,14 +1,16 @@
 {
   "name": "seshat-notch",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "node --experimental-strip-types --test",
-    "audit": "node scripts/hallmark-audit.js"
+    "audit": "node scripts/hallmark-audit.js",
+    "tauri:dev": "npx @tauri-apps/cli dev",
+    "tauri:build": "npx @tauri-apps/cli build"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

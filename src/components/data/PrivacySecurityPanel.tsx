@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { dataOwnershipService } from '../../services/dataOwnershipService';
 import { reminderService, ReminderSettings } from '../../services/reminderService';
+import { desktopShellService } from '../../services/desktopShellService';
 import { getDayBoundaryHour, setDayBoundaryHour } from '../../utils/dateUtils';
 import {
   Lock,
@@ -9,6 +10,7 @@ import {
   Key,
   Bell,
   Clock,
+  Monitor,
 } from 'lucide-react';
 
 interface PrivacySecurityPanelProps {
@@ -26,6 +28,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
     reminderService.getSettings()
   );
   const [boundaryHour, setBoundaryHourState] = useState<number>(() => getDayBoundaryHour());
+  const shellStatus = desktopShellService.getStatus();
 
   const loadSettings = async () => {
     try {
@@ -188,7 +191,9 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
                 Reminders & Scheduled Prompts
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
-                Schedule local desktop reminders for morning planning, evening check-in, and Sunday review.
+                {shellStatus.isDesktopApp
+                  ? 'Fires native Windows notifications even when minimized to the system tray.'
+                  : 'Checked every 60 seconds while Seshat Notch is open in your browser (use the Tauri Windows Desktop app for background tray notifications).'}
               </span>
             </div>
           </div>
@@ -244,7 +249,52 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
         </div>
       </div>
 
-      {/* 4. Optional App Lock PIN */}
+      {/* 4. Windows Desktop Shell Integration Status (Phase 14) */}
+      <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
+        <div className="flex items-center justify-between hairline-b pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <Monitor className="w-4 h-4 text-[var(--color-accent)]" />
+            <div className="flex flex-col">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+                Windows Desktop Shell Integration
+              </h3>
+              <span className="text-xs text-[var(--color-ink-muted)]">
+                Runtime environment: {shellStatus.modeLabel}
+              </span>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-[var(--radius-xs)] text-[11px] font-mono border border-[var(--color-rule)] bg-[var(--color-paper-2)] text-[var(--color-ink)]">
+            {shellStatus.isDesktopApp ? 'Native Shell' : 'Web / PWA'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+            <span className="font-semibold text-[var(--color-ink)]">System Tray & Close-to-Tray</span>
+            <span className="text-[var(--color-ink-muted)]">
+              {shellStatus.traySupported
+                ? 'Active — closing the window keeps Seshat Notch running in the Windows tray.'
+                : 'Available via the Tauri Windows build (npm run tauri:build).'}
+            </span>
+          </div>
+          <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+            <span className="font-semibold text-[var(--color-ink)]">Quick-Add Shortcuts</span>
+            <span className="text-[var(--color-ink-muted)] font-mono">
+              {shellStatus.globalHotkey}
+            </span>
+          </div>
+          <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+            <span className="font-semibold text-[var(--color-ink)]">Local Disk Backups</span>
+            <span className="text-[var(--color-ink-muted)]">
+              {shellStatus.silentDiskBackupSupported
+                ? 'Automatic writes to Documents/SeshatNotch/Backups/'
+                : 'Daily prompt on Today + 1-click JSON file save'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 5. Optional App Lock PIN */}
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
         <div className="flex items-center justify-between hairline-b pb-2.5">
           <div className="flex items-center gap-2.5">
