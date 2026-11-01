@@ -1,6 +1,6 @@
 /**
- * Generates the 10-Page Seshat Notch User Manual in Microsoft Word (.docx) format.
- * Pure Node.js implementation using standard OpenXML (ECMA-376) + ZIP (zlib/CRC32).
+ * Generates a 10-Page, Non-Technical, User-Friendly Manual for Seshat Notch (.docx)
+ * Complete with 6 embedded PNG visual diagrams and everyday real-life examples.
  */
 
 import fs from 'node:fs';
@@ -8,7 +8,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 
 // ============================================================================
-// 1. Minimal Standard ZIP Builder (Deflate + CRC32) for .docx OpenXML Packaging
+// 1. Minimal ZIP Archive Builder (Deflate + CRC32)
 // ============================================================================
 
 function crc32(buf) {
@@ -35,41 +35,39 @@ function buildZipArchive(files) {
     const crc = crc32(uncompressedBuf);
     const compressedBuf = zlib.deflateRawSync(uncompressedBuf, { level: 9 });
 
-    // Local file header (30 bytes + file name)
     const lfh = Buffer.alloc(30);
-    lfh.writeUInt32LE(0x04034b50, 0); // signature
-    lfh.writeUInt16LE(20, 4); // version needed (2.0)
-    lfh.writeUInt16LE(0, 6); // general purpose bit flag
-    lfh.writeUInt16LE(8, 8); // compression method: 8 (deflate)
-    lfh.writeUInt16LE(0, 10); // mod time
-    lfh.writeUInt16LE(0, 12); // mod date
-    lfh.writeUInt32LE(crc, 14); // crc32
-    lfh.writeUInt32LE(compressedBuf.length, 18); // compressed size
-    lfh.writeUInt32LE(uncompressedBuf.length, 22); // uncompressed size
-    lfh.writeUInt16LE(nameBuf.length, 26); // file name length
-    lfh.writeUInt16LE(0, 28); // extra field length
+    lfh.writeUInt32LE(0x04034b50, 0);
+    lfh.writeUInt16LE(20, 4);
+    lfh.writeUInt16LE(0, 6);
+    lfh.writeUInt16LE(8, 8);
+    lfh.writeUInt16LE(0, 10);
+    lfh.writeUInt16LE(0, 12);
+    lfh.writeUInt32LE(crc, 14);
+    lfh.writeUInt32LE(compressedBuf.length, 18);
+    lfh.writeUInt32LE(uncompressedBuf.length, 22);
+    lfh.writeUInt16LE(nameBuf.length, 26);
+    lfh.writeUInt16LE(0, 28);
 
     localFileParts.push(lfh, nameBuf, compressedBuf);
 
-    // Central directory header (46 bytes + file name)
     const cdh = Buffer.alloc(46);
-    cdh.writeUInt32LE(0x02014b50, 0); // signature
-    cdh.writeUInt16LE(20, 4); // version made by
-    cdh.writeUInt16LE(20, 6); // version needed
-    cdh.writeUInt16LE(0, 8); // flags
-    cdh.writeUInt16LE(8, 10); // compression method: deflate
-    cdh.writeUInt16LE(0, 12); // mod time
-    cdh.writeUInt16LE(0, 14); // mod date
-    cdh.writeUInt32LE(crc, 16); // crc32
-    cdh.writeUInt32LE(compressedBuf.length, 20); // compressed size
-    cdh.writeUInt32LE(uncompressedBuf.length, 24); // uncompressed size
-    cdh.writeUInt16LE(nameBuf.length, 28); // file name length
-    cdh.writeUInt16LE(0, 30); // extra field length
-    cdh.writeUInt16LE(0, 32); // comment length
-    cdh.writeUInt16LE(0, 34); // disk number
-    cdh.writeUInt16LE(0, 36); // internal attrs
-    cdh.writeUInt32LE(0, 38); // external attrs
-    cdh.writeUInt32LE(offset, 42); // relative offset of local header
+    cdh.writeUInt32LE(0x02014b50, 0);
+    cdh.writeUInt16LE(20, 4);
+    cdh.writeUInt16LE(20, 6);
+    cdh.writeUInt16LE(0, 8);
+    cdh.writeUInt16LE(8, 10);
+    cdh.writeUInt16LE(0, 12);
+    cdh.writeUInt16LE(0, 14);
+    cdh.writeUInt32LE(crc, 16);
+    cdh.writeUInt32LE(compressedBuf.length, 20);
+    cdh.writeUInt32LE(uncompressedBuf.length, 24);
+    cdh.writeUInt16LE(nameBuf.length, 28);
+    cdh.writeUInt16LE(0, 30);
+    cdh.writeUInt16LE(0, 32);
+    cdh.writeUInt16LE(0, 34);
+    cdh.writeUInt16LE(0, 36);
+    cdh.writeUInt32LE(0, 38);
+    cdh.writeUInt32LE(offset, 42);
 
     centralDirParts.push(cdh, nameBuf);
     offset += lfh.length + nameBuf.length + compressedBuf.length;
@@ -77,20 +75,314 @@ function buildZipArchive(files) {
 
   const centralDirBuf = Buffer.concat(centralDirParts);
   const eocd = Buffer.alloc(22);
-  eocd.writeUInt32LE(0x06054b50, 0); // EOCD signature
-  eocd.writeUInt16LE(0, 4); // disk number
-  eocd.writeUInt16LE(0, 6); // disk with central dir
-  eocd.writeUInt16LE(files.length, 8); // entries on this disk
-  eocd.writeUInt16LE(files.length, 10); // total entries
-  eocd.writeUInt32LE(centralDirBuf.length, 12); // size of central dir
-  eocd.writeUInt32LE(offset, 16); // offset of central dir
-  eocd.writeUInt16LE(0, 20); // comment length
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(0, 4);
+  eocd.writeUInt16LE(0, 6);
+  eocd.writeUInt16LE(files.length, 8);
+  eocd.writeUInt16LE(files.length, 10);
+  eocd.writeUInt32LE(centralDirBuf.length, 12);
+  eocd.writeUInt32LE(offset, 16);
+  eocd.writeUInt16LE(0, 20);
 
   return Buffer.concat([...localFileParts, centralDirBuf, eocd]);
 }
 
 // ============================================================================
-// 2. OpenXML Helpers (Paragraphs, Headings, Tables, Callouts, Page Breaks)
+// 2. Pure-Node 2D PNG Diagram Renderer (with 5x7 Pixel Font for Crisp Labels)
+// ============================================================================
+
+const FONT_5X7 = {
+  A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+  C: ['01110', '10001', '10000', '10000', '10000', '10001', '01110'],
+  D: ['11100', '10010', '10001', '10001', '10001', '10010', '11100'],
+  E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  G: ['01110', '10001', '10000', '10111', '10001', '10001', '01110'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+  I: ['01110', '00100', '00100', '00100', '00100', '00100', '01110'],
+  J: ['00111', '00010', '00010', '00010', '10010', '10010', '01100'],
+  K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+  M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
+  N: ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
+  O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
+  R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+  S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+  V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+  W: ['10001', '10001', '10001', '10101', '10101', '11011', '10001'],
+  X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+  Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
+  '0': ['01110', '10001', '10011', '10101', '11001', '10001', '01110'],
+  '1': ['00100', '01100', '00100', '00100', '00100', '00100', '01110'],
+  '2': ['01110', '10001', '00001', '00010', '00100', '01000', '11111'],
+  '3': ['11110', '00001', '00001', '01110', '00001', '00001', '11110'],
+  '4': ['00010', '00110', '01010', '10010', '11111', '00010', '00010'],
+  '5': ['11111', '10000', '10000', '11110', '00001', '00001', '11110'],
+  '6': ['01110', '10000', '10000', '11110', '10001', '10001', '01110'],
+  '7': ['11111', '00001', '00010', '00100', '01000', '01000', '01000'],
+  '8': ['01110', '10001', '10001', '01110', '10001', '10001', '01110'],
+  '9': ['01110', '10001', '10001', '01111', '00001', '00001', '01110'],
+  ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
+  '-': ['00000', '00000', '00000', '11111', '00000', '00000', '00000'],
+  '+': ['00000', '00100', '00100', '11111', '00100', '00100', '00000'],
+  '/': ['00001', '00010', '00100', '00100', '01000', '10000', '00000'],
+  '%': ['11001', '11010', '00100', '00100', '01011', '10011', '00000'],
+  '#': ['01010', '11111', '01010', '01010', '11111', '01010', '00000'],
+  '!': ['00100', '00100', '00100', '00100', '00100', '00000', '00100'],
+  '@': ['01110', '10001', '10111', '10101', '10111', '10000', '01110'],
+  '~': ['00000', '00000', '01101', '10010', '00000', '00000', '00000'],
+  '>': ['10000', '01000', '00100', '00010', '00100', '01000', '10000'],
+  '.': ['00000', '00000', '00000', '00000', '00000', '01100', '01100'],
+  ',': ['00000', '00000', '00000', '00000', '00100', '00100', '01000'],
+  '(': ['00010', '00100', '01000', '01000', '01000', '00100', '00010'],
+  ')': ['01000', '00100', '00010', '00010', '00010', '00100', '01000'],
+  ' ': ['00000', '00000', '00000', '00000', '00000', '00000', '00000'],
+};
+
+function makePngChunk(type, data) {
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length, 0);
+  const typeBuf = Buffer.from(type, 'ascii');
+  const crcBuf = Buffer.alloc(4);
+  crcBuf.writeUInt32BE(crc32(Buffer.concat([typeBuf, data])), 0);
+  return Buffer.concat([len, typeBuf, data, crcBuf]);
+}
+
+class PngCanvas {
+  constructor(width, height, bg = [250, 247, 238]) {
+    this.width = width;
+    this.height = height;
+    this.raw = Buffer.alloc((width * 4 + 1) * height);
+    for (let y = 0; y < height; y++) {
+      const row = y * (width * 4 + 1);
+      this.raw[row] = 0;
+      for (let x = 0; x < width; x++) {
+        const i = row + 1 + x * 4;
+        this.raw[i] = bg[0];
+        this.raw[i + 1] = bg[1];
+        this.raw[i + 2] = bg[2];
+        this.raw[i + 3] = 255;
+      }
+    }
+  }
+
+  setPixel(x, y, color) {
+    const xi = Math.round(x);
+    const yi = Math.round(y);
+    if (xi < 0 || xi >= this.width || yi < 0 || yi >= this.height) return;
+    const idx = yi * (this.width * 4 + 1) + 1 + xi * 4;
+    this.raw[idx] = color[0];
+    this.raw[idx + 1] = color[1];
+    this.raw[idx + 2] = color[2];
+    this.raw[idx + 3] = 255;
+  }
+
+  fillRect(x, y, w, h, color, borderColor = null, borderWidth = 1) {
+    for (let py = y; py < y + h; py++) {
+      for (let px = x; px < x + w; px++) {
+        if (
+          borderColor &&
+          (px < x + borderWidth ||
+            px >= x + w - borderWidth ||
+            py < y + borderWidth ||
+            py >= y + h - borderWidth)
+        ) {
+          this.setPixel(px, py, borderColor);
+        } else {
+          this.setPixel(px, py, color);
+        }
+      }
+    }
+  }
+
+  drawText(text, x, y, scale = 2, color = [44, 34, 25]) {
+    const str = String(text).toUpperCase();
+    let cursorX = x;
+    for (let c = 0; c < str.length; c++) {
+      const ch = str[c];
+      const glyph = FONT_5X7[ch] || FONT_5X7[' '];
+      for (let gy = 0; gy < 7; gy++) {
+        for (let gx = 0; gx < 5; gx++) {
+          if (glyph[gy][gx] === '1') {
+            for (let sy = 0; sy < scale; sy++) {
+              for (let sx = 0; sx < scale; sx++) {
+                this.setPixel(cursorX + gx * scale + sx, y + gy * scale + sy, color);
+              }
+            }
+          }
+        }
+      }
+      cursorX += 6 * scale;
+    }
+  }
+
+  toBuffer() {
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(this.width, 0);
+    ihdr.writeUInt32BE(this.height, 4);
+    ihdr[8] = 8;
+    ihdr[9] = 6;
+    const idat = zlib.deflateSync(this.raw, { level: 9 });
+    const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+    return Buffer.concat([
+      sig,
+      makePngChunk('IHDR', ihdr),
+      makePngChunk('IDAT', idat),
+      makePngChunk('IEND', Buffer.alloc(0)),
+    ]);
+  }
+}
+
+const COLORS = {
+  paper: [250, 247, 238],
+  card: [243, 238, 224],
+  well: [232, 225, 208],
+  border: [210, 200, 182],
+  ink: [44, 34, 25],
+  muted: [107, 94, 80],
+  teal: [13, 148, 136],
+  tealSoft: [209, 242, 235],
+  amber: [217, 119, 6],
+  amberSoft: [254, 243, 199],
+  white: [255, 255, 255],
+};
+
+// Generate the 6 Visual Illustrations
+function buildManualFigures() {
+  // Figure 1: Top Navigation Bar (5 Tabs + Quick Add)
+  const fig1 = new PngCanvas(760, 170, COLORS.paper);
+  fig1.fillRect(4, 4, 752, 162, COLORS.card, COLORS.border, 2);
+  fig1.drawText('SESHAT NOTCH  -  5 SIMPLE TABS AT THE TOP', 24, 20, 2, COLORS.teal);
+  fig1.fillRect(24, 52, 135, 42, COLORS.teal, COLORS.teal, 2);
+  fig1.drawText('1. TODAY', 44, 66, 2, COLORS.white);
+  fig1.fillRect(168, 52, 125, 42, COLORS.white, COLORS.border, 2);
+  fig1.drawText('2. PLAN', 192, 66, 2, COLORS.ink);
+  fig1.fillRect(302, 52, 135, 42, COLORS.white, COLORS.border, 2);
+  fig1.drawText('3. HABITS', 318, 66, 2, COLORS.ink);
+  fig1.fillRect(446, 52, 150, 42, COLORS.white, COLORS.border, 2);
+  fig1.drawText('4. PROGRESS', 456, 66, 2, COLORS.ink);
+  fig1.fillRect(605, 52, 130, 42, COLORS.white, COLORS.border, 2);
+  fig1.drawText('5. SETTINGS', 612, 66, 2, COLORS.ink);
+  fig1.fillRect(24, 110, 711, 38, COLORS.tealSoft, COLORS.teal, 1);
+  fig1.drawText('+ QUICK ADD BUTTON (PRESS CTRL+K OR N ANYTIME TO ADD A TASK)', 38, 122, 2, COLORS.ink);
+
+  // Figure 2: Quick Add Shortcut Example
+  const fig2 = new PngCanvas(760, 190, COLORS.paper);
+  fig2.fillRect(4, 4, 752, 182, COLORS.card, COLORS.border, 2);
+  fig2.drawText('QUICK ADD: TYPE ONE SENTENCE, GET AUTOMATIC TAGS', 24, 20, 2, COLORS.teal);
+  fig2.fillRect(24, 48, 712, 46, COLORS.white, COLORS.teal, 2);
+  fig2.drawText('BUY GROCERIES AND PREP LUNCHES #HOME ~45M !HIGH @TODAY', 38, 64, 2, COLORS.ink);
+  fig2.drawText('AUTOMATICALLY RECOGNIZED TAGS:', 24, 110, 2, COLORS.muted);
+  fig2.fillRect(24, 134, 155, 34, COLORS.tealSoft, COLORS.teal, 1);
+  fig2.drawText('#HOME PROJECT', 36, 144, 2, COLORS.teal);
+  fig2.fillRect(192, 134, 165, 34, COLORS.well, COLORS.border, 1);
+  fig2.drawText('~45M ESTIMATE', 204, 144, 2, COLORS.ink);
+  fig2.fillRect(370, 134, 175, 34, COLORS.amberSoft, COLORS.amber, 1);
+  fig2.drawText('!HIGH PRIORITY', 382, 144, 2, COLORS.amber);
+  fig2.fillRect(558, 134, 178, 34, COLORS.tealSoft, COLORS.teal, 1);
+  fig2.drawText('@TODAY SCHEDULE', 568, 144, 2, COLORS.teal);
+
+  // Figure 3: Today View Dashboard
+  const fig3 = new PngCanvas(760, 230, COLORS.paper);
+  fig3.fillRect(4, 4, 752, 222, COLORS.card, COLORS.border, 2);
+  fig3.drawText('TODAY SCREEN: MORNING SUMMARY + FOCUS TIMER + CHECKLIST', 24, 18, 2, COLORS.teal);
+  // Progress cord bar
+  fig3.fillRect(24, 44, 712, 36, COLORS.white, COLORS.border, 1);
+  fig3.drawText('DAILY PROGRESS: 3 OF 4 DONE (75%)', 36, 55, 2, COLORS.ink);
+  fig3.fillRect(450, 52, 260, 18, COLORS.well);
+  fig3.fillRect(450, 52, 195, 18, COLORS.teal);
+  // Left box: To-Do List
+  fig3.fillRect(24, 92, 440, 118, COLORS.white, COLORS.border, 1);
+  fig3.drawText('TODAYS TO-DO LIST', 38, 104, 2, COLORS.teal);
+  fig3.fillRect(38, 128, 18, 18, COLORS.teal);
+  fig3.drawText('WALK 8,000 STEPS OUTDOORS (DONE)', 66, 130, 2, COLORS.muted);
+  fig3.fillRect(38, 156, 18, 18, COLORS.teal);
+  fig3.drawText('READ 20 PAGES OF BOOK (DONE)', 66, 158, 2, COLORS.muted);
+  fig3.fillRect(38, 184, 18, 18, COLORS.white, COLORS.ink, 2);
+  fig3.drawText('CALL DENTIST FOR APPOINTMENT', 66, 186, 2, COLORS.ink);
+  // Right box: Focus Timer
+  fig3.fillRect(478, 92, 258, 118, COLORS.tealSoft, COLORS.teal, 1);
+  fig3.drawText('FOCUS TIMER', 494, 104, 2, COLORS.teal);
+  fig3.drawText('25:00 MINS', 494, 134, 3, COLORS.ink);
+  fig3.fillRect(494, 172, 224, 28, COLORS.teal);
+  fig3.drawText('START 25M FOCUS', 516, 179, 2, COLORS.white);
+
+  // Figure 4: Multi-Horizon Cascade (Month -> Week -> Day)
+  const fig4 = new PngCanvas(760, 185, COLORS.paper);
+  fig4.fillRect(4, 4, 752, 177, COLORS.card, COLORS.border, 2);
+  fig4.drawText('CASCADE HELPER: BREAK BIG GOALS INTO SMALL DAILY STEPS', 24, 20, 2, COLORS.teal);
+  fig4.fillRect(24, 52, 215, 110, COLORS.white, COLORS.teal, 2);
+  fig4.drawText('1. MONTHLY GOAL', 40, 68, 2, COLORS.teal);
+  fig4.drawText('READ 300 PAGES', 40, 96, 2, COLORS.ink);
+  fig4.drawText('IN NOVEMBER', 40, 120, 2, COLORS.muted);
+  fig4.drawText('-->', 248, 98, 2, COLORS.teal);
+  fig4.fillRect(290, 52, 215, 110, COLORS.white, COLORS.teal, 2);
+  fig4.drawText('2. WEEKLY GOAL', 306, 68, 2, COLORS.teal);
+  fig4.drawText('75 PAGES / WEEK', 306, 96, 2, COLORS.ink);
+  fig4.drawText('(4 WEEKS)', 306, 120, 2, COLORS.muted);
+  fig4.drawText('-->', 514, 98, 2, COLORS.teal);
+  fig4.fillRect(556, 52, 180, 110, COLORS.tealSoft, COLORS.teal, 2);
+  fig4.drawText('3. DAILY STEP', 572, 68, 2, COLORS.teal);
+  fig4.drawText('11 PAGES / DAY', 572, 96, 2, COLORS.ink);
+  fig4.drawText('EASY TO DO!', 572, 120, 2, COLORS.teal);
+
+  // Figure 5: Fair Streaks & 7-Day Habit Boxes
+  const fig5 = new PngCanvas(760, 185, COLORS.paper);
+  fig5.fillRect(4, 4, 752, 177, COLORS.card, COLORS.border, 2);
+  fig5.drawText('FAIR STREAKS: REST DAYS & SICK DAYS NEVER RUIN YOUR STREAK', 24, 20, 2, COLORS.teal);
+  const days = [
+    { d: 'MON', st: 'DONE', bg: COLORS.teal, fg: COLORS.white },
+    { d: 'TUE', st: 'DONE', bg: COLORS.teal, fg: COLORS.white },
+    { d: 'WED', st: 'SICK', bg: COLORS.amberSoft, fg: COLORS.amber },
+    { d: 'THU', st: 'DONE', bg: COLORS.teal, fg: COLORS.white },
+    { d: 'FRI', st: 'DONE', bg: COLORS.teal, fg: COLORS.white },
+    { d: 'SAT', st: 'REST', bg: COLORS.well, fg: COLORS.muted },
+    { d: 'SUN', st: 'DONE', bg: COLORS.teal, fg: COLORS.white },
+  ];
+  days.forEach((item, idx) => {
+    const bx = 24 + idx * 104;
+    fig5.fillRect(bx, 54, 92, 74, item.bg, COLORS.border, 1);
+    fig5.drawText(item.d, bx + 26, 68, 2, item.fg);
+    fig5.drawText(item.st, bx + 20, 96, 2, item.fg);
+  });
+  fig5.fillRect(24, 138, 712, 32, COLORS.white, COLORS.border, 1);
+  fig5.drawText('RESULT: STREAK STAYS INTACT AT 14 DAYS! (NO GUILT FOR SICK OR REST DAYS)', 34, 148, 2, COLORS.ink);
+
+  // Figure 6: Carry-Over Inbox & One-Click Daily Backup
+  const fig6 = new PngCanvas(760, 185, COLORS.paper);
+  fig6.fillRect(4, 4, 752, 177, COLORS.card, COLORS.border, 2);
+  fig6.drawText('UNFINISHED TASKS & ONE-CLICK DAILY BACKUP', 24, 20, 2, COLORS.teal);
+  fig6.fillRect(24, 50, 345, 114, COLORS.white, COLORS.border, 1);
+  fig6.drawText('CARRY-OVER INBOX (3 CHOICES):', 36, 64, 2, COLORS.teal);
+  fig6.drawText('1. MOVE TO TODAY OR TOMORROW', 36, 92, 2, COLORS.ink);
+  fig6.drawText('2. SPLIT INTO SMALLER STEPS', 36, 116, 2, COLORS.ink);
+  fig6.drawText('3. DROP WITH A SHORT NOTE', 36, 140, 2, COLORS.ink);
+
+  fig6.fillRect(385, 50, 351, 114, COLORS.tealSoft, COLORS.teal, 1);
+  fig6.drawText('DAILY BACKUP TO YOUR PC:', 400, 64, 2, COLORS.teal);
+  fig6.drawText('SAVES ALL PLANS, HABITS, AND', 400, 92, 2, COLORS.ink);
+  fig6.drawText('SETTINGS INTO 1 SAFE FILE.', 400, 114, 2, COLORS.ink);
+  fig6.fillRect(400, 132, 260, 24, COLORS.teal);
+  fig6.drawText('SAVE BACKUP (.JSON)', 430, 138, 2, COLORS.white);
+
+  return [
+    { id: 'rIdImg1', file: 'fig1.png', buf: fig1.toBuffer(), w: 760, h: 170, title: '5 Main Tabs' },
+    { id: 'rIdImg2', file: 'fig2.png', buf: fig2.toBuffer(), w: 760, h: 190, title: 'Quick Add Tags' },
+    { id: 'rIdImg3', file: 'fig3.png', buf: fig3.toBuffer(), w: 760, h: 230, title: 'Today Screen' },
+    { id: 'rIdImg4', file: 'fig4.png', buf: fig4.toBuffer(), w: 760, h: 185, title: 'Cascade Helper' },
+    { id: 'rIdImg5', file: 'fig5.png', buf: fig5.toBuffer(), w: 760, h: 185, title: 'Fair Streaks' },
+    { id: 'rIdImg6', file: 'fig6.png', buf: fig6.toBuffer(), w: 760, h: 185, title: 'Carry-Over & Backups' },
+  ];
+}
+
+// ============================================================================
+// 3. OpenXML Helpers (Including Inline Image Drawing Helper)
 // ============================================================================
 
 function esc(str) {
@@ -110,13 +402,13 @@ function h1(text) {
   return `<w:p>
     <w:pPr>
       <w:pStyle w:val="Heading1"/>
-      <w:spacing w:before="180" w:after="100"/>
+      <w:spacing w:before="140" w:after="90"/>
       <w:pBdr>
-        <w:bottom w:val="single" w:sz="6" w:space="4" w:color="0D9488"/>
+        <w:bottom w:val="single" w:sz="8" w:space="4" w:color="0D9488"/>
       </w:pBdr>
     </w:pPr>
     <w:r>
-      <w:rPr><w:b/><w:color w:val="1F2937"/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr>
+      <w:rPr><w:b/><w:color w:val="1F2937"/><w:sz w:val="30"/><w:szCs w:val="30"/></w:rPr>
       <w:t>${esc(text)}</w:t>
     </w:r>
   </w:p>`;
@@ -126,23 +418,10 @@ function h2(text) {
   return `<w:p>
     <w:pPr>
       <w:pStyle w:val="Heading2"/>
-      <w:spacing w:before="150" w:after="70"/>
+      <w:spacing w:before="130" w:after="60"/>
     </w:pPr>
     <w:r>
-      <w:rPr><w:b/><w:color w:val="0D9488"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr>
-      <w:t>${esc(text)}</w:t>
-    </w:r>
-  </w:p>`;
-}
-
-function h3(text) {
-  return `<w:p>
-    <w:pPr>
-      <w:pStyle w:val="Heading3"/>
-      <w:spacing w:before="110" w:after="50"/>
-    </w:pPr>
-    <w:r>
-      <w:rPr><w:b/><w:color w:val="374151"/><w:sz w:val="21"/><w:szCs w:val="21"/></w:rPr>
+      <w:rPr><w:b/><w:color w:val="0D9488"/><w:sz w:val="23"/><w:szCs w:val="23"/></w:rPr>
       <w:t>${esc(text)}</w:t>
     </w:r>
   </w:p>`;
@@ -150,7 +429,7 @@ function h3(text) {
 
 function p(text) {
   return `<w:p>
-    <w:pPr><w:spacing w:before="40" w:after="90" w:line="260" w:lineRule="auto"/></w:pPr>
+    <w:pPr><w:spacing w:before="30" w:after="75" w:line="255" w:lineRule="auto"/></w:pPr>
     <w:r>
       <w:rPr><w:color w:val="2C2219"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr>
       <w:t xml:space="preserve">${esc(text)}</w:t>
@@ -161,8 +440,8 @@ function p(text) {
 function bullet(leadBold, text) {
   return `<w:p>
     <w:pPr>
-      <w:spacing w:before="30" w:after="55" w:line="250" w:lineRule="auto"/>
-      <w:ind w:left="360" w:hanging="200"/>
+      <w:spacing w:before="25" w:after="50" w:line="245" w:lineRule="auto"/>
+      <w:ind w:left="340" w:hanging="180"/>
     </w:pPr>
     <w:r>
       <w:rPr><w:b/><w:color w:val="0D9488"/><w:sz w:val="20"/></w:rPr>
@@ -180,11 +459,11 @@ function bullet(leadBold, text) {
   </w:p>`;
 }
 
-function callout(title, bodyText) {
+function exampleBox(title, bodyText) {
   return `<w:p>
     <w:pPr>
-      <w:spacing w:before="100" w:after="110" w:line="250" w:lineRule="auto"/>
-      <w:ind w:left="200" w:right="200"/>
+      <w:spacing w:before="80" w:after="90" w:line="245" w:lineRule="auto"/>
+      <w:ind w:left="160" w:right="160"/>
       <w:pBdr>
         <w:left w:val="single" w:sz="18" w:space="8" w:color="0D9488"/>
         <w:top w:val="single" w:sz="4" w:space="4" w:color="E2DCCD"/>
@@ -204,26 +483,41 @@ function callout(title, bodyText) {
   </w:p>`;
 }
 
-function codeBlock(codeText) {
+function embedImage(fig, docPrId) {
+  // 6.0 inches wide = 5,486,400 EMUs
+  const cx = 5486400;
+  const cy = Math.round((cx * fig.h) / fig.w);
   return `<w:p>
     <w:pPr>
-      <w:spacing w:before="70" w:after="90" w:line="240" w:lineRule="auto"/>
-      <w:ind w:left="200" w:right="200"/>
-      <w:pBdr>
-        <w:top w:val="single" w:sz="4" w:space="4" w:color="D8D0BE"/>
-        <w:left w:val="single" w:sz="4" w:space="6" w:color="D8D0BE"/>
-        <w:bottom w:val="single" w:sz="4" w:space="4" w:color="D8D0BE"/>
-        <w:right w:val="single" w:sz="4" w:space="6" w:color="D8D0BE"/>
-      </w:pBdr>
-      <w:shd w:val="clear" w:color="auto" w:fill="FAF7EE"/>
+      <w:jc w:val="center"/>
+      <w:spacing w:before="80" w:after="90"/>
     </w:pPr>
     <w:r>
-      <w:rPr>
-        <w:rFonts w:ascii="Consolas" w:hAnsi="Consolas" w:cs="Consolas"/>
-        <w:color w:val="0D9488"/>
-        <w:sz w:val="18"/>
-      </w:rPr>
-      <w:t xml:space="preserve">${esc(codeText)}</w:t>
+      <w:drawing>
+        <wp:inline distT="0" distB="0" distL="0" distR="0"
+                   xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+          <wp:extent cx="${cx}" cy="${cy}"/>
+          <wp:docPr id="${docPrId}" name="${esc(fig.title)}"/>
+          <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+            <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+              <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+                <pic:nvPicPr>
+                  <pic:cNvPr id="${docPrId}" name="${esc(fig.file)}"/>
+                  <pic:cNvPicPr/>
+                </pic:nvPicPr>
+                <pic:blipFill>
+                  <a:blip r:embed="${fig.id}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
+                  <a:stretch><a:fillRect/></a:stretch>
+                </pic:blipFill>
+                <pic:spPr>
+                  <a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>
+                  <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+                </pic:spPr>
+              </pic:pic>
+            </a:graphicData>
+          </a:graphic>
+        </wp:inline>
+      </w:drawing>
     </w:r>
   </w:p>`;
 }
@@ -235,14 +529,14 @@ function table(headers, rows) {
       <w:tcPr>
         <w:shd w:val="clear" w:color="auto" w:fill="0D9488"/>
         <w:tcMar>
-          <w:top w:w="80" w:type="dxa"/>
-          <w:bottom w:w="80" w:type="dxa"/>
-          <w:left w:w="120" w:type="dxa"/>
-          <w:right w:w="120" w:type="dxa"/>
+          <w:top w:w="70" w:type="dxa"/>
+          <w:bottom w:w="70" w:type="dxa"/>
+          <w:left w:w="110" w:type="dxa"/>
+          <w:right w:w="110" w:type="dxa"/>
         </w:tcMar>
       </w:tcPr>
       <w:p>
-        <w:pPr><w:spacing w:before="20" w:after="20"/></w:pPr>
+        <w:pPr><w:spacing w:before="15" w:after="15"/></w:pPr>
         <w:r>
           <w:rPr><w:b/><w:color w:val="FFFFFF"/><w:sz w:val="18"/></w:rPr>
           <w:t xml:space="preserve">${esc(h)}</w:t>
@@ -261,14 +555,14 @@ function table(headers, rows) {
           <w:tcPr>
             <w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>
             <w:tcMar>
-              <w:top w:w="70" w:type="dxa"/>
-              <w:bottom w:w="70" w:type="dxa"/>
-              <w:left w:w="120" w:type="dxa"/>
-              <w:right w:w="120" w:type="dxa"/>
+              <w:top w:w="65" w:type="dxa"/>
+              <w:bottom w:w="65" w:type="dxa"/>
+              <w:left w:w="110" w:type="dxa"/>
+              <w:right w:w="110" w:type="dxa"/>
             </w:tcMar>
           </w:tcPr>
           <w:p>
-            <w:pPr><w:spacing w:before="20" w:after="20"/></w:pPr>
+            <w:pPr><w:spacing w:before="15" w:after="15"/></w:pPr>
             <w:r>
               <w:rPr>${cIdx === 0 ? '<w:b/>' : ''}<w:color w:val="2C2219"/><w:sz w:val="18"/></w:rPr>
               <w:t xml:space="preserve">${esc(cell)}</w:t>
@@ -296,623 +590,514 @@ function table(headers, rows) {
     <w:tr>${headerCells}</w:tr>
     ${bodyRows}
   </w:tbl>
-  <w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr></w:p>`;
+  <w:p><w:pPr><w:spacing w:before="30" w:after="30"/></w:pPr></w:p>`;
 }
 
 // ============================================================================
-// 3. Author All 10 Pages of the Seshat Notch User Manual
+// 4. Author All 10 User-Friendly Pages with Embedded Figures & Examples
 // ============================================================================
+
+const figs = buildManualFigures();
 
 const pages = [
   // --------------------------------------------------------------------------
-  // PAGE 1: Title Page, Core Philosophy, Installation & Onboarding
+  // PAGE 1: Welcome to Seshat Notch & Getting Started in 60 Seconds
   // --------------------------------------------------------------------------
   [
-    h1('Page 1 — Seshat Notch: User Manual & System Reference (v1.0.0)'),
-    callout(
-      'Every Day, a Notch. Every Goal, Measured.',
-      'Seshat Notch is a local-first personal planning, habit, and time-tracking application designed specifically for Windows laptops and desktops. Named after Seshat—the ancient Egyptian goddess of writing, measurement, and archival records—the app combines multi-horizon planning with verifiable, transparent mathematics.'
+    h1('Page 1 — Welcome to Seshat Notch: Your Friendly Daily Planner'),
+    exampleBox(
+      'What is Seshat Notch?',
+      'Seshat Notch is a calm, private daily planner and habit tracker for your Windows laptop or desktop. It helps you organize your big life goals, break them into small daily steps, track your daily habits without guilt, and see your real progress—all while keeping 100% of your information safely on your own computer.'
     ),
-    h2('1.1 Core Design Philosophy'),
+    embedImage(figs[0], 101),
+    h2('1.1 Why People Love Using Seshat Notch'),
     bullet(
-      'Multi-Horizon Alignment:',
-      'Every daily task and focus block connects upward to weekly targets, monthly milestones, and long-term life areas.'
-    ),
-    bullet(
-      'Plan vs. Reality:',
-      'Most planners hide missed targets or silently delete overdue tasks. Seshat Notch compares planned estimates against actual logged reality and preserves an immutable change history.'
+      'Everything in Five Simple Tabs:',
+      'You never get lost in complicated menus. Everything lives under five clean buttons at the top of the screen: Today, Plan, Habits, Progress, and Settings.'
     ),
     bullet(
-      'Fair Streak Momentum:',
-      'Habits support scheduled rest days, excused skips, and multi-day vacation or illness pauses so legitimate rest never destroys your hard-earned streak.'
+      'Kind to Real Life (No Guilt!):',
+      'Other apps ruin your habit streak if you get sick or take a weekend off. Seshat Notch lets you mark rest days, sick days, and vacations so your streak stays safe.'
     ),
     bullet(
-      '100% Local-First & Private:',
-      'Zero telemetry, no cloud lock-in, and no external analytics. All data lives locally in transactional IndexedDB storage with 1-click JSON, CSV, and Markdown export.'
+      '100% Private & Works Without Internet:',
+      'There is no account sign-up, no subscription fee, and no company watching your to-do list. Everything stays right on your Windows PC and works even when Wi-Fi is turned off.'
     ),
-    h2('1.2 Installing & Running Seshat Notch on Windows'),
+    h2('1.2 How to Install It on Your Windows Laptop'),
     table(
-      ['Runtime Mode', 'How to Install / Launch', 'Capabilities & Best Use Case'],
+      ['Step', 'What to Click', 'What Happens'],
       [
         [
-          'Option A: Installed Windows Web App (PWA)',
-          'Open https://swashbuckler16.github.io/Seshat-Notch/ in Microsoft Edge or Google Chrome on Windows and click "Install App" in the address bar.',
-          'Launches in its own standalone desktop window from the Windows Start Menu or Taskbar. Caches all fonts (Inter & IBM Plex Mono), icons, and scripts for 100% offline use.'
+          'Step 1: Open the Link',
+          'Open Seshat Notch in Microsoft Edge or Google Chrome on your Windows computer.',
+          'The planner loads in your browser and saves its fonts and icons for offline use.'
         ],
         [
-          'Option B: Native Windows Desktop Shell (Tauri v2)',
-          'Run "npm run tauri:build" (or launch the compiled .msi / .exe installer from src-tauri/target/release/bundle).',
-          'Adds a persistent Windows System Tray icon (close-to-tray), OS-wide global Quick-Add hotkey (Ctrl+Shift+K), background native Windows notifications, and silent automatic disk backups.'
+          'Step 2: Click "Install App"',
+          'Click the small computer-screen icon on the right side of your address bar (or Menu -> Apps -> Install Seshat Notch).',
+          'Windows installs Seshat Notch as its own standalone desktop app with an icon in your Start Menu and Taskbar.'
         ],
         [
-          'Option C: Local Developer Server',
-          'Run "npm install" followed by "npm run dev" in PowerShell.',
-          'Runs locally at http://localhost:5173 for development, customization, and running the 76-test automated verification suite.'
+          'Step 3: Quick Welcome Setup',
+          'Type 1 Life Area (like "Health & Fitness"), 1 Project (like "Run a 5K"), and 1 Daily Habit (like "Drink 8 glasses of water").',
+          'Your personal planner is ready in 30 seconds! (Or click "Load Example Plan" if you want to explore a pre-made sample first.)'
         ]
       ]
-    ),
-    h2('1.3 First-Run Onboarding Wizard (OnboardingView)'),
-    p(
-      'When you open Seshat Notch for the first time on a clean machine, the application starts completely empty rather than forcing pre-populated sample clutter. The guided Onboarding screen offers two paths:'
-    ),
-    bullet(
-      'Path 1 — Create Your Own Workspace (30 Seconds):',
-      'Enter your first Life Area (e.g., "Security Engineering" or "Career"), your first active Project or Goal, and an optional daily Habit. Seshat Notch initializes your database inside an atomic transaction and opens the Today screen.'
-    ),
-    bullet(
-      'Path 2 — Load the Optional Example Plan (Heimdall SOC Lab):',
-      'Click "Load Example Plan" to populate an 8-milestone technical project ("Heimdall Detection Lab & SIEM Pipeline") complete with sample tasks, targets, and habits so you can explore every chart and formula immediately.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 2: Global Navigation, App Header & Quick-Add Command Palette
+  // PAGE 2: Finding Your Way Around & The Magic "Quick Add" Bar
   // --------------------------------------------------------------------------
   [
-    h1('Page 2 — Global Navigation, Header Controls & Quick-Add Grammar'),
+    h1('Page 2 — Navigating the App & Using the "Quick Add" Bar'),
     p(
-      'Seshat Notch uses a streamlined 5-tab top navigation bar designed for rapid keyboard and mouse operation on laptop and desktop screens, paired with a global Quick-Add command palette.'
+      'At the very top of Seshat Notch, you will always see the header bar. From here, you can switch between the 5 main screens, start or check a timer, switch between Light and Dark mode, or add a new task in seconds.'
     ),
-    h2('2.1 Top-Level Navigation & Keyboard Shortcuts'),
-    table(
-      ['Shortcut / Control', 'Destination / Action', 'Primary Purpose'],
-      [
-        ['Alt + 1', 'Today Tab (TodayView)', 'Morning 5-second overview, due tasks/targets, focus timer, and 7-day habit notches.'],
-        ['Alt + 2', 'Plan Tab (PlannerView)', 'Manage Life Areas, Projects, Milestones, Dependencies, and Month/Week/Day Targets.'],
-        ['Alt + 3', 'Habits Tab (HabitsView)', 'Manage build/avoidance habits, fair streaks, excused skips, pauses, and 52-week heatmaps.'],
-        ['Alt + 4', 'Progress Tab (DashboardView)', '7-sub-tab analytics dashboard: Overview, Projects, Habits, Activity, Goals, Reviews, Insights.'],
-        ['Alt + 5', 'Settings Tab (DataManagementView)', 'JSON/CSV/Markdown export, bulk import, Recovery Bin, Snapshots, Day Boundary, and Reminders.'],
-        ['Ctrl + K  or  N', 'Quick-Add Command Palette', 'Open the token-aware Quick-Add modal from any screen (when not typing in an input field).'],
-        ['Ctrl + Shift + K', 'Global Windows Quick Add', 'Summons Seshat Notch from the Windows system tray and opens Quick Add (Tauri Desktop mode).'],
-        ['Escape (Esc)', 'Close Modal / Drawer', 'Closes any open modal dialog, formula popover, or Quick-Add palette immediately.']
-      ]
-    ),
-    h2('2.2 Persistent App Header Controls'),
-    bullet(
-      'Header Timer Pill (HeaderTimerPill):',
-      'Whenever a focus timer session is running or paused, a live tabular stopwatch badge appears in the top header across all tabs. You can pause, resume, stop and log the session, or click the pill to jump directly to the Today execution strip.'
-    ),
-    bullet(
-      'Quick Add Button:',
-      'Opens the Quick-Add modal with a single click and displays the Ctrl+K keyboard hint.'
-    ),
-    bullet(
-      'Theme Toggle (ThemeToggle):',
-      'Switches instantaneously between Warm Paper Light Mode ([data-mode="light"]) and Warm Espresso Dark Mode ([data-mode="dark"]). Your selection is persisted in localStorage and included in full JSON backups.'
-    ),
-    h2('2.3 Quick-Add Grammar Engine (QuickAddModal & quickAddParser.ts)'),
+    h2('2.1 Handy Keyboard Shortcuts (Optional Time-Savers)'),
     p(
-      'Pressing Ctrl+K (or N) opens the Quick-Add Command Palette. As you type a single line of text, the deterministic parser extracts structured tokens in real time and displays live preview chips below the input box:'
-    ),
-    codeBlock(
-      'Write Sigma rule for Event ID 4688 #heimdall >phase3 ~45m !high @today +rules:2'
+      'You can click everything with your mouse, or use these simple keyboard shortcuts when your hands are on the keyboard:'
     ),
     table(
-      ['Token Prefix', 'Syntax Example', 'Parsed Field & Behavior'],
+      ['Keys to Press', 'What It Does', 'When to Use It'],
       [
-        ['#project', '#heimdall or #career', 'Matches and links the task to an existing active Project by slug or title prefix.'],
-        ['>milestone', '>phase3 or >baseline', 'Links the task to a specific Milestone/Phase inside the selected project.'],
-        ['~estimate', '~45m, ~1.5h, or ~90m', 'Sets the planned duration estimate in minutes (e.g., ~1.5h -> 90 minutes).'],
-        ['!priority', '!urgent, !high, !med, !low', 'Assigns task priority (defaults to medium when omitted).'],
-        ['@date', '@today, @tomorrow, @2026-11-05', 'Schedules the task for a specific local calendar date (respecting your Day Boundary setting).'],
-        ['+metric:val', '+pages:10, +labs:2, +5', 'Attaches a quantifiable target metric unit and value to the task.']
+        ['Ctrl + K   (or just press N)', 'Opens the Quick Add box', 'Whenever a new task or idea pops into your head.'],
+        ['Alt + 1', 'Jumps to the Today tab', 'To see today’s to-do list, focus timer, and daily habits.'],
+        ['Alt + 2', 'Jumps to the Plan tab', 'To organize your life areas, projects, and monthly/weekly goals.'],
+        ['Alt + 3', 'Jumps to the Habits tab', 'To check off habits, take a sick/rest day, or view your streaks.'],
+        ['Alt + 4', 'Jumps to the Progress tab', 'To see encouraging charts of what you accomplished.'],
+        ['Alt + 5', 'Jumps to the Settings tab', 'To save a backup file, change reminders, or recover deleted items.'],
+        ['Esc (Escape key)', 'Closes any open pop-up box', 'Whenever you want to close a window without saving.']
       ]
     ),
-    callout(
-      'Interactive Example Chips',
-      'Below the input box, the row labeled "Examples:" displays clickable token chips tailored to your active projects. Clicking any example chip inserts or replaces that token in your current command line.'
+    h2('2.2 How the "Quick Add" Box Works'),
+    p(
+      'Click the "Quick Add" button at the top (or press Ctrl+K). You can simply type a task name like "Call Mom" and press Enter—or you can add optional little symbols to automatically set the project, time estimate, priority, and date all in one line!'
+    ),
+    embedImage(figs[1], 102),
+    table(
+      ['Symbol', 'Everyday Example', 'What It Means'],
+      [
+        ['#  (Project)', '#home   or   #fitness', 'Attaches the task to one of your projects (like Home or Fitness).'],
+        ['~  (Time needed)', '~30m   or   ~1.5h', 'Estimates how long the task will take (30 minutes or 1.5 hours).'],
+        ['!  (Priority)', '!high   or   !urgent   or   !low', 'Marks how important the task is so top priorities stand out.'],
+        ['@  (Date)', '@today   or   @tomorrow', 'Puts the task on Today’s list or Tomorrow’s list automatically.'],
+        ['+  (Number goal)', '+pages:20   or   +glasses:8', 'Adds a number counter you can tick up as you make progress.']
+      ]
+    ),
+    exampleBox(
+      'Real-Life Example',
+      'Suppose you want to study Spanish for 30 minutes today. Just press Ctrl+K, type: "Practice Spanish vocabulary ~30m !high @today" and press Enter. Seshat Notch automatically schedules it for Today, marks it High Priority, and sets a 30-minute estimate!'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 3: Tab 1 — Today View & Rapid Execution Strip
+  // PAGE 3: Tab 1 — The "Today" Screen (Your Daily Home Base)
   // --------------------------------------------------------------------------
   [
-    h1('Page 3 — Tab 1: Today View & Rapid Execution Strip'),
+    h1('Page 3 — Tab 1: The "Today" Screen (Your Daily Home Base)'),
     p(
-      'The Today tab (Alt+1) is your operational command center. It is engineered so you can scan your entire day in under five seconds and start executing without navigating through nested menus.'
+      'When you open Seshat Notch each morning, you land on the Today screen. It is designed so you can see everything that matters for today in less than 5 seconds without feeling overwhelmed.'
     ),
-    h2('3.1 Morning Summary Strip (MorningSummary)'),
+    embedImage(figs[2], 103),
+    h2('3.1 The Morning Summary Bar (Top of the Screen)'),
     bullet(
-      'Local Date Header & Day Stepper:',
-      'Displays the active calendar date (e.g., "Sunday, Nov 1, 2026") using your configured local day-rollover boundary. Use the Previous (<), Today, and Next (>) buttons to inspect past days or pre-plan tomorrow.'
-    ),
-    bullet(
-      'Four Hero Counters:',
-      'Displays tabular counts for Tasks (Done / Scheduled), Goals (Done / Active Daily & Weekly Targets), Habits (Checked / Active), and Focus Time (Logged vs. Estimated).'
+      'Date & Day Switcher:',
+      'Shows today’s date in large, friendly letters. Use the "<" (Previous Day) and ">" (Next Day) arrows if you forgot to check off something yesterday or want to peek at tomorrow.'
     ),
     bullet(
-      'The Measuring Cord (CordBar):',
-      'A single horizontal progress bar with 10% survey ticks showing combined daily completion percentage across tasks, targets, and habits.'
+      'Four Simple Scorecards:',
+      'Shows how many Tasks, Goals, and Habits you have completed today, plus how much Focus Time you have logged.'
     ),
-    h2('3.2 Proactive Contextual Banners on Today'),
-    table(
-      ['Banner Name', 'When It Appears', 'User Actions Available'],
-      [
-        [
-          'Daily Backup Due Prompt',
-          'Appears when the daily backup prompt is enabled in Settings and no local .json backup file has been saved yet for today.',
-          'Click "Save backup (.json)" to save your entire database and settings to disk in one click, or click "Later" to snooze the prompt until tomorrow.'
-        ],
-        [
-          'Sunday Weekly Review & Triage',
-          'Appears automatically on Sundays to remind you to close out the week.',
-          'Click "Start Review" to open the Weekly Review & Carry-Over Triage workflow.'
-        ],
-        [
-          'Scheduled Reminder Banner',
-          'Appears when a Morning Plan, Evening Check-In, or Sunday 17:00 reminder triggers.',
-          'Displays the reminder message inside the workspace alongside a native desktop/browser notification.'
-        ]
-      ]
+    bullet(
+      'The Green Progress Cord:',
+      'As you check off tasks and habits during the day, this single green bar fills up from 0% to 100%.'
     ),
-    h2('3.3 Rapid Execution & Focus Strip (ExecutionStrip & FocusTimerWidget)'),
+    h2('3.2 The Built-In Focus Timer & Quick-Log Buttons'),
     p(
-      'Located directly beneath the Morning Summary, the Execution Strip folds focus time tracking directly into your daily workflow so you do not have to switch screens:'
+      'Right below the summary bar is your Focus Strip. When you want to concentrate without distractions:'
     ),
     bullet(
-      'Live Stopwatch & Interval Presets:',
-      'Start a 25-minute Pomodoro, a 50-minute Deep Work block, or a 90-minute Deep Work block linked optionally to any task scheduled for today.'
-    ),
-    bullet(
-      'Session Classification:',
-      'Classify every focus session as Deep Work (cognitively demanding creation/engineering), Deliberate Learning (study/labs), or Shallow Work (admin/triage).'
+      'Start a Focus Timer:',
+      'Pick a task you are working on, choose a 25-minute or 50-minute block, and click Start. A small timer badge stays visible at the top of the app even if you switch tabs.'
     ),
     bullet(
       'One-Click Quick-Log Buttons:',
-      'Forgot to start the timer? Click "+15m", "+25m", "+50m", or "+90m Deep work" (or open the Manual Time Modal) to log completed focus blocks retroactively.'
+      'Forgot to turn on the timer while you were cooking, studying, or working? Just click "+15m", "+25m", "+50m", or "+90m" to record the time you spent with one click.'
     ),
-    h2('3.4 Today’s Operational Grid (Tasks, Targets & Habits)'),
+    h2('3.3 Helpful Reminders That Appear When Needed'),
     bullet(
-      'TodayTasks (Left Column):',
-      'Lists all tasks scheduled or due on the selected date. Check off tasks, expand subtasks, log partial progress, or click "+ Add task" to invoke Quick Add.'
-    ),
-    bullet(
-      'TodayTargets (Left Column):',
-      'Shows both Daily targets for the selected date and Weekly targets for the current ISO week so your weekly commitments stay visible every day. Increment numeric progress directly with + / - controls.'
+      'Daily Backup Due Banner:',
+      'Once a day, a gentle banner reminds you to click "Save backup (.json)" so a fresh copy of your planner is saved to your computer’s Documents/Downloads folder. If you are busy, click "Later" to hide it until tomorrow.'
     ),
     bullet(
-      'TodayHabits (Right Column):',
-      'Renders each active habit with an interactive 7-day Notch Rib. Click today’s notch to mark completion, or use the Skip/Pause actions for excused rest.'
+      'Sunday Weekly Review Banner:',
+      'On Sundays, a friendly card invites you to click "Start Review" so you can celebrate your week’s wins and tidy up any leftover tasks.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 4: Tab 2 — Multi-Horizon Planner (Areas, Projects & Milestones)
+  // PAGE 4: Tab 2 — The "Plan" Screen (Life Areas, Projects & Milestones)
   // --------------------------------------------------------------------------
   [
-    h1('Page 4 — Tab 2: Plan View (Life Areas, Projects & Milestones)'),
+    h1('Page 4 — Tab 2: The "Plan" Screen (Areas, Projects & Steps)'),
     p(
-      'The Plan tab (Alt+2) organizes your long-term architecture across two dedicated sub-views: "Projects & Milestones" and "Monthly, Weekly & Daily Targets".'
+      'Click "Plan" (Alt+2) at the top of the screen when you want to look at the bigger picture. The Plan screen helps you organize your life into clear categories and break big projects into manageable steps.'
     ),
-    h2('4.1 Life Areas Organizer (AreaManager)'),
+    h2('4.1 Step 1: Create Your "Life Areas" (Left Column)'),
     p(
-      'Life Areas represent ongoing spheres of responsibility that never "finish" (for example: Security Engineering, Career & Certifications, Health & Fitness, or Open Source). In the left sidebar of the Projects view:'
+      'Think of Life Areas as the main buckets of your life that are always ongoing. Most people create 3 to 5 Life Areas:'
     ),
-    bullet('Create Area:', 'Click "+ New Area" to define a domain name, description, and display order.'),
-    bullet('Filter by Area:', 'Click any Area in the list (or "All Areas") to filter the active projects list.'),
-    bullet('Reorder & Archive:', 'Use the up/down arrows to prioritize areas or archive inactive areas without losing historical projects.'),
-    h2('4.2 Project & Goal Inspector (ProjectInspector)'),
+    bullet('Health & Fitness:', 'Exercise, sleep, nutrition, doctor visits.'),
+    bullet('Home & Family:', 'Home organization, family trips, chores, errands.'),
+    bullet('Career & Study:', 'Work projects, learning a new skill, reading, exams.'),
+    bullet('Personal Finances:', 'Budgeting, saving for a trip, paying off bills.'),
+    h2('4.2 Step 2: Create a "Project" Inside a Life Area'),
     p(
-      'Selecting a project opens the Project Inspector panel, which captures both strategic context and quantitative pacing parameters:'
+      'While a Life Area goes on forever, a Project has a clear finish line! When you click "+ New Project", Seshat Notch asks you a few helpful questions:'
     ),
     table(
-      ['Project Field', 'Options / Format', 'How Seshat Notch Uses It'],
+      ['Box on Screen', 'Everyday Example ("Renovate the Kitchen")', 'Why It Helps You'],
       [
-        ['Title & Type (isGoal)', 'Project or Quantified Goal', 'Distinguishes milestone-driven builds from metric-driven goals.'],
-        ['Why This Matters (why)', 'Freeform strategic statement', 'Keeps your core motivation visible during weekly reviews and low-energy days.'],
-        ['Success Criteria', 'Concrete definition of done', 'Defines the exact verifiable outcome required to mark the project completed.'],
-        ['Start Date & End Date', 'Local YYYY-MM-DD dates', 'Used by the Metric Engine to compute Expected Progress % and Schedule Ratio.'],
-        ['Weighting Mode', 'Equal, Manual Weight, or Estimate', 'Controls how milestones and tasks contribute to overall Project Progress %.'],
-        ['Status', 'Active, Paused, Completed, Dropped', 'Paused projects are excluded from "Behind" penalties; Dropped requires a reason.']
+        ['Project Title', 'Organize & Paint the Home Office', 'Gives your project a clear, motivating name.'],
+        ['Why This Matters', 'So I have a calm, clutter-free desk to work and read.', 'Reminds you why you started when motivation dips!'],
+        ['Success Criteria (Done When)', 'Desk assembled, walls painted, and old cables donated.', 'Makes it 100% clear when the project is officially finished.'],
+        ['Start Date & Target End Date', 'Nov 1 to Nov 30', 'Lets Seshat Notch tell you if you are On Track or falling behind.'],
+        ['Project Status', 'Active, Paused, Completed, or Dropped', 'Putting a project on "Paused" freezes its schedule so you aren’t penalized while taking a break.']
       ]
     ),
-    callout(
-      'Mandatory Drop Reason Guard (domainService.dropProject)',
-      'If you change a project or task status to "Dropped", Seshat Notch requires a non-empty explanation (e.g., "Superseded by new architecture"). This prevents silent abandonment and records the decision in the append-only Change Log.'
-    ),
-    h2('4.3 Milestone Timeline & Dependency Graph (MilestoneTimeline)'),
+    h2('4.3 Step 3: Break Your Project into "Milestones" (Phases)'),
     p(
-      'Complex projects are broken down into sequential Milestones (Phases). For example, an 8-phase engineering lab can assign specific weights and target dates to each phase:'
+      'A big project feels scary until you slice it into 3 or 4 smaller phases (called Milestones). For example, for "Plan Family Summer Trip", your Milestones might be:'
     ),
-    bullet(
-      'Finish-to-Start Dependencies:',
-      'Link Milestone B to depend on Milestone A. The timeline highlights whether prerequisite phases are complete before dependent phases begin.'
-    ),
-    bullet(
-      'Milestone Weighting:',
-      'Assign custom relative weights (e.g., Phase 1 = 10%, Phase 2 = 25%) or let the engine weight phases automatically by task duration estimates.'
-    ),
-    bullet(
-      'Blocker Tracking & Impact Calculation:',
-      'Attach active Blockers to any project or milestone with a description and start timestamp. The metric engine calculates total days blocked so schedule delays are explained rather than mystery gaps.'
+    bullet('Milestone 1:', 'Pick dates and book flights (Weight: 25%)'),
+    bullet('Milestone 2:', 'Reserve family hotel and rental car (Weight: 25%)'),
+    bullet('Milestone 3:', 'Make packing list and pet-sitter plan (Weight: 50%)'),
+    exampleBox(
+      'What If Something Blocks Your Progress?',
+      'Waiting on a contractor or waiting for a package to arrive? Click "Add Blocker" on the project. Seshat Notch records how many days you were waiting on someone else so you know why a project took longer.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 5: Tab 2 (Continued) — Multi-Horizon Targets & Cascade Engine
+  // PAGE 5: Tab 2 (Cont.) — Monthly, Weekly & Daily Goals ("Cascade" Helper)
   // --------------------------------------------------------------------------
   [
-    h1('Page 5 — Tab 2 (Cont.): Multi-Horizon Targets & Cascade Engine'),
+    h1('Page 5 — Breaking Big Monthly Goals into Weekly & Daily Steps'),
     p(
-      'Switching the Plan tab to "Monthly, Weekly & Daily Targets" (MultiHorizonView) reveals the multi-horizon planning matrix that bridges high-level monthly objectives down to daily execution.'
+      'Inside the "Plan" tab, click the second button at the top labeled "Monthly, Weekly & Daily Targets". This screen solves one of the biggest problems in planning: setting a big monthly goal and forgetting about it until the 29th of the month!'
     ),
-    h2('5.1 The Three Planning Horizons (periodUtils.ts)'),
+    embedImage(figs[3], 104),
+    h2('5.1 How the Three Time Horizons Work Together'),
     table(
-      ['Horizon', 'Period Key Format', 'Role in the Planning Hierarchy'],
+      ['Time Horizon', 'Everyday Example', 'How You Use It'],
       [
         [
-          'Month Horizon',
-          'YYYY-MM (e.g., 2026-11)',
-          'Defines high-level monthly quotas and milestone deliverables (e.g., "Complete 4 detection lab phases" or "Log 40 hours of deep work").'
+          'Monthly Goal',
+          'Read 300 pages in November  (or Walk 120 miles this month)',
+          'Set 1 to 3 big measurable goals at the start of the month.'
         ],
         [
-          'Week Horizon',
-          'ISO Week YYYY-Www (e.g., 2026-W44)',
-          'Breaks monthly targets into actionable 7-day sprints (Monday–Sunday). Appears on both the Plan screen and the Today screen.'
+          'Weekly Goal',
+          'Read 75 pages this week  (or Walk 30 miles this week)',
+          'Keeps your focus on what needs to happen between Monday and Sunday. Shows up right on your Today screen!'
         ],
         [
-          'Day Horizon',
-          'Local Date YYYY-MM-DD (e.g., 2026-11-01)',
-          'Concrete daily numeric or boolean targets that appear directly in TodayTargets and feed the Morning Summary Measuring Cord.'
+          'Daily Target',
+          'Read 11 pages today  (or Walk 4.5 miles today)',
+          'Small, bite-sized numbers you can easily finish in a single day.'
         ]
       ]
     ),
-    h2('5.2 Creating & Updating Measurable Targets (TargetEditorModal)'),
+    h2('5.2 The Magic "Cascade" Button (Automatic Goal Splitter)'),
     p(
-      'Every Target in Seshat Notch is attached to a verifiable number so progress is never subjective:'
+      'You don’t need a calculator to divide your monthly goals into weekly or daily goals! Here is how the Cascade button does the math for you:'
     ),
     bullet(
-      'Metric Types:',
-      'Choose Count (e.g., 12 rules, 5 chapters), Duration (e.g., 180 minutes), Percentage (0–100%), or Boolean (Done / Not Done).'
+      'Step 1:',
+      'Create a Monthly Goal—for example, "Save $400 for Holiday Gifts in November".'
     ),
     bullet(
-      'Project & Milestone Linking:',
-      'Optionally link a target to an active Project so increments logged on the target also surface in project reviews.'
+      'Step 2:',
+      'Click the "Cascade" button next to that Monthly Goal.'
     ),
     bullet(
-      'Rapid Progress Logging:',
-      'Use the inline +1 / -1 buttons or enter an exact delta value. Every increment writes both an updated currentValue and a timestamped ProgressLog record inside a database transaction.'
+      'Step 3:',
+      'Seshat Notch automatically splits that $400 goal into four Weekly Goals of $100 each! You can even cascade a Weekly Goal into 7 Daily Goals (or 5 Weekday-only Goals) with one more click.'
     ),
-    h2('5.3 The Cascade Distribution Engine (CascadeModal)'),
-    p(
-      'One of Seshat Notch’s signature planning tools is the Cascade Engine (domainService.cascadeTargetToSubPeriods). Instead of manually creating 4 weekly targets or 7 daily targets by hand:'
-    ),
-    bullet(
-      'Month -> Weeks Cascade:',
-      'Click "Cascade" on any Monthly target (for example, "Write 20 pages in November"). The Cascade Modal calculates the overlapping ISO weeks and divides the remaining target value evenly across those weeks.'
-    ),
-    bullet(
-      'Week -> Days Cascade:',
-      'Click "Cascade" on any Weekly target (for example, "Complete 350 minutes of study in 2026-W44"). Choose whether to distribute across all 7 days (50m/day) or weekdays only (70m/day Mon–Fri).'
-    ),
-    h2('5.4 Period Navigation & Copy-Forward Re-Planning'),
-    bullet(
-      'Adjacent Period Stepper:',
-      'Step backward or forward across months, ISO weeks, or days using getAdjacentPeriod().'
-    ),
-    bullet(
-      'Copy Unfinished Targets Forward:',
-      'At the end of a week or month, click "Copy Unfinished to Next Period" to carry remaining target quotas into the upcoming week or month while preserving the original period’s historical record.'
+    exampleBox(
+      'What If You Don’t Finish a Goal This Week?',
+      'Life happens! At the end of the week, click the "Copy Unfinished Forward" button. Seshat Notch gently carries the remaining amount into next week so you can keep going without starting over.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 6: Tab 3 — Habits & Routines & Fair Streak Engine
+  // PAGE 6: Tab 3 — The "Habits" Screen & Fair Streaks (No More Guilt!)
   // --------------------------------------------------------------------------
   [
-    h1('Page 6 — Tab 3: Habits & Routines & The Fair Streak Engine'),
+    h1('Page 6 — Tab 3: Habits & "Fair Streaks" (Consistency Without Guilt)'),
     p(
-      'The Habits tab (Alt+3) implements Seshat Notch’s Fair Streak Engine (habitMath.ts)—designed to reward genuine long-term consistency without punishing planned rest, illness, or travel.'
+      'Click "Habits" (Alt+3) to build healthy daily routines or break unwanted habits. Most habit apps punish you: if you build a 30-day streak and catch a cold for one day, they reset your streak to 0. Seshat Notch uses "Fair Streaks" instead.'
     ),
-    h2('6.1 Flexible Habit Schedules (HabitEditorModal)'),
+    embedImage(figs[4], 105),
+    h2('6.1 Choose a Schedule That Fits Your Real Life'),
+    bullet(
+      'Every Day:',
+      'Great for daily essentials like "Drink 8 glasses of water" or "Take morning vitamins".'
+    ),
+    bullet(
+      'Weekdays Only (Mon–Fri):',
+      'Great for work or study habits like "Clear email inbox by 5 PM". Saturday and Sunday are automatically marked as Rest Days—they never break your streak!'
+    ),
+    bullet(
+      'Specific Days (e.g., Mon, Wed, Fri):',
+      'Great for workouts like "30-minute strength training". Tuesday, Thursday, and weekends are automatic Rest Days.'
+    ),
+    bullet(
+      'X Times Per Week (e.g., 3 times a week):',
+      'Do it on any 3 days you choose between Monday and Sunday to keep your streak alive!'
+    ),
+    h2('6.2 How to Take an "Excused Skip" or a "Vacation Pause"'),
     table(
-      ['Schedule Type', 'Configuration', 'How Fair Streak Evaluates It'],
+      ['Situation', 'Which Button to Click on Your Habit', 'What Happens to Your Streak'],
       [
         [
-          'Daily (daily)',
-          'Every calendar day',
-          'Expects a check-in each day unless the day is marked with an Excused Skip or falls inside an active Pause window.'
+          'You are sick, exhausted, or had a family emergency today',
+          'Click "Skip / Excuse Today" and type a short note like "Down with flu".',
+          'Today is marked as an Excused Skip (◆). Your streak does NOT reset to zero—it freezes safely until tomorrow!'
         ],
         [
-          'Weekdays Only (weekdays)',
-          'Monday through Friday',
-          'Saturday and Sunday are automatically treated as scheduled Rest Days. Missing Saturday/Sunday never breaks your streak.'
-        ],
-        [
-          'Specific Days (custom_days)',
-          'Select exact days (e.g., Mon, Wed, Fri)',
-          'Only selected weekdays require a check-in; non-selected days are automatic Rest Days that bridge your streak.'
-        ],
-        [
-          'X Times Per Week (times_per_week)',
-          'Target frequency (e.g., 4x / week)',
-          'Evaluates whether you met your weekly quota across the Monday–Sunday ISO week.'
+          'You are going on a 1-week trip or taking a break',
+          'Click "Pause Habit" and pick your start and end dates.',
+          'All days during your trip are paused. When you return, your streak picks up right where you left off.'
         ]
       ]
     ),
-    h2('6.2 Excused Skips & Vacation / Illness Pauses'),
+    h2('6.3 Building Good Habits vs. Quitting Bad Habits'),
     bullet(
-      'Excused Skip (HabitSkipModal):',
-      'If an unexpected obligation or recovery day prevents a habit on a scheduled day, click "Excuse / Skip Today" and select or enter a brief reason. The day is recorded as an Excused Skip (◆): it does not increment the streak counter, nor does it reset your streak to zero.'
+      'Build a Good Habit:',
+      'Click the daily check-in box when you complete your habit (like "Read 15 minutes").'
     ),
     bullet(
-      'Habit Pause Windows (HabitPauseModal):',
-      'Going on vacation or recovering from illness? Add a start-to-end Pause Window on the habit. All dates inside the pause window are bypassed by the streak and consistency denominator.'
-    ),
-    h2('6.3 Build Habits vs. Avoidance Habits (HabitRelapseModal)'),
-    bullet(
-      'Positive Build Habits:',
-      'Standard habits where you log completions (e.g., "90m Deep Work Block", "Mobility Routine"). Displays Current Fair Streak, Best Streak, and 30-Day Consistency %.'
-    ),
-    bullet(
-      'Avoidance / Abstinence Habits (isAvoidance = true):',
-      'Tracks habits where success is abstaining from a behavior (e.g., "Zero late-night doomscrolling"). Automatically counts "Days Clean" since start or last relapse, and provides a structured Relapse Modal to record triggers and reset notes honestly.'
-    ),
-    h2('6.4 Visual Motifs: 7-Day Notch Rib & 52-Week Year Heatmap'),
-    bullet(
-      'The 7-Day Notch Rib (NotchRib):',
-      'Each habit card displays a tactile 7-day row of vertical notches representing the last 7 local days (Completed ●, Excused/Rest ◆, or Missed). Click any day tick to toggle or log.'
-    ),
-    bullet(
-      '52-Week Year Heatmap (HabitYearHeatmap):',
-      'Expand any habit to inspect its full 52-week (364-day) ledger matrix, showing seasonal consistency patterns at a glance.'
+      'Quit an Unwanted Habit (Avoidance Habit):',
+      'Want to quit "Late-night sugary snacks" or "Mindless phone scrolling"? Turn on the "Avoidance Habit" switch when creating the habit. Seshat Notch counts your "Days Clean" automatically, and if you slip up, lets you log what triggered it so you can learn and start fresh.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 7: Tab 4 — Progress Dashboard (Overview, Projects, Habits, Activity, Goals)
+  // PAGE 7: Tab 4 — The "Progress" Screen (Charts Anyone Can Understand)
   // --------------------------------------------------------------------------
   [
-    h1('Page 7 — Tab 4: Progress Dashboard & Traceable Visuals'),
+    h1('Page 7 — Tab 4: The "Progress" Screen (Visual Charts & Health)'),
     p(
-      'The Progress tab (Alt+4) brings all of your execution data together across 7 directly accessible sub-tabs (with zero hidden "More" dropdowns) and zero external charting bloat. Every chart is a custom, high-contrast SVG built from saved records.'
+      'Click "Progress" (Alt+4) whenever you want to see how far you have come. All 7 views are lined up clearly across the top of the Progress screen so nothing is hidden.'
     ),
-    h2('7.1 Global Dashboard Filter Bar (DashboardHeader)'),
-    p(
-      'At the top of the Progress view, you can filter all metrics and charts by Time Window (Last 7 Days, Last 30 Days, Last 90 Days, or All Time) and by Life Area.'
-    ),
-    h2('7.2 Sub-Tabs 1 to 5 Reference'),
+    h2('7.1 What Each of the 7 Progress Views Shows You'),
     table(
-      ['Sub-Tab', 'Visualizations & Components', 'Key Metrics & What They Tell You'],
+      ['View Button', 'What You Will See in Plain English', 'Best Question It Answers'],
       [
         [
-          '1. Overview (DashboardOverviewTab)',
-          '4 Hero StatTiles with Formula Popovers + Project Health List + Horizontal Time Breakdown Bar (SvgTimePieChart)',
-          'Shows Active Projects Progress %, Weekly Goals %, Habit Consistency %, and Total Focus Hours Logged. If no focus time is logged yet, displays a clean, honest empty state instead of an empty ring.'
+          '1. Overview',
+          '4 big summary scorecards, a list of your active projects, and a horizontal color bar showing how you spent your focus time.',
+          '"How am I doing overall this month?"'
         ],
         [
-          '2. Projects (DashboardProjectsTab)',
-          'Stephen Few Bullet Charts (SvgBulletChart) + Milestone Pacing Table + Blocker Impact badges',
-          'Compares Actual Progress % (solid bar) against Expected Progress % by today (vertical target marker). Classifies each project with both word and glyph: On track (●), At risk (▲), Behind (■), or Paused (◆).'
+          '2. Projects',
+          'Progress bars for each project with a marker showing where you planned to be by today.',
+          '"Are my projects On Track (●), At Risk (▲), or Behind (■)?"'
         ],
         [
-          '3. Habits (DashboardHabitsTab)',
-          'Fair Consistency Leaderboard + 52-Week Heatmap Matrix',
-          'Ranks habits by fair consistency rate (completed days divided by required non-paused days) and highlights current vs. best streaks.'
+          '3. Habits',
+          'Your habit consistency percentages, best streaks, and full-year calendar grids.',
+          '"Which habits am I sticking to best?"'
         ],
         [
-          '4. Activity (DashboardExecutionTab)',
-          'Task Completion Burn-Up Curve (SvgBurnUpChart) + Daily Focus Volume Sparklines (SvgSparkline) + Estimate Accuracy',
-          'Compares cumulative tasks planned vs. completed over time and calculates Estimate Accuracy (Actual Minutes / Estimated Minutes) to help calibrate future planning.'
+          '4. Activity',
+          'A line chart of tasks completed over time and how close your time estimates were to reality.',
+          '"Do tasks usually take me longer than I think?"'
         ],
         [
-          '5. Goals (DashboardGoalsTab)',
-          'Multi-Horizon Target Completion Bars across Month, Week, and Day horizons',
-          'Shows exact numeric progress (currentValue / targetValue) across all active monthly, weekly, and daily targets.'
+          '5. Goals',
+          'Progress bars for all your Monthly, Weekly, and Daily number targets.',
+          '"How close am I to hitting my weekly and monthly numbers?"'
+        ],
+        [
+          '6. Reviews',
+          'Your Carry-Over Inbox for unfinished tasks, plus Daily, Weekly, and Monthly reflection journals.',
+          '"What did I accomplish this week, and what rolled over?"'
+        ],
+        [
+          '7. Insights',
+          'Smart observations about your most productive day of the week (appears once you have 14+ active days of data).',
+          '"Which day of the week do I get the most done?"'
         ]
       ]
     ),
-    h2('7.3 Traceable Math: The Formula Inspector Modal (FormulaInspectorModal)'),
-    callout(
-      'Click the "?" Icon on Any Metric Tile',
-      'Every hero metric tile in Seshat Notch includes a Formula Inspector button. Clicking it opens a modal showing: (1) the exact mathematical formula used, (2) the live input variables pulled from your database, (3) the step-by-step calculation, and (4) how to interpret the result.'
+    h2('7.2 The "?" Button: No Mystery Numbers!'),
+    exampleBox(
+      'Tap the "?" Icon on Any Scorecard',
+      'Have you ever wondered how an app calculated a percentage? In Seshat Notch, every big number has a small "?" button in its corner. Click it, and a friendly pop-up box explains in plain English how the number was calculated using your own tasks and habits!'
+    ),
+    h2('7.3 Why "Insights" Waits Until You Have 14 Days of Activity'),
+    p(
+      'If you only used the app for two days, it would be silly for the app to claim "Saturday is your most productive day!" Seshat Notch waits until you have logged tasks on at least 14 days before showing patterns—and shows a clear counter ("3 of 14 active days recorded") until then.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 8: Carry-Over Inbox, Periodic Reviews & Rule-Based Insights
+  // PAGE 8: Handling Unfinished Tasks (Carry-Over Inbox) & Weekly Reviews
   // --------------------------------------------------------------------------
   [
-    h1('Page 8 — Carry-Over Triage, Periodic Reviews & Insights'),
+    h1('Page 8 — Unfinished Tasks (Carry-Over Inbox) & Weekly Reviews'),
     p(
-      'Pages 8 covers the reflection and course-correction engines of Seshat Notch: the Carry-Over Inbox, Structured Reviews (Daily, Weekly, Monthly), and the deterministic Insights engine.'
+      'Even with the best intentions, we all have days where 2 or 3 tasks on our to-do list don’t get done. In Seshat Notch, unfinished tasks from yesterday never disappear into a black hole—they go into your Carry-Over Inbox.'
     ),
-    h2('8.1 Carry-Over Inbox & Triage Workflow (CarryOverInbox)'),
+    embedImage(figs[5], 106),
+    h2('8.1 Three Stress-Free Ways to Clear Unfinished Tasks'),
     p(
-      'When scheduled tasks from previous days remain unfinished, Seshat Notch collects them into the Carry-Over Inbox (accessible from Reviews and the Sunday Review prompt). Every overdue task is triaged using one of three explicit actions:'
+      'Open Progress -> Reviews (or click the Sunday Review banner on Today) to see your Carry-Over Inbox. For each leftover task from a past day, you have three simple buttons:'
+    ),
+    bullet(
+      'Choice 1 — Reschedule It (Move to Today or Tomorrow):',
+      'Still need to do it? Click "Today", "Tomorrow", or pick a date next week. The task moves cleanly to your new day.'
+    ),
+    bullet(
+      'Choice 2 — Split It into Smaller Pieces:',
+      'Sometimes we procrastinate on a task because it is too big (like "Clean the entire garage"). Click "Split", and break it into two smaller tasks (like "Sort tool shelf - 20m" and "Sweep garage floor - 15m").'
+    ),
+    bullet(
+      'Choice 3 — Drop It (With a Short Note):',
+      'Realized you no longer need to do it? Click "Drop" and jot down a quick reason (like "Already handled by phone"). It is taken off your plate without guilt!'
+    ),
+    h2('8.2 Doing a 5-Minute Sunday Weekly Review'),
+    p(
+      'Every Sunday, Seshat Notch makes it easy to close out your week and start Monday feeling calm and organized:'
     ),
     table(
-      ['Triage Action', 'Component / Service Method', 'What Happens in the Database'],
+      ['Review Step', 'What Seshat Notch Shows You', 'What You Write (1–2 Sentences)'],
+      [
+        ['1. Automatic Summary', 'Automatically counts how many tasks you finished, hours you focused, and habits you checked off this week.', 'Nothing to calculate—it is filled in for you automatically!'],
+        ['2. Highlights & Wins', 'A box for your favorite moments of the week.', 'Example: "Walked 4 times this week and finished painting the office."'],
+        ['3. What Got in the Way', 'A box for any obstacles or lessons learned.', 'Example: "Stayed up too late on Wednesday; need to start reading by 9:30 PM."'],
+        ['4. Energy & Mood', 'Simple 1-to-5 rating buttons for how energized you felt.', 'Click a number from 1 (exhausted) to 5 (great energy) and click Save Review!']
+      ]
+    ),
+  ].join('\n'),
+
+  // --------------------------------------------------------------------------
+  // PAGE 9: Tab 5 — "Settings" (Backups, Night-Owl Hours, Reminders & Trash)
+  // --------------------------------------------------------------------------
+  [
+    h1('Page 9 — Tab 5: Settings (Backups, Night-Owl Hours & Reminders)'),
+    p(
+      'Click "Settings" (Alt+5) in the top right corner whenever you want to save a backup copy of your data, bring back a deleted item, adjust late-night hours, or set up daily reminders.'
+    ),
+    h2('9.1 The 5 Sections Inside Settings'),
+    table(
+      ['Settings Sub-Tab', 'What You Can Do Here', 'When You Will Use It'],
       [
         [
-          '1. Reschedule Task',
-          'domainService.rescheduleTask(id, newDate)',
-          'Moves scheduleDate to Today, Tomorrow, or a chosen date and logs a "reschedule" entry in the Change Log.'
+          '1. Export Data',
+          'Download all your data as a Backup file (.json), a Spreadsheet (.csv for Excel), or a Printable Document (.md).',
+          'When you want a spreadsheet of your hours or a printable list of your goals.'
         ],
         [
-          '2. Split into Smaller Tasks',
-          'CarryOverSplitModal -> domainService.splitTask()',
-          'Marks the oversized parent task as split/archived and creates 2 or more smaller, actionable child tasks scheduled for today.'
+          '2. Import Plans',
+          'Restore a saved backup file, paste a simple checklist of tasks, or load the sample project.',
+          'When moving to a new computer or pasting a big list of tasks at once.'
         ],
         [
-          '3. Drop with Reason',
-          'CarryOverDropModal -> domainService.dropTask(id, reason)',
-          'Requires a written explanation before marking the task "dropped", ensuring tasks never vanish silently.'
+          '3. Recovery Bin (Trash)',
+          'See every task, project, or habit you deleted and restore it with one click.',
+          'Whenever you accidentally delete a task or project and want it back!'
+        ],
+        [
+          '4. Backups & Snapshots',
+          'Click "Save Backup to File" to save a .json copy to your PC, or restore an automatic safety snapshot.',
+          'Once a day (or week) to keep a safe copy of your planner on your computer.'
+        ],
+        [
+          '5. Privacy & Preferences',
+          'Set your Night-Owl Day Rollover hour, turn on Morning/Evening reminders, or set an optional PIN lock.',
+          'When customizing the app for your personal schedule.'
         ]
       ]
     ),
-    h2('8.2 Structured Periodic Reviews (ReviewsView & ReviewEditor)'),
-    p(
-      'Accessible from Progress -> Reviews (or the "Start Review" button on Today), the Review Editor supports three cadences: Daily Shutdown, Weekly Review, and Monthly Retrospective:'
+    h2('9.2 Night-Owl Setting: "When Does Your Day End?"'),
+    exampleBox(
+      'Do You Ever Stay Up Past Midnight?',
+      'If you finish a task at 1:30 AM on Monday night, most apps count it as Tuesday! In Settings -> Privacy & Preferences, look for "Local Day Rollover Boundary". You can set your new day to start at 1:00 AM, 2:00 AM, 3:00 AM, 4:00 AM, or 5:00 AM so late-night check-ins still count for "Today".'
+    ),
+    h2('9.3 Setting Up Daily Reminders & PIN Lock'),
+    bullet(
+      'Morning & Evening Reminders:',
+      'Turn on the "Reminders" checkbox and pick a Morning time (like 09:00 AM) and Evening time (like 08:00 PM). When Seshat Notch is open on your computer (or minimized to the Windows system tray in the desktop version), it will pop up a friendly reminder banner and notification.'
     ),
     bullet(
-      'Auto-Compiled Period Snapshot:',
-      'Automatically summarizes tasks completed, tasks carried over, focus minutes logged, and habit completion rate for the review period.'
-    ),
-    bullet(
-      'Structured Reflection Prompts:',
-      'Provides dedicated sections for Wins & Accomplishments, Friction & Blockers, Lessons Learned, and Next Period Priorities.'
-    ),
-    bullet(
-      'Energy & Mood Rating (1–5 Scale):',
-      'Records subjective energy and focus quality alongside objective execution metrics.'
-    ),
-    h2('8.3 Sub-Tab 7: Deterministic Insights (DashboardInsightsTab)'),
-    p(
-      'Unlike apps that hallucinate patterns from two days of data, Seshat Notch’s Insights tab uses a strict deterministic rule evaluator:'
-    ),
-    callout(
-      '14-Day Active Data Threshold Guard',
-      'Insights requires at least 14 distinct active task days before generating velocity or weekday performance observations. If you have fewer than 14 active task days recorded, the screen displays an honest "Needs more data (X of 14 active task days recorded)" progress bar rather than guessing.'
-    ),
-    bullet(
-      'Peak Velocity Day & Estimation Bias:',
-      'Once 14+ active days exist, Insights identifies your highest-output day of the week, compares deep-work ratios across projects, and flags systematic under- or over-estimation.'
+      'Optional PIN Lock:',
+      'Sharing your laptop with family? Click "Set Up PIN" to add a 4-to-8 digit passcode.'
     ),
   ].join('\n'),
 
   // --------------------------------------------------------------------------
-  // PAGE 9: Tab 5 — Settings & Data Management
+  // PAGE 10: Everyday Cheat Sheet & Common Questions (FAQ)
   // --------------------------------------------------------------------------
   [
-    h1('Page 9 — Tab 5: Settings, Backups, Export/Import & Recovery Bin'),
+    h1('Page 10 — Everyday Routine Cheat Sheet & Common Questions'),
     p(
-      'The Settings tab (Alt+5, implemented in DataManagementView) gives you total ownership over your data, backups, deleted items, and local desktop preferences across five sub-panels.'
+      'You don’t need to use every feature on day one! Here is a simple, stress-free daily routine used by most Seshat Notch users, followed by answers to the most common questions.'
     ),
-    h2('9.1 Backups & Snapshots (SnapshotsPanel)'),
-    bullet(
-      'Save Backup to Local File (.json):',
-      'Saves a complete JSON archive directly to your Windows filesystem (`seshat-notch-backup-YYYY-MM-DD.json`). In Tauri Desktop mode, daily backups write silently to `Documents/SeshatNotch/Backups/`. In browser mode, a "Daily backup due" prompt appears on Today when not yet saved.'
-    ),
-    bullet(
-      'Full Settings Preservation:',
-      'Every JSON backup embeds all 12 database tables PLUS your user preferences (`dayBoundaryHour`, `reminderSettings`, `dailyBackupPromptEnabled`, and `theme`), so restoring a backup restores your exact setup.'
-    ),
-    bullet(
-      'In-App Restore Points:',
-      'Take manual snapshots anytime or rely on up to 10 automatic pre-import safety snapshots stored in IndexedDB with 1-click Restore.'
-    ),
-    h2('9.2 Export Data (DataExportPanel) & Import Plans (DataImportPanel)'),
+    h2('10.1 The Simple 3-Step Daily Routine'),
     table(
-      ['Format', 'Export / Import Capability', 'Details & Standards Compliance'],
+      ['Time of Day', 'What to Do in Seshat Notch', 'Time Required'],
       [
         [
-          'Full JSON (.json)',
-          'Export & Import (Merge or Replace)',
-          'Lossless archive of all entities, logs, and settings. "Merge" resolves conflicts by newest updatedAt timestamp; "Replace" takes an automatic safety snapshot first.'
+          'Morning (With Coffee)',
+          'Open the Today tab. Look at your 2 or 3 tasks for today. Press Ctrl+K if you need to add anything new.',
+          '1 minute'
         ],
         [
-          'Tabular CSV (.csv)',
-          'Export any of 6 core tables',
-          'RFC 4180 compliant CSV export (properly escaping commas, quotes, and newlines) for tasks, projects, targets, habits, timeSessions, and progressLogs.'
+          'During the Day',
+          'Click "Start 25m Focus" when working on an important task (or click "+25m" afterward). Check off tasks as you finish them.',
+          'Seconds'
         ],
         [
-          'Markdown (.md)',
-          'Export Master Ledger & Bulk Import Checklists',
-          'Exports a human-readable Master Planning Ledger, or imports any Markdown checklist (`- [ ] Task #project ~45m !high @today`) using Quick-Add tokens.'
+          'Evening (Wind-Down)',
+          'Tick off your daily Habits on the 7-day boxes (or click "Skip" if you had a sick/rest day). Click "Save backup (.json)" if prompted.',
+          '1 minute'
         ]
       ]
     ),
-    h2('9.3 Recovery Bin (RecoveryBinPanel)'),
-    p(
-      'Deleting a project, milestone, target, task, habit, or routine performs a Soft Delete (`isDeleted = true`). The Recovery Bin lists every deleted item with its deletion timestamp and reason, allowing 1-click Restore or Permanent Purge.'
-    ),
-    h2('9.4 Privacy, Day Rollover & Reminders (PrivacySecurityPanel)'),
+    h2('10.2 Frequently Asked Questions (Plain-English FAQ)'),
     bullet(
-      'Local Day Rollover Boundary (00:00 to 05:00 AM):',
-      'Working at 2:00 AM? Set your rollover boundary to 03:00 AM or 04:00 AM so late-night work still counts toward the current day and @today resolves accurately in your local timezone.'
+      'Q: Does Seshat Notch work when I have no internet connection (like on a plane or train)?',
+      'A: Yes! Once you open or install Seshat Notch on your Windows laptop, all screens, fonts, and icons are saved inside your browser/computer. You can add tasks, run timers, and check off habits 100% offline.'
     ),
     bullet(
-      'Reminders & Scheduled Prompts:',
-      'Off by default. Configure Morning Plan (e.g., 09:00), Evening Check-In (e.g., 20:00), and Sunday 17:00 Review prompts. Evaluated every 60 seconds while open in the browser, or continuously in the background via the Tauri Windows System Tray.'
+      'Q: Where is my information stored? Can anyone else see it?',
+      'A: Your data is stored strictly inside your own computer’s local storage. Nothing is uploaded to the internet. That is why we encourage clicking "Save backup (.json)" regularly so you always have your own backup file in your Documents or OneDrive folder.'
     ),
     bullet(
-      'Local App Lock PIN:',
-      'Optional 4-to-8 digit offline PIN hash to lock sensitive personal reviews on shared machines.'
-    ),
-  ].join('\n'),
-
-  // --------------------------------------------------------------------------
-  // PAGE 10: Services Architecture, Mathematical Formulas & Troubleshooting
-  // --------------------------------------------------------------------------
-  [
-    h1('Page 10 — Architecture Services, Mathematical Formulas & FAQ'),
-    p(
-      'This final reference page documents the internal TypeScript/Rust services powering Seshat Notch, the exact mathematical formulas used across the application, and common troubleshooting steps.'
-    ),
-    h2('10.1 Core Services & Modules Reference'),
-    table(
-      ['Service / Module Path', 'Primary Responsibilities'],
-      [
-        ['src/services/domainService.ts', 'Atomic multi-store CRUD wrapped in db.transaction(), milestone dependency checks, cascade target splitting, carry-over triage, and mandatory drop-reason guards.'],
-        ['src/services/dataOwnershipService.ts', 'Full JSON/CSV/Markdown export, Merge/Replace JSON import, Markdown checklist import, Snapshot rotation (max 10 auto), Recovery Bin restore/purge, and preferences backup.'],
-        ['src/services/reminderService.ts', 'Evaluates local HH:MM time against Morning, Evening, and Sunday reminder slots, prevents duplicate daily firing, and dispatches notifications.'],
-        ['src/services/desktopShellService.ts', 'Bridges the React frontend with Tauri v2 (src-tauri/src/main.rs) for Windows System Tray events, global Ctrl+Shift+K shortcut, native toasts, and silent disk backups.'],
-        ['src/db/changeLogService.ts', 'Records an append-only audit trail (create, update, soft_delete, hard_delete, drop, reschedule) with before/after values and user reasons.'],
-        ['src/utils/dateUtils.ts', 'Local timezone calendar date formatting (YYYY-MM-DD) and configurable late-night day boundary rollover (00:00–05:00 AM), eliminating UTC midnight drift.'],
-        ['src/utils/metricEngine.ts & habitMath.ts', 'Pure deterministic functions for Project Progress %, Expected Pacing %, Schedule Ratio, 14-day Velocity Forecast, Fair Streaks, and 52-week heatmaps.']
-      ]
-    ),
-    h2('10.2 Verifiable Mathematical Formulas'),
-    bullet(
-      'Project Progress % (Equal / Manual / Estimate Weighting):',
-      'Progress % = (Sum of Completed Milestone/Task Weights ÷ Total Active Weights) × 100.'
+      'Q: What happens to my settings (like my reminder times and night-owl rollover hour) when I restore a backup?',
+      'A: Your backup file (.json) saves everything—all your projects, tasks, habits, focus logs, light/dark theme, reminder times, and night-owl day boundary. Restoring that file brings your entire setup back!'
     ),
     bullet(
-      'Expected Progress % & Schedule Ratio:',
-      'Expected % = ((Today − StartDate) ÷ (EndDate − StartDate)) × 100. Schedule Ratio = Actual Progress % ÷ Expected Progress %. Status: On Track ● (≥ 0.90), At Risk ▲ (0.70–0.89), Behind ■ (< 0.70).'
+      'Q: I accidentally deleted a project or habit! Is it gone forever?',
+      'A: No! Go to Settings (Alt+5) -> Recovery Bin. Click "Restore" next to the item, and it will reappear immediately.'
     ),
     bullet(
-      '14-Day Velocity Forecast Date:',
-      'Daily Velocity = Completed Weight over Last 14 Days ÷ 14. Remaining Days = Remaining Weight ÷ Daily Velocity (rendered as a credible ±15% date range).'
+      'Q: How can I import a quick list of tasks from Notepad or Word?',
+      'A: Go to Settings -> Import Plans, and paste lines starting with "- [ ] " (for example: "- [ ] Pack suitcase ~30m @today"). Seshat Notch will turn every line into a scheduled task automatically!'
     ),
-    bullet(
-      'Fair Habit Consistency %:',
-      'Consistency % = (Completed Days ÷ (Total Scheduled Days − Excused Skips − Paused Days)) × 100.'
-    ),
-    bullet(
-      'Deep Work Ratio & Estimate Accuracy:',
-      'Deep Work Ratio = (Deep Work Minutes ÷ Total Logged Minutes) × 100. Estimate Accuracy = (Actual Logged Minutes ÷ Planned Estimate Minutes) × 100.'
-    ),
-    h2('10.3 Troubleshooting & Frequently Asked Questions'),
-    bullet(
-      'Q: Why did my planner show the wrong date between midnight and 5:00 AM?',
-      'A: All 43 date operations now use local timezone calendar dates via dateUtils.ts instead of UTC. If you work past midnight, set your "Local Day Rollover Boundary" in Settings -> Privacy & Preferences to 03:00 AM or 04:00 AM.'
-    ),
-    bullet(
-      'Q: How do I verify offline mode works before going offline?',
-      'A: Open the app once in Edge or Chrome; the service worker (sw.js v3) caches the HTML shell, self-hosted fonts, and icons individually. You can also run "npm test" to execute the automated static-server offline smoke test.'
-    ),
-    bullet(
-      'Q: How do I move my data to a new Windows laptop?',
-      'A: Click "Save backup (.json)" on the Today banner (or Settings -> Backups & Snapshots), copy the .json file to your new laptop, and import it under Settings -> Import Plans. All projects, tasks, habits, logs, and settings will be restored.'
+    exampleBox(
+      'Thank You for Using Seshat Notch!',
+      'Remember our motto: "Every day, a notch. Every goal, measured." Small, steady steps recorded honestly every day add up to extraordinary results over a year.'
     ),
   ].join('\n'),
 ];
 
 // ============================================================================
-// 4. Assemble OpenXML Package Files and Write Seshat-Notch-User-Manual.docx
+// 5. Assemble OpenXML Relationships (Including All 6 Embedded PNG Images)
 // ============================================================================
 
 const documentBodyXml = pages
@@ -923,6 +1108,7 @@ const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
+  <Default Extension="png" ContentType="image/png"/>
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
   <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
   <Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>
@@ -938,11 +1124,19 @@ const rootRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
 </Relationships>`;
 
+const imageRelsXml = figs
+  .map(
+    (f) =>
+      `  <Relationship Id="${f.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${f.file}"/>`
+  )
+  .join('\n');
+
 const wordRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
   <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>
   <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>
+${imageRelsXml}
 </Relationships>`;
 
 const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -975,13 +1169,6 @@ const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <w:qFormat/>
     <w:pPr><w:keepNext/></w:pPr>
   </w:style>
-  <w:style w:type="paragraph" w:styleId="Heading3">
-    <w:name w:val="heading 3"/>
-    <w:basedOn w:val="Normal"/>
-    <w:next w:val="Normal"/>
-    <w:qFormat/>
-    <w:pPr><w:keepNext/></w:pPr>
-  </w:style>
 </w:styles>`;
 
 const header1Xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -992,7 +1179,7 @@ const header1Xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     </w:pPr>
     <w:r>
       <w:rPr><w:b/><w:color w:val="0D9488"/><w:sz w:val="16"/></w:rPr>
-      <w:t xml:space="preserve">SESHAT NOTCH — USER MANUAL &amp; SYSTEM REFERENCE   |   </w:t>
+      <w:t xml:space="preserve">SESHAT NOTCH — FRIENDLY USER GUIDE   |   </w:t>
     </w:r>
     <w:r>
       <w:rPr><w:color w:val="6B5E50"/><w:sz w:val="16"/></w:rPr>
@@ -1010,7 +1197,7 @@ const footer1Xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     </w:pPr>
     <w:r>
       <w:rPr><w:color w:val="6B5E50"/><w:sz w:val="16"/></w:rPr>
-      <w:t xml:space="preserve">Seshat Notch v1.0.0 (Windows Desktop &amp; Offline PWA)  —  Page </w:t>
+      <w:t xml:space="preserve">Seshat Notch User Guide  —  Page </w:t>
     </w:r>
     <w:fldSimple w:instr="PAGE">
       <w:r><w:rPr><w:b/><w:color w:val="0D9488"/><w:sz w:val="16"/></w:rPr><w:t>1</w:t></w:r>
@@ -1034,7 +1221,7 @@ const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <w:headerReference w:type="default" r:id="rId2"/>
       <w:footerReference w:type="default" r:id="rId3"/>
       <w:pgSz w:w="12240" w:h="15840"/>
-      <w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="540" w:footer="540" w:gutter="0"/>
+      <w:pgMar w:top="1000" w:right="1000" w:bottom="1000" w:left="1000" w:header="500" w:footer="500" w:gutter="0"/>
     </w:sectPr>
   </w:body>
 </w:document>`;
@@ -1044,10 +1231,10 @@ const coreXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                    xmlns:dc="http://purl.org/dc/elements/1.1/"
                    xmlns:dcterms="http://purl.org/dc/terms/"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <dc:title>Seshat Notch — 10-Page User Manual &amp; System Reference</dc:title>
-  <dc:subject>Complete User Guide for Tabs, Workflows, Formulas, and Services</dc:subject>
+  <dc:title>Seshat Notch — Friendly 10-Page User Guide</dc:title>
+  <dc:subject>Step-by-Step Illustrated User Manual with Everyday Examples</dc:subject>
   <dc:creator>Swashbuckler16</dc:creator>
-  <cp:revision>1</cp:revision>
+  <cp:revision>2</cp:revision>
   <dcterms:created xsi:type="dcterms:W3CDTF">2026-11-01T00:00:00Z</dcterms:created>
   <dcterms:modified xsi:type="dcterms:W3CDTF">2026-11-01T00:00:00Z</dcterms:modified>
 </cp:coreProperties>`;
@@ -1060,7 +1247,7 @@ const appXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <AppVersion>1.0000</AppVersion>
 </Properties>`;
 
-const zipBuffer = buildZipArchive([
+const archiveEntries = [
   { name: '[Content_Types].xml', data: contentTypesXml },
   { name: '_rels/.rels', data: rootRelsXml },
   { name: 'docProps/core.xml', data: coreXml },
@@ -1070,7 +1257,10 @@ const zipBuffer = buildZipArchive([
   { name: 'word/header1.xml', data: header1Xml },
   { name: 'word/footer1.xml', data: footer1Xml },
   { name: 'word/document.xml', data: documentXml },
-]);
+  ...figs.map((f) => ({ name: `word/media/${f.file}`, data: f.buf })),
+];
+
+const zipBuffer = buildZipArchive(archiveEntries);
 
 const rootDocxPath = path.resolve('Seshat-Notch-User-Manual.docx');
 const docsDocxPath = path.resolve('docs', 'Seshat-Notch-User-Manual.docx');
@@ -1078,6 +1268,6 @@ fs.mkdirSync(path.dirname(docsDocxPath), { recursive: true });
 fs.writeFileSync(rootDocxPath, zipBuffer);
 fs.writeFileSync(docsDocxPath, zipBuffer);
 
-console.log(`Generated 10-page .docx user manual (${zipBuffer.length} bytes):`);
+console.log(`Generated friendly 10-page illustrated .docx user manual (${zipBuffer.length} bytes, with 6 embedded PNG figures):`);
 console.log(` - ${rootDocxPath}`);
 console.log(` - ${docsDocxPath}`);
