@@ -20,7 +20,7 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
   const [showArchived, setShowArchived] = useState(false);
 
   const areas = useLiveQuery(() => db.areas.orderBy('order').toArray(), []);
-  const projects = useLiveQuery(() => db.projects.where('isDeleted').equals(0).toArray(), []);
+  const projects = useLiveQuery(() => db.projects.filter((p) => !p.isDeleted).toArray(), []);
 
   const filteredAreas = (areas || []).filter((a) => (showArchived ? true : !a.isArchived));
 

@@ -94,7 +94,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
               Recovery Bin (Soft-Delete Ledger)
             </h3>
             <span className="text-[11px] text-[var(--color-ink-muted)]">
-              PRD DT-5: Soft-deleted items are safely held here with full history until permanently purged.
+              Soft-deleted items are held here safely until restored or permanently erased.
             </span>
           </div>
         </div>

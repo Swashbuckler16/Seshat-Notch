@@ -120,7 +120,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-[var(--color-accent)]" />
             <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-              Energy & Mood Dual-Line Trend (PRD 7.3)
+              Energy & Mood Dual-Line Trend
             </h3>
           </div>
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
@@ -128,9 +128,15 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           </span>
         </div>
 
-        <div className="p-2 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-          <SvgMoodEnergyTrend data={trendData} height={130} />
-        </div>
+        {trendData.length < 2 ? (
+          <div className="py-6 text-center text-xs text-[var(--color-ink-muted)]">
+            Log at least 2 periodic reviews with energy and mood ratings to display trends.
+          </div>
+        ) : (
+          <div className="p-2 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+            <SvgMoodEnergyTrend data={trendData} height={130} />
+          </div>
+        )}
       </div>
 
       {/* 3. Searchable Reflections Ledger */}

@@ -1,11 +1,9 @@
-/* hallmark v2.0.0 · Base Stylesheet */
 
 html,
 body {
   margin: 0;
   padding: 0;
-  overflow-x: clip; /* Hallmark Floor 4: never hidden, never 100vw */
-  background-color: var(--color-paper);
+  overflow-x: clip;   background-color: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -25,7 +23,6 @@ th,
   font-feature-settings: "tnum" 1, "zero" 1;
 }
 
-/* Hallmark Floor 6: instant focus-visible outline, no transition delay */
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;

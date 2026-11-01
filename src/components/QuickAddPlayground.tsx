@@ -48,11 +48,11 @@ export const QuickAddPlayground: React.FC<QuickAddPlaygroundProps> = ({ onOpenQu
 
   // Live queries
   const recentTasks = useLiveQuery(
-    () => db.tasks.where('isDeleted').equals(0).reverse().sortBy('createdAt'),
+    () => db.tasks.filter((x) => !x.isDeleted).toArray(),
     []
   );
-  const projects = useLiveQuery(() => db.projects.where('isDeleted').equals(0).toArray(), []);
-  const milestones = useLiveQuery(() => db.milestones.where('isDeleted').equals(0).toArray(), []);
+  const projects = useLiveQuery(() => db.projects.filter((x) => !x.isDeleted).toArray(), []);
+  const milestones = useLiveQuery(() => db.milestones.filter((x) => !x.isDeleted).toArray(), []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

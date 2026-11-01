@@ -1,6 +1,4 @@
-/* hallmark v2.0.0 · Hallmark · theme: warm progress · genre: playful · shape: app screen · modes: light+dark · redesign: full */
-/* Hallmark · critique: P5 H4 E4 S5 R4 V4 · weakest: restraint, lead with today and let useful progress carry the color */
-/* waive: none */
+/* hallmark v2.0.0 */
 
 :root,
 [data-mode="light"] {
@@ -47,10 +45,10 @@
   --text-hero: clamp(2.25rem, 4vw, 3.25rem);
   --text-h1: 1.875rem;
   --text-h2: 1.375rem;
-  --text-h3: 1.0625rem;
+  --text-h3: 1.125rem;
   --text-body: 0.9375rem;
-  --text-body-s: 0.8125rem;
-  --text-caption: 0.75rem;
+  --text-body-s: 0.875rem;
+  --text-caption: 0.8125rem;
   --text-code: 0.8125rem;
 
   /* Hairline and Radii — restrained, precision-cut corners */

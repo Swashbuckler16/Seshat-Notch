@@ -126,7 +126,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
             </h2>
           </div>
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Fair Streaks (PRD HB-3)
+            Fair Streaks
           </span>
         </div>
 

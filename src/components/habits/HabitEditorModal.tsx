@@ -250,7 +250,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
             ))}
           </select>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
-            Habit completions directly contribute to the goal's progress score (PRD HB-7).
+            Habit completions directly contribute to the goal's progress score.
           </span>
         </div>
 

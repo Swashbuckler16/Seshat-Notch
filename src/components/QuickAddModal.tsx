@@ -37,8 +37,8 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Load existing projects & milestones to resolve queries
-  const projects = useLiveQuery(() => db.projects.where('isDeleted').equals(0).toArray(), []);
-  const milestones = useLiveQuery(() => db.milestones.where('isDeleted').equals(0).toArray(), []);
+  const projects = useLiveQuery(() => db.projects.filter((p) => !p.isDeleted).toArray(), []);
+  const milestones = useLiveQuery(() => db.milestones.filter((m) => !m.isDeleted).toArray(), []);
 
   // Update parsed whenever input changes
   useEffect(() => {

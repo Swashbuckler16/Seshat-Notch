@@ -27,7 +27,7 @@ export const ProjectMetricsView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)]">
-            Traceable project roll-ups, schedule pacing ratios, and 14-day velocity forecasts (PRD Section 7.3).
+            Traceable project roll-ups, schedule pacing ratios, and 14-day velocity forecasts.
           </p>
         </div>
       </div>

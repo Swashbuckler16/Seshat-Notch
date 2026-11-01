@@ -93,7 +93,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
         <div className="flex items-center gap-2">
           <HardDrive className="w-4 h-4 text-[var(--color-accent)]" />
           <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Data Export Center (PRD Section 6.8 DT-3)
+            Export Your Data
           </h3>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">

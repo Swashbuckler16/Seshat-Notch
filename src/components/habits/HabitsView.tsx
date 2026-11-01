@@ -93,7 +93,7 @@ export const HabitsView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)]">
-            Flexible schedules with rest days and vacation pauses preserved per PRD Section 6.4 & HB-3.
+            Flexible schedules with rest days and vacation pauses preserved.
           </p>
         </div>
 

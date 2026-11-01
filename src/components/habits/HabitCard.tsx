@@ -4,7 +4,7 @@ import { db } from '../../db';
 import { Habit, ProjectGoal } from '../../types';
 import { domainService } from '../../services/domainService';
 import { calculateHabitMetrics, isDateExcused } from '../../utils/habitMath';
-import { StatTile } from '../ui/StatTile';
+
 import { Button } from '../ui/Button';
 import { NotchRib, DayNotch } from '../NotchRib';
 import { HabitYearHeatmap } from './HabitYearHeatmap';
@@ -190,57 +190,42 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* Compact Habit Key Metrics */}
       {habit.isAvoidance ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <StatTile
-            label="Days clean"
-            value={metrics.daysClean ?? 0}
-            unit="days"
-            formulaExplanation="Days elapsed since the most recent recorded relapse (or start date if zero relapses)."
-          />
-          <StatTile
-            label="Best clean streak"
-            value={metrics.bestCleanStreak ?? 0}
-            unit="days"
-            formulaExplanation="Longest consecutive clean stretch recorded in history."
-          />
-          <StatTile
-            label="30-day clean rate"
-            value={`${metrics.consistency30d}%`}
-            formulaExplanation="Percentage of days in the last 30 days without any relapse events."
-          />
-          <StatTile
-            label="Total relapses"
-            value={metrics.totalRelapses ?? 0}
-            unit="events"
-            formulaExplanation="Cumulative count of all logged relapse occurrences."
-          />
+        <div className="flex flex-wrap items-center gap-3 text-xs surface-well px-3 py-2 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="text-[var(--color-ink-muted)]">Clean:</span>
+            <span className="font-bold text-sm text-[var(--color-ink)] tabular-figure">{metrics.daysClean ?? 0}</span>
+            <span className="text-[11px] text-[var(--color-ink-muted)]">days</span>
+          </div>
+          <span className="text-[var(--color-rule)]">·</span>
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="text-[var(--color-ink-muted)]">Best:</span>
+            <span className="font-semibold text-[var(--color-ink)] tabular-figure">{metrics.bestCleanStreak ?? 0}d</span>
+          </div>
+          <span className="text-[var(--color-rule)]">·</span>
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="text-[var(--color-ink-muted)]">30-day:</span>
+            <span className="font-semibold text-[var(--color-accent)] tabular-figure">{metrics.consistency30d}%</span>
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <StatTile
-            label="Current streak"
-            value={metrics.currentStreak}
-            unit={habit.scheduleType === 'n_per_week' ? 'wks' : 'days'}
-            formulaExplanation="Consecutive scheduled periods completed without unexcused miss. Excused rest days & vacation pauses preserve this count per PRD HB-3."
-          />
-          <StatTile
-            label="Best streak"
-            value={metrics.bestStreak}
-            unit={habit.scheduleType === 'n_per_week' ? 'wks' : 'days'}
-            formulaExplanation="All-time longest completion streak recorded."
-          />
-          <StatTile
-            label="30-day consistency"
-            value={`${metrics.consistency30d}%`}
-            formulaExplanation="Formula: habit completions in last 30 days divided by scheduled occurrences, excluding declared skip and pause days (PRD 7.3)."
-          />
-          <StatTile
-            label="90-day consistency"
-            value={`${metrics.consistency90d}%`}
-            formulaExplanation="Quarterly consistency percentage excluding declared skip and pause days."
-          />
+        <div className="flex flex-wrap items-center gap-3 text-xs surface-well px-3 py-2 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="text-[var(--color-ink-muted)]">Streak:</span>
+            <span className="font-bold text-sm text-[var(--color-accent)] tabular-figure">{metrics.currentStreak}</span>
+            <span className="text-[11px] text-[var(--color-ink-muted)]">{habit.scheduleType === 'n_per_week' ? 'wks' : 'days'}</span>
+          </div>
+          <span className="text-[var(--color-rule)]">·</span>
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="text-[var(--color-ink-muted)]">Best:</span>
+            <span className="font-semibold text-[var(--color-ink)] tabular-figure">{metrics.bestStreak}</span>
+          </div>
+          <span className="text-[var(--color-rule)]">·</span>
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="text-[var(--color-ink-muted)]">30-day:</span>
+            <span className="font-semibold text-[var(--color-ink)] tabular-figure">{metrics.consistency30d}%</span>
+          </div>
         </div>
       )}
 

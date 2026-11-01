@@ -29,22 +29,22 @@ export const ProjectHealthCard: React.FC<ProjectHealthCardProps> = ({ project, t
 
   // Live queries for project children
   const milestones = useLiveQuery(
-    () => db.milestones.where('projectId').equals(project.id).toArray(),
+    () => db.milestones.where('projectId').equals(project.id).filter((m) => !m.isDeleted).toArray(),
     [project.id]
   );
 
   const targets = useLiveQuery(
-    () => db.targets.where('projectId').equals(project.id).toArray(),
+    () => db.targets.where('projectId').equals(project.id).filter((t) => !t.isDeleted).toArray(),
     [project.id]
   );
 
   const tasks = useLiveQuery(
-    () => db.tasks.where('projectId').equals(project.id).toArray(),
+    () => db.tasks.where('projectId').equals(project.id).filter((t) => !t.isDeleted).toArray(),
     [project.id]
   );
 
   const progressLogs = useLiveQuery(
-    () => db.progressLogs.toArray(),
+    () => db.progressLogs.filter((l) => !l.isDeleted).toArray(),
     []
   );
 
@@ -120,7 +120,7 @@ export const ProjectHealthCard: React.FC<ProjectHealthCardProps> = ({ project, t
             className="input-field px-2 py-0.5 text-[11px] font-mono rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
             value={project.weightType || 'equal'}
             onChange={(e) => handleWeightingChange(e.target.value as 'equal' | 'estimate' | 'manual')}
-            title="Configure mathematical roll-up weighting (PRD TR-2)"
+            title="Configure mathematical roll-up weighting"
           >
             <option value="equal">Equal (1/N)</option>
             <option value="estimate">By Estimate</option>

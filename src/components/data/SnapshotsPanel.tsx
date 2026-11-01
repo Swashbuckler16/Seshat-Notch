@@ -91,7 +91,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
           <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
           <div className="flex flex-col">
             <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-              Local Snapshot Backups (PRD DT-4)
+              Local Snapshot Backups
             </h3>
             <span className="text-[11px] text-[var(--color-ink-muted)]">
               Automated and manual snapshots stored securely in offline IndexedDB storage.

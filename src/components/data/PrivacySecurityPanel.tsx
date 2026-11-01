@@ -5,6 +5,7 @@ import {
   Shield,
   CheckCircle2,
   Key,
+  Bell,
 } from 'lucide-react';
 
 interface PrivacySecurityPanelProps {
@@ -56,6 +57,30 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
     }
   };
 
+  const [notificationPermission, setNotificationPermission] = useState<string>(() => {
+    return typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default';
+  });
+
+  const handleRequestNotifications = async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const res = await Notification.requestPermission();
+        setNotificationPermission(res);
+        if (res === 'granted') {
+          onNotify('Notifications enabled for morning reminders and weekly reviews.');
+          new Notification('Seshat Notch', {
+            body: 'Reminders enabled. Every day, a notch. Every goal, measured.',
+            icon: '/logo.svg',
+          });
+        } else {
+          onNotify('Notification permission was not granted.');
+        }
+      } catch {
+        onNotify('Could not request notification permission.');
+      }
+    }
+  };
+
   const handleDisableLock = async () => {
     const input = prompt('Enter your current PIN to disable App Lock:');
     if (!input) return;
@@ -80,7 +105,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
         <div className="flex items-center gap-2.5 hairline-b pb-2.5">
           <Shield className="w-4 h-4 text-[var(--color-emerald)]" />
           <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Data Privacy & Offline Integrity (PRD Section 6.8 DT-7)
+            Data Privacy & Offline Integrity
           </h3>
         </div>
 
@@ -124,7 +149,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
             <Lock className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
               <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-                Local App Lock (PRD DT-6)
+                Local App Lock
               </h3>
               <span className="text-[11px] text-[var(--color-ink-muted)]">
                 Protect your personal plans and reviews with an offline PIN.
@@ -216,6 +241,47 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
                 Set Up PIN
               </button>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Daily & Weekly Notification Reminders */}
+      <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
+        <div className="flex items-center justify-between hairline-b pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <Bell className="w-4 h-4 text-[var(--color-accent)]" />
+            <div className="flex flex-col">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+                Reminders & Prompts
+              </h3>
+              <span className="text-[11px] text-[var(--color-ink-muted)]">
+                Receive local browser notifications for morning planning and Sunday weekly reviews.
+              </span>
+            </div>
+          </div>
+          <span
+            className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[10px] font-mono border uppercase tracking-wider ${
+              notificationPermission === 'granted'
+                ? 'bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30 text-[var(--color-emerald)]'
+                : 'bg-[var(--color-paper-3)] border-[var(--color-rule)] text-[var(--color-ink-muted)]'
+            }`}
+          >
+            {notificationPermission === 'granted' ? 'Enabled' : notificationPermission === 'denied' ? 'Blocked' : 'Off'}
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+          <span className="text-xs text-[var(--color-ink-muted)]">
+            Local browser notifications respect your privacy and never transmit notifications to external push servers.
+          </span>
+          {notificationPermission !== 'granted' && (
+            <button
+              type="button"
+              onClick={handleRequestNotifications}
+              className="px-3 py-1.5 text-xs font-medium rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] hover:opacity-90 min-h-11 sm:min-h-8 whitespace-nowrap self-start sm:self-auto"
+            >
+              Enable Notifications
+            </button>
           )}
         </div>
       </div>

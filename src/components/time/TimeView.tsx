@@ -52,7 +52,7 @@ export const TimeView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)]">
-            Stopwatch and countdown intervals tagged by deep, shallow, or learning focus (PRD Section 6.5 & TM-1 to TM-3).
+            Stopwatch and countdown intervals tagged by deep, shallow, or learning focus.
           </p>
         </div>
       </div>

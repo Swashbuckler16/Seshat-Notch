@@ -11,12 +11,12 @@ export const StorageInspector: React.FC = () => {
 
   // Live queries from Dexie database
   const areas = useLiveQuery(() => db.areas.toArray(), []);
-  const projects = useLiveQuery(() => db.projects.where('isDeleted').equals(0).toArray(), []);
-  const milestones = useLiveQuery(() => db.milestones.where('isDeleted').equals(0).toArray(), []);
-  const targets = useLiveQuery(() => db.targets.where('isDeleted').equals(0).toArray(), []);
-  const tasks = useLiveQuery(() => db.tasks.where('isDeleted').equals(0).toArray(), []);
-  const habits = useLiveQuery(() => db.habits.where('isDeleted').equals(0).toArray(), []);
-  const routines = useLiveQuery(() => db.routines.where('isDeleted').equals(0).toArray(), []);
+  const projects = useLiveQuery(() => db.projects.filter((x) => !x.isDeleted).toArray(), []);
+  const milestones = useLiveQuery(() => db.milestones.filter((x) => !x.isDeleted).toArray(), []);
+  const targets = useLiveQuery(() => db.targets.filter((x) => !x.isDeleted).toArray(), []);
+  const tasks = useLiveQuery(() => db.tasks.filter((x) => !x.isDeleted).toArray(), []);
+  const habits = useLiveQuery(() => db.habits.filter((x) => !x.isDeleted).toArray(), []);
+  const routines = useLiveQuery(() => db.routines.filter((x) => !x.isDeleted).toArray(), []);
   const progressLogs = useLiveQuery(() => db.progressLogs.toArray(), []);
   const changeLogs = useLiveQuery(() => db.changeLogs.reverse().sortBy('timestamp'), []);
 

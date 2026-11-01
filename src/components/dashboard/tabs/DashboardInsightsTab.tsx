@@ -46,6 +46,14 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
     setExpandedInsightIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Check history breadth before evaluating insights
+  const allDates = new Set<string>();
+  tasks.forEach((t) => { if (t.scheduleDate) allDates.add(t.scheduleDate); });
+  progressLogs.forEach((l) => { if (l.date) allDates.add(l.date); });
+  timeSessions.forEach((s) => { if (s.startTime) allDates.add(s.startTime.slice(0, 10)); });
+
+  const hasEnoughData = allDates.size >= 14 && tasks.filter((t) => t.status === 'done').length >= 10;
+
   // 1. Evaluate Rule: Weekday Velocity Anomaly
   const insights: RuleInsight[] = [];
 
@@ -61,8 +69,9 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
     return { name, total: dayTasks.length, done, rate };
   });
 
-  const qualifiedDays = dayStats.filter((d) => d.total >= 2);
-  if (qualifiedDays.length > 0) {
+  // Only trigger weekday velocity insight when there is statistically credible data (>= 8 tasks and >= 14 days)
+  const qualifiedDays = dayStats.filter((d) => d.total >= 8);
+  if (hasEnoughData && qualifiedDays.length > 0) {
     const bestDay = [...qualifiedDays].sort((a, b) => b.rate - a.rate)[0];
     if (bestDay && bestDay.rate >= 70) {
       insights.push({
@@ -71,7 +80,7 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
         severity: 'positive',
         title: `${bestDay.name} is your highest velocity execution day`,
         observation: `Historical completion rate peaks at ${bestDay.rate}% on ${bestDay.name}s (${bestDay.done}/${bestDay.total} tasks completed).`,
-        ruleFormula: `rate = (doneTasks[day] / totalTasks[day]) * 100; condition: totalTasks >= 2 && rate >= 70%`,
+        ruleFormula: `rate = (doneTasks[day] / totalTasks[day]) * 100; condition: totalTasks >= 8 && history >= 14 days && rate >= 70%`,
         triggeredValue: `${bestDay.rate}% completion rate on ${bestDay.name}`,
         recommendation: `Schedule your highest-priority or most challenging milestones on ${bestDay.name}s.`,
       });
@@ -234,16 +243,26 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
         <div className="flex items-center gap-2">
           <Lightbulb className="w-4 h-4 text-[var(--color-accent)]" />
           <h2 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Deterministic Rule-Based Insights Engine (PRD 7.4)
+            Insights & Pattern Analysis
           </h2>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          Every observation is mathematically derived from your local execution logs with zero hallucination. Formulas and triggering conditions are fully visible.
+          Observations are derived from your execution logs with transparent mathematical formulas and clear thresholds.
         </p>
       </div>
 
       {/* Insights Ledger */}
-      {insights.length === 0 ? (
+      {!hasEnoughData ? (
+        <div className="surface-card rounded-[var(--radius-sm)] p-8 border border-[var(--color-rule)] text-center flex flex-col items-center gap-2">
+          <div className="w-10 h-10 rounded-full bg-[var(--color-paper-2)] border border-[var(--color-rule)] flex items-center justify-center text-[var(--color-ink-muted)]">
+            <Lightbulb className="w-5 h-5 text-[var(--color-accent)]" />
+          </div>
+          <h3 className="font-semibold text-xs text-[var(--color-ink)]">Needs more data</h3>
+          <p className="text-xs text-[var(--color-ink-muted)] max-w-md">
+            Pattern analysis requires at least 14 days of logged activity to detect genuine trends without false assumptions. You currently have {allDates.size} day{allDates.size === 1 ? '' : 's'} recorded.
+          </p>
+        </div>
+      ) : insights.length === 0 ? (
         <div className="surface-card rounded-[var(--radius-sm)] p-8 border border-[var(--color-rule)] text-center text-xs text-[var(--color-ink-muted)]">
           All systems operating smoothly within expected bounds. Continue logging sessions and tasks to reveal advanced observations.
         </div>

@@ -96,7 +96,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
         <div className="flex items-center gap-2">
           <Upload className="w-4 h-4 text-[var(--color-accent)]" />
           <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Bulk Plan & Data Import (PRD PL-9 & DT-2)
+            Import Data & Plans
           </h3>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">

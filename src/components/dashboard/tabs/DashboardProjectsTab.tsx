@@ -111,7 +111,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
             </h2>
           </div>
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Traceable to PRD Section 6 & 7
+            Progress and schedule pacing
           </span>
         </div>
 

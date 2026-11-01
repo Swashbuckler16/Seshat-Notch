@@ -306,7 +306,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
         onClose={() => {
           setIsDropModalOpen(false);
         }}
-        title="Reason Required: Dropping Effort (PRD TR-3)"
+        title="Reason Required: Dropping Effort"
         subtitle="Dropping an item requires an explicit reason which is permanently stored in the audit history."
         footer={
           <>

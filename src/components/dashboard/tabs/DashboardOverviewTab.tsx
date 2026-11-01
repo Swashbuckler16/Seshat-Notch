@@ -3,11 +3,15 @@ import { ProjectGoal, Target, Task, Habit, MilestonePhase, TimeSession, Progress
 import { SvgBulletChart } from '../charts/SvgBulletChart';
 import { SvgTimePieChart } from '../charts/SvgTimePieChart';
 import { SvgWeeklyFocusChart } from '../charts/SvgWeeklyFocusChart';
-import { calculateProjectProgress, calculateExpectedProgress, calculateScheduleRatio } from '../../../utils/metricEngine';
-import { getCurrentPeriod } from '../../../utils/periodUtils';
+import {
+  calculateProjectProgress,
+  calculateExpectedProgress,
+  calculateScheduleRatio,
+  calculateWeeklyTargetSummary,
+  calculateMonthlyTargetSummary,
+} from '../../../utils/metricEngine';
 import { calculateTimeMetrics, formatMinutesToHuman } from '../../../utils/timeMath';
 import {
-  Sun,
   Calendar,
   AlertCircle,
   Briefcase,
@@ -30,27 +34,13 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
   projects,
   targets,
   tasks,
-  habits,
+  habits: _habits,
   milestones,
   timeSessions,
-  progressLogs,
+  progressLogs: _progressLogs,
   onNavigateTab,
 }) => {
-  // 1. Today Strip calculations
-  const todayTasks = tasks.filter((t) => !t.isDeleted && t.scheduleDate === todayStr);
-  const todayCompletedTasks = todayTasks.filter((t) => t.status === 'done');
-  const todayPlannedMinutes = todayTasks.reduce((acc, t) => acc + (t.estimateMinutes || 0), 0);
-
-  const todaySessions = timeSessions.filter((s) => s.startTime.startsWith(todayStr));
-  const todayLoggedMinutes = todaySessions.reduce((acc, s) => acc + (s.durationMinutes || 0), 0);
   const timeMetrics = calculateTimeMetrics(timeSessions, tasks, projects);
-
-  const activeHabits = habits.filter((h) => !h.isDeleted && !h.isArchived);
-  const habitsDoneToday = activeHabits.filter((h) =>
-    progressLogs.some(
-      (l) => l.entityId === h.id && l.date === todayStr && !l.isDeleted && l.value > 0
-    )
-  );
 
   // Carry-over count (uncompleted tasks scheduled before today)
   const carryOverTasks = tasks.filter(
@@ -62,30 +52,16 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
       t.scheduleDate < todayStr
   );
 
-  // 2. Next upcoming deadline / milestone
-  const upcomingMilestones = milestones
-    .filter((m) => !m.isDeleted && m.status !== 'done' && m.endDate && m.endDate >= todayStr)
-    .sort((a, b) => a.endDate!.localeCompare(b.endDate!));
-  const nextMilestone = upcomingMilestones[0];
+  // 3. Week and Month Target completion rates (Centralized calculation)
+  const weekSummary = calculateWeeklyTargetSummary(targets, todayStr);
+  const monthSummary = calculateMonthlyTargetSummary(targets, todayStr);
+  const weekTargets = weekSummary.targets;
+  const weekCompleted = weekSummary.completed;
+  const weekRate = weekSummary.ratePercent;
 
-  let daysToNextMilestone: number | null = null;
-  if (nextMilestone?.endDate) {
-    const todayD = new Date(`${todayStr}T00:00:00Z`);
-    const targetD = new Date(`${nextMilestone.endDate}T00:00:00Z`);
-    daysToNextMilestone = Math.max(0, Math.round((targetD.getTime() - todayD.getTime()) / 86400000));
-  }
-
-  // 3. Week and Month Target completion rates
-  const currentWeekStr = getCurrentPeriod('week', new Date(`${todayStr}T00:00:00`));
-  const currentMonthStr = todayStr.slice(0, 7); // YYYY-MM
-
-  const weekTargets = targets.filter((t) => !t.isDeleted && t.horizon === 'week' && t.period === currentWeekStr);
-  const weekCompleted = weekTargets.filter((t) => t.currentValue >= t.targetValue).length;
-  const weekRate = weekTargets.length > 0 ? Math.round((weekCompleted / weekTargets.length) * 100) : 0;
-
-  const monthTargets = targets.filter((t) => !t.isDeleted && t.horizon === 'month' && t.period === currentMonthStr);
-  const monthCompleted = monthTargets.filter((t) => t.currentValue >= t.targetValue).length;
-  const monthRate = monthTargets.length > 0 ? Math.round((monthCompleted / monthTargets.length) * 100) : 0;
+  const monthTargets = monthSummary.targets;
+  const monthCompleted = monthSummary.completed;
+  const monthRate = monthSummary.ratePercent;
 
   // 4. Project health status roll-up
   const activeProjects = projects.filter((p) => !p.isDeleted && p.status === 'active');
@@ -98,87 +74,26 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* 1. Today Glance Strip (<5s scan) */}
-      <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3 border border-[var(--color-rule)]">
-        <div className="flex items-center justify-between hairline-b pb-2">
-          <div className="flex items-center gap-2">
-            <Sun className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="font-semibold text-xs text-[var(--color-ink)]">
-              Today strip (<span className="font-mono tabular-figure">{todayStr}</span>)
-            </h3>
+      {/* Carry-over triage alert banner */}
+      {carryOverTasks.length > 0 && (
+        <div className="flex items-center justify-between p-3 rounded-[var(--radius-sm)] bg-[var(--color-status-at-risk-bg)] border border-[var(--color-status-at-risk)]/40 text-xs">
+          <div className="flex items-center gap-2 text-[var(--color-status-at-risk)]">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>
+              <strong className="font-semibold">{carryOverTasks.length} unfinished tasks</strong> carried over from earlier days require triage.
+            </span>
           </div>
-          <span className="text-[11px] text-[var(--color-ink-muted)]">
-            Execution readiness
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-0.5">
-            <span className="text-[11px] text-[var(--color-ink-muted)] font-medium">Tasks completed</span>
-            <div className="flex items-baseline gap-1.5 font-mono">
-              <span className="text-lg font-bold tabular-figure text-[var(--color-ink)]">
-                {todayCompletedTasks.length}
-              </span>
-              <span className="text-xs text-[var(--color-ink-muted)]">/ {todayTasks.length}</span>
-            </div>
-          </div>
-
-          <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-0.5">
-            <span className="text-[11px] text-[var(--color-ink-muted)] font-medium">Habits checked-in</span>
-            <div className="flex items-baseline gap-1.5 font-mono">
-              <span className="text-lg font-bold tabular-figure text-[var(--color-accent)]">
-                {habitsDoneToday.length}
-              </span>
-              <span className="text-xs text-[var(--color-ink-muted)]">/ {activeHabits.length}</span>
-            </div>
-          </div>
-
-          <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-0.5">
-            <span className="text-[11px] text-[var(--color-ink-muted)] font-medium">Time planned vs logged</span>
-            <div className="flex items-baseline gap-1.5 font-mono">
-              <span className="text-lg font-bold tabular-figure text-[var(--color-ink)]">
-                {formatMinutesToHuman(todayLoggedMinutes)}
-              </span>
-              <span className="text-xs text-[var(--color-ink-muted)]">
-                / {formatMinutesToHuman(todayPlannedMinutes)}
-              </span>
-            </div>
-          </div>
-
-          <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-0.5">
-            <span className="text-[11px] text-[var(--color-ink-muted)] font-medium">Next milestone</span>
-            <div className="flex items-baseline gap-1.5 font-mono">
-              <span className="text-lg font-bold tabular-figure text-[var(--color-ink)]">
-                {daysToNextMilestone !== null ? `${daysToNextMilestone}d` : '-'}
-              </span>
-              <span className="text-[10px] text-[var(--color-ink-muted)] truncate max-w-[90px]">
-                {nextMilestone?.title || 'None pending'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Carry-over triage alert banner */}
-        {carryOverTasks.length > 0 && (
-            <div className="flex items-center justify-between p-2.5 rounded-[var(--radius-xs)] bg-[var(--color-status-at-risk-bg)] border border-[var(--color-status-at-risk)]/30 text-xs">
-            <div className="flex items-center gap-2 text-[var(--color-status-at-risk)]">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>
-                <strong className="font-semibold">{carryOverTasks.length} unfinished tasks</strong> carried over from earlier days require triage.
-              </span>
-            </div>
-            {onNavigateTab && (
-              <button
-                type="button"
-                onClick={() => onNavigateTab('reviews')}
-                className="font-medium underline hover:text-[var(--color-status-at-risk)] ml-2"
-              >
+          {onNavigateTab && (
+            <button
+              type="button"
+              onClick={() => onNavigateTab('reviews')}
+              className="font-medium underline hover:text-[var(--color-status-at-risk)] ml-2"
+            >
               Review tasks
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+            </button>
+          )}
+        </div>
+      )}
 
       <section className="surface-card overview-focus-card" aria-labelledby="overview-focus-heading">
         <div className="section-heading-row">

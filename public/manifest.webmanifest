@@ -1,0 +1,20 @@
+{
+  "name": "Seshat Notch",
+  "short_name": "Seshat",
+  "description": "Personal multi-horizon planning and tracking application. Every day, a notch. Every goal, measured.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

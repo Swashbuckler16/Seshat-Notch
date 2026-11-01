@@ -6,7 +6,7 @@ import { AreaManager } from './AreaManager';
 import { ProjectInspector } from './ProjectInspector';
 import { MilestoneTimeline } from './MilestoneTimeline';
 import { HorizonPlanner } from './HorizonPlanner';
-import { ProjectMetricsView } from '../metrics/ProjectMetricsView';
+
 import { EntityId, Priority } from '../../types';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -17,11 +17,11 @@ import {
   Plus,
   Check,
   Calendar,
-  Calculator,
+
 } from 'lucide-react';
 
 export const PlannerView: React.FC = () => {
-  const [plannerMode, setPlannerMode] = useState<'projects' | 'horizons' | 'health'>('projects');
+  const [plannerMode, setPlannerMode] = useState<'projects' | 'horizons'>('projects');
   const [selectedAreaId, setSelectedAreaId] = useState<EntityId | 'all'>('all');
   const [selectedProjectId, setSelectedProjectId] = useState<EntityId | null>(null);
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
@@ -40,7 +40,10 @@ export const PlannerView: React.FC = () => {
   // Live queries
   const areas = useLiveQuery(() => db.areas.orderBy('order').toArray(), []);
   const allProjects = useLiveQuery(
-    () => db.projects.where('isDeleted').equals(0).reverse().sortBy('createdAt'),
+    async () => {
+      const list = await db.projects.filter((p) => !p.isDeleted).toArray();
+      return list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    },
     []
   );
 
@@ -134,18 +137,6 @@ export const PlannerView: React.FC = () => {
               <Calendar className="w-3.5 h-3.5" />
               <span>Time horizons</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setPlannerMode('health')}
-              className={`min-h-11 sm:min-h-8 px-3 py-1 text-xs rounded-[var(--radius-xs)] font-medium inline-flex items-center gap-1.5 transition-colors ${
-                plannerMode === 'health'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <Calculator className="w-3.5 h-3.5" />
-              <span>Health & metrics</span>
-            </button>
           </div>
 
           {plannerMode === 'projects' && (
@@ -163,9 +154,7 @@ export const PlannerView: React.FC = () => {
         </div>
       </div>
 
-      {plannerMode === 'health' ? (
-        <ProjectMetricsView />
-      ) : plannerMode === 'horizons' ? (
+      {plannerMode === 'horizons' ? (
         <HorizonPlanner />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">

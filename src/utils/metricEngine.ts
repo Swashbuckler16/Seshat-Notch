@@ -8,6 +8,14 @@ import type {
   ScheduleStatus,
   EntityId,
 } from '../types/index.ts';
+function getISOWeekString(date: Date): string {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
 
 export interface FormulaVariable {
   symbol: string;
@@ -743,3 +751,55 @@ export function evaluateCompleteProjectMetrics(
     blockers: blockerMetrics,
   };
 }
+
+export interface HorizonTargetSummary {
+  period: string;
+  total: number;
+  completed: number;
+  ratePercent: number;
+  targets: Target[];
+}
+
+/**
+ * Single source of truth calculation for weekly horizon target progress
+ */
+export function calculateWeeklyTargetSummary(targets: Target[], dateStr: string): HorizonTargetSummary {
+  const dateObj = new Date(`${dateStr}T00:00:00`);
+  const currentWeekStr = getISOWeekString(dateObj);
+  const weekTargets = (targets || []).filter(
+    (t) => !t.isDeleted && t.horizon === 'week' && t.period === currentWeekStr
+  );
+  const completed = weekTargets.filter((t) => t.status === 'done' || t.currentValue >= t.targetValue).length;
+  const total = weekTargets.length;
+  const ratePercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return {
+    period: currentWeekStr,
+    total,
+    completed,
+    ratePercent,
+    targets: weekTargets,
+  };
+}
+
+/**
+ * Single source of truth calculation for monthly horizon target progress
+ */
+export function calculateMonthlyTargetSummary(targets: Target[], dateStr: string): HorizonTargetSummary {
+  const currentMonthStr = dateStr.slice(0, 7);
+  const monthTargets = (targets || []).filter(
+    (t) => !t.isDeleted && t.horizon === 'month' && t.period === currentMonthStr
+  );
+  const completed = monthTargets.filter((t) => t.status === 'done' || t.currentValue >= t.targetValue).length;
+  const total = monthTargets.length;
+  const ratePercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return {
+    period: currentMonthStr,
+    total,
+    completed,
+    ratePercent,
+    targets: monthTargets,
+  };
+}
+

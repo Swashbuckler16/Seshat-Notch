@@ -6,12 +6,15 @@ import { ExecutionStrip } from './ExecutionStrip';
 import { TodayTasks } from './TodayTasks';
 import { TodayTargets } from './TodayTargets';
 import { TodayHabits } from './TodayHabits';
+import { getISOWeekString } from '../../utils/periodUtils';
+import { Inbox, ArrowRight } from 'lucide-react';
 
 interface TodayViewProps {
   onOpenQuickAdd: () => void;
+  onNavigateTab?: (tab: string) => void;
 }
 
-export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd }) => {
+export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigateTab }) => {
   // Default to today's local date YYYY-MM-DD
   const [dateStr, setDateStr] = useState<string>(() => {
     return new Date().toISOString().split('T')[0];
@@ -46,7 +49,9 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd }) => {
     [dateStr]
   );
 
-  // Query daily targets for dateStr
+  const currentWeekStr = getISOWeekString(new Date(`${dateStr}T00:00:00`));
+
+  // Query daily targets for dateStr and weekly targets for current week (consistent calculation)
   const targets = useLiveQuery(
     () =>
       db.targets
@@ -54,10 +59,10 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd }) => {
           (t) =>
             !t.isDeleted &&
             ((t.horizon === 'day' && t.period === dateStr) ||
-              (t.horizon === 'week' && t.status === 'active'))
+              (t.horizon === 'week' && t.period === currentWeekStr))
         )
         .toArray(),
-    [dateStr]
+    [dateStr, currentWeekStr]
   );
 
   // Query habits and logs for dateStr
@@ -84,9 +89,9 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd }) => {
     [dateStr]
   );
 
-  // Compute summary numbers
+  // Compute summary numbers with consistent math
   const targetsTotal = targets?.length ?? 0;
-  const targetsDone = (targets || []).filter((t) => t.status === 'done').length;
+  const targetsDone = (targets || []).filter((t) => t.status === 'done' || t.currentValue >= t.targetValue).length;
 
   const tasksTotal = tasks?.length ?? 0;
   const tasksDone = (tasks || []).filter((t) => t.status === 'done').length;
@@ -96,6 +101,8 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd }) => {
 
   const minutesLogged = (sessions || []).reduce((acc, s) => acc + (s.durationMinutes || 0), 0);
   const minutesEstimated = (tasks || []).reduce((acc, t) => acc + (t.estimateMinutes || 0), 0);
+
+  const isSunday = new Date(`${dateStr}T00:00:00`).getDay() === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -114,6 +121,35 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd }) => {
         minutesLogged={minutesLogged}
         minutesEstimated={minutesEstimated}
       />
+
+      {/* Sunday Weekly Review & Triage Prompt */}
+      {isSunday && (
+        <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-accent)]/50 bg-[var(--color-paper-2)] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 flex items-center justify-center text-[var(--color-accent)]">
+              <Inbox className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-xs text-[var(--color-ink)]">
+                Sunday Weekly Review & Triage
+              </h3>
+              <p className="text-xs text-[var(--color-ink-muted)]">
+                It's Sunday. Reflect on this week's progress and review any carry-over tasks.
+              </p>
+            </div>
+          </div>
+          {onNavigateTab && (
+            <button
+              type="button"
+              onClick={() => onNavigateTab('reviews')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-accent)] text-[var(--color-accent-ink)] rounded-[var(--radius-xs)] hover:opacity-90 transition-opacity"
+            >
+              <span>Start Review</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 2. Rapid Execution & Focus Strip */}
       <ExecutionStrip tasks={tasks || []} dateStr={dateStr} />

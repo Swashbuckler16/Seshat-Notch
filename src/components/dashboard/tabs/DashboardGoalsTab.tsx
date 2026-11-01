@@ -63,7 +63,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
           </h2>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          Hierarchical tree cascading from Life Areas down to Project Goals, Horizons, and supporting Habits (PRD Section 5 & HB-7).
+          Hierarchical tree cascading from Life Areas down to Project Goals, Horizons, and supporting Habits.
         </p>
       </div>
 
