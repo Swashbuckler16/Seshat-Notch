@@ -85,3 +85,4 @@ export const SvgBulletChart: React.FC<SvgBulletChartProps> = ({
     </div>
   );
 };
+

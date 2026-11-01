@@ -179,3 +179,4 @@ export const SvgBurnUpChart: React.FC<SvgBurnUpChartProps> = ({
     </div>
   );
 };
+

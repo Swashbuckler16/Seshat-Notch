@@ -12,6 +12,7 @@ import {
   Review,
   Blocker,
   ChangeLogEntry,
+  BackupSnapshot,
 } from '../types';
 
 export interface AppSetting {
@@ -38,6 +39,7 @@ export class SeshatDatabase extends Dexie {
   blockers!: EntityTable<Blocker, 'id'>;
   changeLogs!: EntityTable<ChangeLogEntry, 'id'>;
   settings!: EntityTable<AppSetting, 'key'>;
+  backups!: EntityTable<BackupSnapshot, 'id'>;
 
   constructor() {
     super('seshat_notch_db');
@@ -57,6 +59,11 @@ export class SeshatDatabase extends Dexie {
       blockers: 'id, entityType, entityId, dateRaised, dateCleared',
       changeLogs: 'id, timestamp, entityType, entityId, action',
       settings: 'key',
+    });
+
+    // Schema v2 — Phase 13 snapshot backups
+    this.version(2).stores({
+      backups: 'id, name, timestamp, isAutomated',
     });
   }
 }

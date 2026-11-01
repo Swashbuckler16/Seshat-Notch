@@ -53,3 +53,4 @@ export const SvgHorizonBarChart: React.FC<SvgHorizonBarChartProps> = ({ records,
     </div>
   );
 };
+

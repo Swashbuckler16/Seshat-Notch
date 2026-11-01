@@ -117,3 +117,4 @@ test('PRD Section 7: DashboardView container wires all tabs and navigation callb
   assert.ok(content.includes('DashboardReviewsTab'), 'Must wire DashboardReviewsTab');
   assert.ok(content.includes('DashboardInsightsTab'), 'Must wire DashboardInsightsTab');
 });
+

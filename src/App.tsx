@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
-import { StorageInspector } from './components/StorageInspector';
+import { DataManagementView } from './components/data/DataManagementView';
 import { ComponentShowcase } from './components/ComponentShowcase';
 import { QuickAddPlayground } from './components/QuickAddPlayground';
 import { QuickAddModal } from './components/QuickAddModal';
@@ -129,19 +129,19 @@ const PHASES: PhaseInfo[] = [
     title: 'Import, export, and recovery',
     scope: 'Move your plans between formats, restore removed items, and save backups.',
     outcome: 'Keep control of your planning data',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 14,
     title: 'Windows app packaging',
     scope: 'Prepare a desktop release with a system tray, quick-add shortcut, and local reminders.',
     outcome: 'A planner that runs as a Windows app',
-    status: 'queued',
+    status: 'in_progress',
   },
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(12);
+  const [selectedPhase, setSelectedPhase] = useState<number>(13);
   const [activeTab, setActiveTab] = useState<'today' | 'dashboard' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 
@@ -396,10 +396,10 @@ export const App: React.FC = () => {
           </section>
         )}
 
-        {/* Tab 3: Storage & Change Log Engine */}
+        {/* Tab 3: Data Ownership, Export & Recovery */}
         {activeTab === 'storage' && (
           <section>
-            <StorageInspector />
+            <DataManagementView />
           </section>
         )}
 

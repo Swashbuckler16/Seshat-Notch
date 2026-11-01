@@ -108,3 +108,4 @@ export const SvgSparkline: React.FC<SvgSparklineProps> = ({
     </svg>
   );
 };
+

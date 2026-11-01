@@ -233,3 +233,23 @@ export interface ChangeLogEntry {
   reason?: string;
 }
 
+export interface BackupSnapshot {
+  id: EntityId;
+  name: string;
+  timestamp: string; // ISO 8601 UTC
+  isAutomated: boolean;
+  itemCount: number;
+  data: string; // JSON string payload
+  sizeBytes?: number;
+}
+
+export interface RecoveryBinItem {
+  id: EntityId;
+  entityType: 'project' | 'milestone' | 'target' | 'task' | 'habit' | 'routine';
+  title: string;
+  deletedAt: string;
+  reason?: string;
+  originalData: unknown;
+}
+
+
