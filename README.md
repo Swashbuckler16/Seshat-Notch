@@ -17,6 +17,7 @@
 
 ### Option 1: Install as a Windows Desktop Web App (Edge / Chrome)
 - **Live App:** [https://swashbuckler16.github.io/Seshat-Notch/](https://swashbuckler16.github.io/Seshat-Notch/)
+- **10-Page User Manual (.docx):** [`Seshat-Notch-User-Manual.docx`](Seshat-Notch-User-Manual.docx) (also in [`docs/Seshat-Notch-User-Manual.docx`](docs/Seshat-Notch-User-Manual.docx))
   1. Open [https://swashbuckler16.github.io/Seshat-Notch/](https://swashbuckler16.github.io/Seshat-Notch/) in **Microsoft Edge** or **Google Chrome** on Windows.
   2. Click the **Install app** icon in the right side of the address bar (or open the browser menu → **Apps** → **Install Seshat Notch**).
   3. Launch **Seshat Notch** from your Windows Start Menu or Taskbar. All fonts (`Inter` and `IBM Plex Mono`), icons (`192px`, `256px`, `512px`, `maskable`, `favicon.svg`), and shell assets are self-hosted and cached individually for 100% offline use.

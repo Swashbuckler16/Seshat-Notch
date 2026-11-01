@@ -18,3 +18,4 @@ tauri = { version = "2.0.0", features = ["tray-icon"] }
 tauri-plugin-global-shortcut = "2.0.0"
 tauri-plugin-notification = "2.0.0"
 tauri-plugin-fs = "2.0.0"
+

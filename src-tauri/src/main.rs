@@ -147,3 +147,4 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running Seshat Notch Windows desktop application");
 }
+

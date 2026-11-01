@@ -139,3 +139,4 @@ fs.mkdirSync(tauriIconsDir, { recursive: true });
 fs.writeFileSync(path.join(tauriIconsDir, 'icon.png'), createStarPng(256, false));
 
 console.log('Generated icon-192.png, icon-256.png, icon-512.png, icon-maskable-512.png, and src-tauri/icons/icon.png');
+
