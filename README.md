@@ -60,7 +60,6 @@ npm run build
 
 ---
 
-## 4. License & Repository
+## 4. License
 
-- **License:** [MIT](LICENSE) © 2026 Swashbuckler16
-- **GitHub:** [https://github.com/Swashbuckler16/Seshat-Notch.git](https://github.com/Swashbuckler16/Seshat-Notch.git)
+- **License:** [MIT](LICENSE) © 2026 Atharva Ghag (Swashbuckler16)
