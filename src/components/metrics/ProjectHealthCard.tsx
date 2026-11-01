@@ -131,7 +131,7 @@ export const ProjectHealthCard: React.FC<ProjectHealthCardProps> = ({ project, t
 
       {/* Measuring Cord Pacing Meter (Brand Motif & PRD 7.3) */}
       <div className="flex flex-col gap-1.5 surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-        <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)] font-mono">
+          <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--color-ink)]">
               {metrics.progress.progressPercent}% Actual
@@ -156,7 +156,7 @@ export const ProjectHealthCard: React.FC<ProjectHealthCardProps> = ({ project, t
         <div className="relative w-full h-3 rounded-[1px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] overflow-hidden">
           {/* Actual Progress Fill */}
           <div
-            className="h-full bg-[var(--color-accent)] transition-all duration-300"
+            className="h-full bg-[var(--color-accent)] transition-colors duration-300"
             style={{ width: `${Math.min(100, metrics.progress.progressPercent)}%` }}
           />
 
@@ -266,16 +266,16 @@ export const ProjectHealthCard: React.FC<ProjectHealthCardProps> = ({ project, t
           <button
             type="button"
             onClick={() => setActiveTrace(metrics.blockers.trace)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] bg-amber-500/10 border border-amber-500/30 text-amber-600 hover:bg-amber-500/20 transition-colors self-start sm:self-auto"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] bg-[var(--color-status-at-risk-bg)] border border-[var(--color-status-at-risk)]/30 text-[var(--color-status-at-risk)] hover:bg-[var(--color-status-at-risk-bg)] transition-colors self-start sm:self-auto"
           >
             <AlertCircle className="w-3.5 h-3.5" />
             <span className="font-semibold">
-              {metrics.blockers.openBlockersCount} open blocker ({metrics.blockers.totalBlockedDays}d blocked)
+              Review {metrics.blockers.openBlockersCount} blockers
             </span>
           </button>
         ) : (
-          <span className="text-[11px] text-[var(--color-ink-muted)] font-mono self-start sm:self-auto">
-            Zero active blockers
+          <span className="text-[11px] text-[var(--color-ink-muted)] self-start sm:self-auto">
+            No open blockers
           </span>
         )}
       </div>

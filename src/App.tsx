@@ -16,16 +16,14 @@ import { Button } from './components/ui/Button';
 import { seedDatabase } from './db/seedData';
 import {
   Terminal,
-  Palette,
-  Database,
   Sparkles,
-  Command,
   Briefcase,
   Sun,
   Inbox,
   Flame,
   Clock,
   BarChart2,
+  Settings2,
 } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -67,7 +65,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-shell min-h-screen bg-[var(--color-paper)] text-[var(--color-ink)] flex flex-col">
-      {/* Top Ledger Chrome */}
+      {/* Friendly app header */}
       <header className="app-header hairline-b bg-[var(--color-paper)] sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <BrandLogo size={28} />
@@ -76,7 +74,7 @@ export const App: React.FC = () => {
               <span className="font-semibold text-base tracking-tight">Seshat Notch</span>
             </div>
             <span className="text-xs text-[var(--color-ink-muted)]">
-              Every day, a notch. Every goal, measured.
+              A little progress, every day.
             </span>
           </div>
         </div>
@@ -122,7 +120,7 @@ export const App: React.FC = () => {
               }`}
             >
               <BarChart2 className="w-3.5 h-3.5" />
-              <span>Dashboard</span>
+              <span>Progress</span>
             </button>
             <button
               type="button"
@@ -133,7 +131,7 @@ export const App: React.FC = () => {
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
-              <span>Projects</span>
+              <span>Plan</span>
             </button>
             <button
               type="button"
@@ -155,7 +153,7 @@ export const App: React.FC = () => {
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>Time</span>
+              <span>Focus</span>
             </button>
             <button
               type="button"
@@ -168,41 +166,18 @@ export const App: React.FC = () => {
               <Inbox className="w-3.5 h-3.5" />
               <span>Reviews</span>
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('quickadd')}
-              aria-current={activeTab === 'quickadd' ? 'page' : undefined}
-              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
-                activeTab === 'quickadd' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
-              }`}
-            >
-              <Command className="w-3.5 h-3.5" />
-              <span>Quick add</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('components')}
-              aria-current={activeTab === 'components' ? 'page' : undefined}
-              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
-                activeTab === 'components' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
-              }`}
-            >
-              <Palette className="w-3.5 h-3.5" />
-              <span>Components</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('storage')}
-              aria-current={activeTab === 'storage' ? 'page' : undefined}
-              className={`app-nav-item active:translate-y-px inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-xs)] font-medium transition-opacity ${
-                activeTab === 'storage' ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-sm' : 'text-[var(--color-ink-muted)]'
-              }`}
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>Data</span>
-            </button>
-            
           </nav>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setActiveTab('storage')}
+            className="app-data-link"
+            aria-label="Open data and backup settings"
+          >
+            <Settings2 className="w-4 h-4" />
+            <span>Data</span>
+          </Button>
 
           <ThemeToggle />
         </div>
@@ -301,8 +276,8 @@ export const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="app-footer hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
-<div>Seshat Notch: Every day, a notch. Every goal, measured.</div>
-        <div>Plans stay on this device</div>
+        <div>Seshat Notch. Small steps, your pace.</div>
+        <div>Your plans stay on this device</div>
       </footer>
     </div>
   );

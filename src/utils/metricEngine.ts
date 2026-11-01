@@ -491,21 +491,20 @@ export function calculateVelocityAndForecast(
   const recentLogs = progressLogs.filter(
     (l) =>
       !l.isDeleted &&
+      l.entityType === 'target' &&
       l.date >= cutoffStr &&
       l.date <= todayStr &&
-      (l.entityId === project.id || targetIds.has(l.entityId))
+      targetIds.has(l.entityId)
   );
 
-  const totalPlannedVal = targets
-    .filter((t) => t.projectId === project.id)
-    .reduce((sum, t) => sum + (t.targetValue || 1), 0) || 100;
+  const projectTargets = targets.filter((t) => !t.isDeleted && t.projectId === project.id);
+  const totalPlannedVal = projectTargets.reduce((sum, t) => sum + Math.max(0, t.targetValue), 0);
 
   // Progress accomplished in window
   const windowProgressVal = recentLogs.reduce((sum, l) => sum + (l.value || 0), 0);
-  const progressCompletedInWindow = Math.min(
-    100,
-    Math.round((windowProgressVal / totalPlannedVal) * 1000) / 10
-  );
+  const progressCompletedInWindow = totalPlannedVal > 0
+    ? Math.min(100, Math.round((windowProgressVal / totalPlannedVal) * 1000) / 10)
+    : 0;
 
   // Velocity per day (in % per day)
   const recentVelocityPerDay =
@@ -555,7 +554,7 @@ export function calculateVelocityAndForecast(
   }
 
   // Honest empty state: not enough data / zero velocity
-  if (recentVelocityPerDay <= 0.05) {
+  if (totalPlannedVal <= 0 || recentVelocityPerDay <= 0.05) {
     steps.push('Velocity in the last 14 days is near zero (<0.05%/day).');
     steps.push('PRD 7.3: Honest low-data state displayed rather than invented false precision.');
     return {

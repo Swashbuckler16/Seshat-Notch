@@ -1,5 +1,5 @@
-/* Hallmark · v2.0.0 · theme: seshat-ledger · genre: modern-minimal · shape: app screen · modes: light+dark · redesign: full */
-/* Hallmark · critique: P4 H5 E4 S5 R4 V4 · weakest: restraint, remove the verification banner and keep the planner in focus */
+/* Hallmark · v2.0.0 · theme: warm progress · genre: playful · shape: app screen · modes: light+dark · redesign: full */
+/* Hallmark · critique: P5 H4 E4 S5 R4 V4 · weakest: restraint, lead with today and let useful progress carry the color */
 /* Hallmark · waive 47b · notch ticks render real habit records · the notch rib is the project’s data motif */
 /* Hallmark · dismissed F1 · the warning reads JSX attribute quotes, not visible interface copy */
 
@@ -70,6 +70,312 @@
   justify-content: center;
 }
 
+:root,
+[data-mode="light"] {
+  color-scheme: light;
+}
+
+[data-mode="dark"] {
+  color-scheme: dark;
+}
+
+.app-shell {
+  background-color: var(--color-paper);
+}
+
+.app-header {
+  background-color: var(--color-paper);
+  border-bottom-color: var(--color-rule);
+  box-shadow: 0 4px 16px var(--color-shadow);
+}
+
+.app-primary-nav {
+  gap: var(--space-3xs);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+}
+
+.app-nav-item {
+  min-height: 42px;
+  padding-inline: var(--space-sm);
+  border-radius: 999px;
+  color: var(--color-ink-muted);
+  transition: color var(--dur-short) var(--ease-ledger), background-color var(--dur-short) var(--ease-ledger);
+}
+
+.app-nav-item[aria-current="page"] {
+  color: var(--color-ink);
+  background-color: var(--color-paper-2);
+  box-shadow: none;
+}
+
+.app-nav-item:hover:not([aria-current="page"]) {
+  color: var(--color-ink);
+  background-color: var(--color-paper-2);
+}
+
+.app-data-link {
+  min-width: 44px;
+  min-height: 44px !important;
+  border-radius: 999px !important;
+}
+
+.app-header button:not(.app-nav-item),
+.app-primary-nav button:not(.app-nav-item),
+.dashboard-tabs button:not(.dashboard-tab),
+.dashboard-tabs select,
+.app-shell select,
+.app-shell input,
+.app-shell textarea {
+  border-radius: var(--radius-xs);
+}
+
+.app-shell button,
+.app-shell a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell button:focus-visible,
+.app-shell a:focus-visible,
+.app-shell select:focus-visible,
+.app-shell input:focus-visible,
+.app-shell textarea:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.app-shell button:disabled,
+.app-shell [aria-disabled="true"] {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.surface-card {
+  border-color: var(--color-rule);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.surface-well {
+  border-radius: var(--radius-sm);
+}
+
+.app-main {
+  padding-top: var(--space-lg);
+  padding-bottom: clamp(40px, 6vw, 72px);
+}
+
+.overview-focus-card {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.overview-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 4vw, 36px);
+}
+
+.overview-chart-block {
+  min-width: 0;
+  margin: 0;
+}
+
+.overview-chart-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+  margin-bottom: var(--space-sm);
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+}
+
+.overview-chart-caption h4 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.weekly-focus-chart {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  overflow: visible;
+}
+
+.focus-chart-empty {
+  display: grid;
+  min-height: 172px;
+  place-content: center;
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+.priority-chart-list {
+  display: grid;
+  gap: var(--space-md);
+  padding-block: var(--space-xs);
+}
+
+.priority-chart-row {
+  display: grid;
+  grid-template-columns: minmax(56px, 0.35fr) minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.priority-chart-label,
+.priority-chart-count {
+  color: var(--color-ink);
+  font-size: 0.9rem;
+}
+
+.priority-chart-count {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.priority-chart-track {
+  height: 10px;
+  overflow: clip;
+  border-radius: var(--radius-xs);
+  background: var(--color-paper-3);
+}
+
+.priority-chart-track > span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-xs);
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.section-heading-row h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.section-heading-row p {
+  margin: var(--space-2xs) 0 0;
+  color: var(--color-ink-muted);
+  font-size: 0.9rem;
+}
+
+.overview-focus-total {
+  color: var(--color-ink);
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-pie-layout {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.time-pie-chart,
+.time-pie-empty {
+  width: min(100%, 210px);
+  aspect-ratio: 1;
+  justify-self: center;
+}
+
+.time-pie-empty {
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  background: var(--color-paper-3);
+  color: var(--color-ink-muted);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.time-pie-legend {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.time-pie-legend li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 36px;
+  border-bottom: 1px solid var(--color-rule-subtle);
+  color: var(--color-ink);
+}
+
+.time-pie-key {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.time-pie-name {
+  font-size: 0.95rem;
+  font-weight: 550;
+}
+
+.time-pie-value {
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dashboard-tabs {
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  padding: var(--space-2xs);
+  background: transparent;
+  border: 0;
+  gap: var(--space-xs);
+}
+
+.dashboard-tab {
+  min-height: 42px;
+  border-radius: 999px !important;
+}
+
+.dashboard-tab[aria-pressed="true"] {
+  background: var(--color-accent-subtle);
+}
+
+.dashboard-more-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dashboard-more-select {
+  min-height: 42px;
+  padding: 0 var(--space-xl) 0 var(--space-sm);
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  font: inherit;
+}
+
 @media (max-width: 60rem) {
   .app-header {
     padding-inline: var(--space-md);
@@ -117,5 +423,50 @@
 
   .app-footer {
     gap: var(--space-xs);
+  }
+
+  .app-header > div:last-child {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .app-primary-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .app-nav-item {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .app-nav-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .time-pie-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .time-pie-chart,
+  .time-pie-empty {
+    width: min(55vw, 190px);
+  }
+
+  .time-pie-legend {
+    width: 100%;
+  }
+
+  .overview-charts {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .weekly-focus-chart {
+    max-width: none;
   }
 }

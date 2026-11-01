@@ -57,7 +57,7 @@ export const TimeSessionLedger: React.FC<TimeSessionLedgerProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead>
-              <tr className="hairline-b text-[var(--color-ink-muted)] font-mono text-[11px]">
+              <tr className="hairline-b text-[var(--color-ink-muted)] text-[11px]">
                 <th className="py-2 px-2.5 font-normal">Timestamp</th>
                 <th className="py-2 px-2.5 font-normal">Type</th>
                 <th className="py-2 px-2.5 font-normal">Linked Item</th>
@@ -90,7 +90,7 @@ export const TimeSessionLedger: React.FC<TimeSessionLedgerProps> = ({
                       {dateStr} <span className="text-[10px]">{timeStr}</span>
                     </td>
                     <td className="py-2.5 px-2.5 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--radius-xs)] font-mono text-[10px] bg-[var(--color-paper-2)] border border-[var(--color-rule)]">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[10px] bg-[var(--color-paper-2)] border border-[var(--color-rule)]">
                         {session.kind === 'deep' ? (
                           <>
                             <Brain className="w-2.5 h-2.5 text-[var(--color-accent)]" />
@@ -98,7 +98,7 @@ export const TimeSessionLedger: React.FC<TimeSessionLedgerProps> = ({
                           </>
                         ) : session.kind === 'learning' ? (
                           <>
-                            <BookOpen className="w-2.5 h-2.5 text-indigo-500" />
+                            <BookOpen className="w-2.5 h-2.5 text-[var(--color-chart-2)]" />
                             <span className="font-medium text-[var(--color-ink)]">Learning</span>
                           </>
                         ) : (
@@ -122,7 +122,7 @@ export const TimeSessionLedger: React.FC<TimeSessionLedgerProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDelete(session)}
-                        className="p-1 text-[var(--color-ink-muted)] hover:text-red-500 rounded transition-colors"
+                        className="p-1 text-[var(--color-ink-muted)] hover:text-[var(--color-status-behind)] rounded transition-colors"
                         title="Delete time session"
                         aria-label="Delete time session"
                       >

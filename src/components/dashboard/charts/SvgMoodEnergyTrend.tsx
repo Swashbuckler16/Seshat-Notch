@@ -37,15 +37,23 @@ export const SvgMoodEnergyTrend: React.FC<SvgMoodEnergyTrendProps> = ({
   // Ratings from 1 to 5
   const getY = (rating: number) => paddingY + innerH - ((rating - 1) / 4) * innerH;
 
-  const energyPoints = data
-    .filter((d) => d.energy !== undefined)
-    .map((d, i) => `${getX(i)},${getY(d.energy!)}`)
-    .join(' ');
+  const getSegments = (rating: 'energy' | 'mood') => {
+    const segments: string[][] = [];
+    data.forEach((point, index) => {
+      const value = point[rating];
+      if (value === undefined) return;
+      let segment = segments[segments.length - 1];
+      if (index === 0 || data[index - 1][rating] === undefined) {
+        segment = [];
+        segments.push(segment);
+      }
+      segment.push(`${getX(index)},${getY(value)}`);
+    });
+    return segments.filter((segment) => segment.length > 1);
+  };
 
-  const moodPoints = data
-    .filter((d) => d.mood !== undefined)
-    .map((d, i) => `${getX(i)},${getY(d.mood!)}`)
-    .join(' ');
+  const energySegments = getSegments('energy');
+  const moodSegments = getSegments('mood');
 
   const activePoint = hoverIndex !== null && data[hoverIndex] ? data[hoverIndex] : data[data.length - 1];
 
@@ -64,7 +72,7 @@ export const SvgMoodEnergyTrend: React.FC<SvgMoodEnergyTrendProps> = ({
             </span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-0.5 bg-indigo-500 inline-block" />
+            <span className="w-2.5 h-0.5 bg-[var(--color-chart-2)] inline-block" />
             <span className="text-[var(--color-ink)]">
               Mood: {activePoint.mood ? `${activePoint.mood}/5` : '-'}
             </span>
@@ -109,28 +117,30 @@ export const SvgMoodEnergyTrend: React.FC<SvgMoodEnergyTrendProps> = ({
           })}
 
           {/* Energy Rating Line */}
-          {energyPoints && (
+          {energySegments.map((points, index) => (
             <polyline
-              points={energyPoints}
+              key={`energy-${index}`}
+              points={points.join(' ')}
               fill="none"
               stroke="var(--color-accent)"
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          )}
+          ))}
 
           {/* Mood Rating Line */}
-          {moodPoints && (
+          {moodSegments.map((points, index) => (
             <polyline
-              points={moodPoints}
+              key={`mood-${index}`}
+              points={points.join(' ')}
               fill="none"
-              stroke="rgb(99 102 241)" // indigo-500
+              stroke="var(--color-chart-2)"
               strokeWidth={1.5}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          )}
+          ))}
 
           {/* Points & Interactive Scrubber */}
           {data.map((d, idx) => {
@@ -166,7 +176,7 @@ export const SvgMoodEnergyTrend: React.FC<SvgMoodEnergyTrendProps> = ({
                     cx={x}
                     cy={getY(d.mood)}
                     r={isHovered ? 4 : 2}
-                    fill="rgb(99 102 241)"
+                    fill="var(--color-chart-2)"
                   />
                 )}
               </g>

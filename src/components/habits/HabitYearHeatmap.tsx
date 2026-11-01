@@ -90,7 +90,7 @@ export const HabitYearHeatmap: React.FC<HabitYearHeatmapProps> = ({ habit, logs,
                     let tooltipDesc = `${cell.dateStr}: Not completed`;
 
                     if (cell.isRelapse) {
-                      cellBg = 'bg-amber-600/30 border border-amber-600/50';
+                      cellBg = 'bg-[var(--color-status-behind)]/30 border border-[var(--color-status-behind)]/50';
                       tooltipDesc = `${cell.dateStr}: Relapse event ${cell.note ? `(${cell.note})` : ''}`;
                     } else if (cell.isCompleted) {
                       if (cell.intensity === 3) {
@@ -130,11 +130,11 @@ export const HabitYearHeatmap: React.FC<HabitYearHeatmapProps> = ({ habit, logs,
       </div>
 
       {/* Interactive Tooltip Inspector Bar */}
-      <div className="h-6 flex items-center justify-between text-[11px] font-mono hairline-t pt-1 text-[var(--color-ink-muted)]">
+      <div className="h-6 flex items-center justify-between text-[11px] hairline-t pt-1 text-[var(--color-ink-muted)]">
         {hoveredCell ? (
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--color-ink)]">{hoveredCell.dateStr}</span>
-            <span>·</span>
+            <span>,</span>
             <span>
               {hoveredCell.isRelapse
                 ? 'Relapse recorded'

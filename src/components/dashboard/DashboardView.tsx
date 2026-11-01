@@ -123,15 +123,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }, [habits, progressLogs, todayStr]);
 
   const subTabs: { id: DashboardSubTab; label: string; icon: React.FC<{ className?: string }> }[] = [
-    { id: 'overview', label: 'Executive Overview', icon: LayoutDashboard },
-    { id: 'execution', label: 'Execution Analytics', icon: Activity },
-    { id: 'projects', label: 'Projects Health', icon: Briefcase },
-    { id: 'goals', label: 'Strategic Goals', icon: Compass },
-    { id: 'habits', label: 'Habit Consistency', icon: Flame },
-    { id: 'time', label: 'Time Tracking', icon: Clock },
-    { id: 'reviews', label: 'Periodic Reviews', icon: BookOpen },
-    { id: 'insights', label: 'Rule-Based Insights', icon: Lightbulb },
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'execution', label: 'Activity', icon: Activity },
+    { id: 'projects', label: 'Projects', icon: Briefcase },
+    { id: 'goals', label: 'Goals', icon: Compass },
+    { id: 'habits', label: 'Habits', icon: Flame },
+    { id: 'time', label: 'Focus time', icon: Clock },
+    { id: 'reviews', label: 'Reviews', icon: BookOpen },
+    { id: 'insights', label: 'Insights', icon: Lightbulb },
   ];
+  const primaryTabs = subTabs.filter((tab) => ['overview', 'projects', 'habits', 'time'].includes(tab.id));
+  const moreTabs = subTabs.filter((tab) => ['execution', 'goals', 'reviews', 'insights'].includes(tab.id));
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-16">
@@ -152,8 +154,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       />
 
       {/* 2. Sub-Tab Navigation Bar */}
-      <div className="flex items-center gap-1 overflow-x-auto p-1 surface-card rounded-[var(--radius-sm)] border border-[var(--color-rule)] select-none">
-        {subTabs.map((tab) => {
+      <div className="dashboard-tabs flex items-center gap-1 overflow-x-auto p-1 surface-card rounded-[var(--radius-sm)] border border-[var(--color-rule)] select-none" role="group" aria-label="Progress views">
+        {primaryTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
           return (
@@ -161,7 +163,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               key={tab.id}
               type="button"
               onClick={() => setActiveSubTab(tab.id)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium whitespace-nowrap transition-colors min-h-8 ${
+              aria-pressed={isActive}
+              className={`dashboard-tab flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium whitespace-nowrap transition-colors min-h-8 ${
                 isActive
                   ? 'bg-[var(--color-paper-3)] text-[var(--color-ink)] font-semibold shadow-xs'
                   : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-2)]'
@@ -172,6 +175,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </button>
           );
         })}
+        <label className="dashboard-more-label">
+          <span className="sr-only">More dashboard views</span>
+          <select
+            className="dashboard-more-select"
+            value={moreTabs.some((tab) => tab.id === activeSubTab) ? activeSubTab : ''}
+            onChange={(event) => {
+              if (event.target.value) setActiveSubTab(event.target.value as DashboardSubTab);
+            }}
+          >
+            <option value="">More</option>
+            {moreTabs.map((tab) => <option key={tab.id} value={tab.id}>{tab.label}</option>)}
+          </select>
+        </label>
       </div>
 
       {/* 3. Sub-Tab Content */}

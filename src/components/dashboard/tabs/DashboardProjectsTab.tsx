@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { ProjectGoal, Area, MilestonePhase, Target, Task, ProgressLog, Blocker, TimeSession } from '../../../types';
 import { evaluateCompleteProjectMetrics, MetricCalculationTrace } from '../../../utils/metricEngine';
-import { SvgBurnUpChart, BurnUpPoint } from '../charts/SvgBurnUpChart';
 import { FormulaInspectorModal } from '../../metrics/FormulaInspectorModal';
 import { formatMinutesToHuman } from '../../../utils/timeMath';
 import {
   Briefcase,
   AlertTriangle,
-  Layers,
   HelpCircle,
   ExternalLink,
   ChevronRight,
@@ -56,6 +54,11 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
     );
 
     const projectTasks = tasks.filter((t) => !t.isDeleted && (t.projectId === p.id || t.targetId === p.id));
+    const relatedEntityIds = new Set([
+      p.id,
+      ...targets.filter((target) => !target.isDeleted && target.projectId === p.id).map((target) => target.id),
+      ...projectTasks.map((task) => task.id),
+    ]);
     const projectSessions = timeSessions.filter((s) => s.entityType === 'project' && s.entityId === p.id);
     
     // Estimate vs Actual hours
@@ -69,7 +72,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
       .map((t) => t.scheduleDate || t.updatedAt?.slice(0, 10))
       .filter((d): d is string => Boolean(d));
     const logDates = progressLogs
-      .filter((l) => !l.isDeleted)
+      .filter((l) => !l.isDeleted && relatedEntityIds.has(l.entityId))
       .map((l) => l.date)
       .filter((d): d is string => Boolean(d));
     const allDates = [...taskDates, ...logDates].sort().reverse();
@@ -95,32 +98,6 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
   });
 
   const selectedItem = projectMetricsList.find((item) => item.project.id === selectedProjectId) || projectMetricsList[0];
-
-  // Generate burn-up points for the selected project
-  const generateBurnUpData = (p: ProjectGoal | undefined): BurnUpPoint[] => {
-    if (!p) return [];
-    const pTargets = targets.filter((t) => !t.isDeleted && t.projectId === p.id);
-    const totalPlanned = pTargets.reduce((acc, t) => acc + (t.targetValue || 1), 0) || 10;
-
-    // Build 6 weeks history up to today
-    const weeks: BurnUpPoint[] = [];
-    const baseVal = Math.min(totalPlanned, selectedItem?.metrics.progress.completedValue || 3);
-    const step = baseVal / 5;
-
-    for (let i = 5; i >= 0; i--) {
-      const wkNum = 44 - i;
-      const completedSoFar = Math.min(totalPlanned, Math.round(step * (5 - i)));
-      weeks.push({
-        date: `2026-W${wkNum}`,
-        label: `W${wkNum}`,
-        scope: totalPlanned,
-        completed: completedSoFar,
-      });
-    }
-    return weeks;
-  };
-
-  const burnUpData = generateBurnUpData(selectedItem?.project);
 
   return (
     <div className="flex flex-col gap-5">
@@ -297,15 +274,13 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
         )}
       </div>
 
-      {/* 2. Detailed Burn-Up vs Plan for Selected Project */}
+      {/* 2. Current project progress */}
       {selectedItem && (
         <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3 border border-[var(--color-rule)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 hairline-b pb-2.5">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[var(--color-accent)]" />
-              <h3 className="text-xs font-bold text-[var(--color-ink)]">
-                Cumulative Burn-Up vs Plan: {selectedItem.project.title}
-              </h3>
+              <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
+              <h3 className="text-xs font-bold text-[var(--color-ink)]">Project progress: {selectedItem.project.title}</h3>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -329,9 +304,25 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
             </div>
           </div>
 
-          {/* SVG Burn Up Chart */}
-          <div className="p-2 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-            <SvgBurnUpChart data={burnUpData} height={150} unit="pts" />
+          <div className="p-4 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-2">
+            <div className="flex justify-between items-baseline gap-3">
+              <span className="text-sm font-semibold text-[var(--color-ink)]">{selectedItem.metrics.progress.progressPercent}% complete</span>
+              <span className="text-xs text-[var(--color-ink-muted)]">
+                {selectedItem.metrics.progress.totalPlannedValue > 0
+                  ? `${selectedItem.metrics.progress.completedValue} of ${selectedItem.metrics.progress.totalPlannedValue} weighted progress`
+                  : 'Add targets, milestones, or tasks to track progress'}
+              </span>
+            </div>
+            <div
+              className="h-3 overflow-hidden rounded-full bg-[var(--color-paper-3)]"
+              role="progressbar"
+              aria-label={`${selectedItem.project.title} progress`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={selectedItem.metrics.progress.progressPercent}
+            >
+              <div className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-300" style={{ width: `${selectedItem.metrics.progress.progressPercent}%` }} />
+            </div>
           </div>
 
           {/* Forecast Range & Methodology Footnote */}

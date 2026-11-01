@@ -1,8 +1,7 @@
 import React from 'react';
-import { Target, Task, ChangeLogEntry } from '../../../types';
+import { Target, Task, ChangeLogEntry, Priority } from '../../../types';
 import { SvgHorizonBarChart } from '../charts/SvgHorizonBarChart';
-import { SvgSparkline } from '../charts/SvgSparkline';
-import { Calendar, TrendingUp, AlertTriangle, Activity } from 'lucide-react';
+import { Calendar, AlertTriangle, Activity } from 'lucide-react';
 
 interface DashboardExecutionTabProps {
   todayStr?: string;
@@ -74,8 +73,18 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
   );
   const carriedOverTasks = tasks.filter((t) => t.carriedOverFromDate);
 
-  // 4. Slippage Trend (simulate past 14 days slippage in days)
-  const slippageTrend = [0, 0, 1, 1, 0, 2, 1, 1, 0, 0, 1, 2, 1, 1];
+  // 4. Open tasks by priority, derived from saved tasks
+  const openTasks = tasks.filter((task) => !task.isDeleted && task.status !== 'done' && task.status !== 'dropped');
+  const priorityLevels: { value: Priority; label: string; color: string }[] = [
+    { value: 'urgent', label: 'Urgent', color: 'var(--color-status-behind)' },
+    { value: 'high', label: 'High', color: 'var(--color-status-at-risk)' },
+    { value: 'medium', label: 'Medium', color: 'var(--color-accent)' },
+    { value: 'low', label: 'Low', color: 'var(--color-ink-subtle)' },
+  ];
+  const priorityCounts = priorityLevels.map((level) => ({
+    ...level,
+    count: openTasks.filter((task) => task.priority === level.value).length,
+  }));
 
   return (
     <div className="flex flex-col gap-5">
@@ -88,8 +97,8 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
               Target completion rate by horizon
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Multi-horizon execution
+          <span className="text-[11px] text-[var(--color-ink-muted)]">
+            Goal progress
           </span>
         </div>
         <SvgHorizonBarChart records={horizonRecords} />
@@ -106,8 +115,8 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
                 Completion rate by weekday
               </h4>
             </div>
-            <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-              Mon to Sun rhythm
+            <span className="text-[11px] text-[var(--color-ink-muted)]">
+              Monday to Sunday
             </span>
           </div>
 
@@ -122,7 +131,7 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
                 </span>
                 <div className="w-full bg-[var(--color-paper-3)] h-10 flex items-end rounded-[1px] overflow-hidden">
                   <div
-                    className="w-full bg-[var(--color-accent)] transition-all duration-300"
+                    className="w-full bg-[var(--color-accent)] transition-colors duration-300"
                     style={{ height: `${item.rate}%` }}
                     title={`${item.dayLabel}: ${item.rate}% (${item.completed}/${item.total})`}
                   />
@@ -135,32 +144,40 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
           </div>
         </div>
 
-        {/* Slippage Trend */}
+        {/* Open Tasks by Priority */}
         <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col justify-between gap-3 border border-[var(--color-rule)]">
           <div>
             <div className="flex items-center justify-between hairline-b pb-2">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[var(--color-accent)]" />
+                <Activity className="w-4 h-4 text-[var(--color-accent)]" />
                 <h4 className="font-semibold text-xs text-[var(--color-ink)]">
-                  Schedule slippage trend
+                  Open tasks by priority
                 </h4>
               </div>
-              <span className="text-[11px] font-mono tabular-figure font-semibold text-[var(--color-accent)]">
-                +1.0d avg
+              <span className="text-[11px] tabular-figure text-[var(--color-ink-muted)]">
+                {openTasks.length} open tasks
               </span>
             </div>
-            <p className="text-xs text-[var(--color-ink-muted)] mt-2">
-              Average variance in days past scheduled deadline across active tasks and targets.
-            </p>
           </div>
 
-          <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex items-center justify-between">
-            <SvgSparkline data={slippageTrend} width={180} height={40} />
-            <div className="flex flex-col text-right font-mono text-xs">
-              <span className="text-[10px] text-[var(--color-ink-muted)]">Max slip</span>
-              <span className="font-bold text-[var(--color-ink)]">2 days</span>
+          {openTasks.length === 0 ? (
+            <p className="focus-chart-empty">No open tasks to group yet.</p>
+          ) : (
+            <div className="priority-chart-list">
+              {priorityCounts.map((item) => {
+                const share = (item.count / openTasks.length) * 100;
+                return (
+                  <div className="priority-chart-row" key={item.value}>
+                    <span className="priority-chart-label">{item.label}</span>
+                    <div className="priority-chart-track" role="img" aria-label={`${item.label}: ${item.count} tasks`}>
+                      <span style={{ width: `${share}%`, backgroundColor: item.color }} />
+                    </div>
+                    <span className="priority-chart-count">{item.count}</span>
+                  </div>
+                );
+              })}
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -173,8 +190,8 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
               Carry-over & drop audit ledger
             </h4>
           </div>
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            PRD TR-3 & TR-4 traceability
+          <span className="text-[11px] text-[var(--color-ink-muted)]">
+            Task history
           </span>
         </div>
 
@@ -188,7 +205,7 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
               {dropEntries.map((entry) => (
                 <div key={entry.id} className="py-2 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] font-mono text-[10px] bg-red-500/10 text-red-600 border border-red-500/30">
+                    <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[10px] bg-[var(--color-status-behind-bg)] text-[var(--color-status-behind)] border border-[var(--color-status-behind)]/30">
                       Dropped
                     </span>
                     <span className="font-medium text-[var(--color-ink)]">
@@ -203,14 +220,14 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
               {carriedOverTasks.map((t) => (
                 <div key={t.id} className="py-2 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] font-mono text-[10px] bg-amber-500/10 text-amber-600 border border-amber-500/30">
+                    <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[10px] bg-[var(--color-status-at-risk-bg)] text-[var(--color-status-at-risk)] border border-[var(--color-status-at-risk)]/30">
                       Carry-Over
                     </span>
                     <span className="font-medium text-[var(--color-ink)] truncate max-w-sm">
                       {t.title}
                     </span>
                   </div>
-                  <span className="font-mono text-[11px] text-[var(--color-ink-muted)]">
+                  <span className="text-[11px] text-[var(--color-ink-muted)]">
                     Carried from {t.carriedOverFromDate}
                   </span>
                 </div>

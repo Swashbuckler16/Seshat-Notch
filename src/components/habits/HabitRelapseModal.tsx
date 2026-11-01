@@ -50,7 +50,7 @@ export const HabitRelapseModal: React.FC<HabitRelapseModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-xs)] p-3 text-xs flex items-start gap-2.5">
-          <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <AlertCircle className="w-4 h-4 text-[var(--color-status-at-risk)] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1 text-[var(--color-ink-muted)]">
             <span className="font-semibold text-[var(--color-ink)]">
               {habit.title}

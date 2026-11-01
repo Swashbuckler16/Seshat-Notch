@@ -42,10 +42,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <BarChart2 className="w-5 h-5 text-[var(--color-accent)]" />
           <div className="flex flex-col">
             <h1 className="text-base font-bold text-[var(--color-ink)] tracking-tight">
-              Executive dashboard & analytics
+              Your progress
             </h1>
             <span className="text-xs text-[var(--color-ink-muted)]">
-              Multi-horizon synthesis with traceable formulas and custom SVG graphics (PRD Section 7).
+              A clear look at your habits, plans, and focus.
             </span>
           </div>
         </div>
@@ -53,7 +53,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {/* Global Controls Filter Group */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {/* Date Range Selector */}
-          <div className="flex items-center gap-1 bg-[var(--color-paper-2)] p-1 rounded-[var(--radius-xs)] border border-[var(--color-rule)] font-mono text-[11px]">
+          <div className="flex items-center gap-1 bg-[var(--color-paper-2)] p-1 rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-[11px]">
             <Calendar className="w-3.5 h-3.5 text-[var(--color-ink-muted)] ml-1" />
             <button
               type="button"
@@ -97,7 +97,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
-              90d
+              3 months
             </button>
             <button
               type="button"
@@ -116,6 +116,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="flex items-center gap-1">
             <Filter className="w-3.5 h-3.5 text-[var(--color-ink-muted)]" />
             <select
+              aria-label="Filter by life area"
               className="input-field px-2 py-1 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
               value={selectedAreaId}
               onChange={(e) => onAreaChange(e.target.value)}
@@ -133,6 +134,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="flex items-center gap-1">
             <Layers className="w-3.5 h-3.5 text-[var(--color-ink-muted)]" />
             <select
+              aria-label="Filter by project"
               className="input-field px-2 py-1 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
               value={selectedProjectId}
               onChange={(e) => onProjectChange(e.target.value)}
@@ -157,7 +159,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           formulaExplanation="Count of currently active projects under chosen filter."
         />
         <StatTile
-          label="Aggregate progress"
+          label="Project progress"
           value={`${overallProgressPercent}%`}
           formulaExplanation="Mean progress rate weighted across active projects."
         />
@@ -167,9 +169,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           formulaExplanation="Cumulative focus hours logged across the selected period."
         />
         <StatTile
-          label="Top active streak"
+          label="Longest streak"
           value={activeHabitStreak}
-          unit="intervals"
+          unit="days"
           formulaExplanation="Longest current fair habit streak preserved without unexcused miss."
         />
       </div>

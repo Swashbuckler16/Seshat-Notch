@@ -1,38 +1,44 @@
-/* hallmark v2.0.0 · theme: seshat-ledger · genre: modern-minimal · shape: workbench · modes: light+dark */
-/* critique: dense ledger instrument panel, tabular numerals hero, notch-and-cord motif, zero ai-slop */
+/* hallmark v2.0.0 · Hallmark · theme: warm progress · genre: playful · shape: app screen · modes: light+dark · redesign: full */
+/* Hallmark · critique: P5 H4 E4 S5 R4 V4 · weakest: restraint, lead with today and let useful progress carry the color */
 /* waive: none */
 
 :root,
 [data-mode="light"] {
   /* Color system — OKLCH Light Paper & Ink */
-  --color-paper: oklch(98.5% 0.005 200);
-  --color-paper-2: oklch(96.0% 0.007 200);
-  --color-paper-3: oklch(93.5% 0.010 200);
-  --color-rule: oklch(88.0% 0.008 200);
-  --color-rule-subtle: oklch(92.0% 0.006 200);
-  --color-rule-strong: oklch(76.0% 0.012 200);
+  --color-paper: oklch(98.5% 0.018 93);
+  --color-paper-2: oklch(96.0% 0.025 94);
+  --color-paper-3: oklch(92.5% 0.035 92);
+  --color-rule: oklch(88.0% 0.035 90);
+  --color-rule-subtle: oklch(93.0% 0.025 90);
+  --color-rule-strong: oklch(79.0% 0.035 75);
 
-  --color-ink: oklch(16.5% 0.014 200);
-  --color-ink-muted: oklch(44.0% 0.015 200);
-  --color-ink-subtle: oklch(64.0% 0.012 200);
+  --color-ink: oklch(24% 0.035 55);
+  --color-ink-muted: oklch(42% 0.035 55);
+  --color-ink-subtle: oklch(54% 0.035 55);
 
   /* Single Signal Accent — Deep Egyptian Teal */
-  --color-accent: oklch(46.0% 0.165 205);
-  --color-accent-hover: oklch(41.0% 0.170 205);
-  --color-accent-subtle: oklch(95.0% 0.025 205);
-  --color-accent-ink: oklch(98.5% 0.005 205);
-  --color-focus: oklch(50.0% 0.180 205);
-  --color-scrim: oklch(16.5% 0.014 200 / 0.58);
+  --color-accent: oklch(58% 0.17 145);
+  --color-accent-hover: oklch(51% 0.17 145);
+  --color-accent-subtle: oklch(94% 0.045 145);
+  --color-accent-ink: oklch(99% 0.01 100);
+  --color-focus: oklch(50% 0.19 145);
+  --color-scrim: oklch(24% 0.035 55 / 0.5);
+  --color-shadow: oklch(24% 0.035 55 / 0.05);
+  --color-chart-1: oklch(58% 0.17 145);
+  --color-chart-2: oklch(74% 0.15 72);
+  --color-chart-3: oklch(67% 0.14 25);
+  --color-emerald: oklch(58% 0.17 145);
+  --color-paper-muted: oklch(74% 0.15 72);
 
   /* Semantic Status — Dual encodings (Color + Glyph/Word) */
-  --color-status-on-track: oklch(56.0% 0.145 145);
-  --color-status-on-track-bg: oklch(95.0% 0.035 145);
-  --color-status-at-risk: oklch(64.0% 0.150 75);
-  --color-status-at-risk-bg: oklch(95.0% 0.040 75);
-  --color-status-behind: oklch(52.0% 0.175 25);
-  --color-status-behind-bg: oklch(94.5% 0.040 25);
-  --color-status-paused: oklch(58.0% 0.020 200);
-  --color-status-paused-bg: oklch(94.0% 0.010 200);
+  --color-status-on-track: oklch(48% 0.14 145);
+  --color-status-on-track-bg: oklch(94% 0.045 145);
+  --color-status-at-risk: oklch(53% 0.14 72);
+  --color-status-at-risk-bg: oklch(95% 0.04 82);
+  --color-status-behind: oklch(51% 0.15 25);
+  --color-status-behind-bg: oklch(95% 0.035 25);
+  --color-status-paused: oklch(48% 0.025 55);
+  --color-status-paused-bg: oklch(93% 0.02 75);
 
   /* Typography Scale */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -48,10 +54,10 @@
   --text-code: 0.8125rem;
 
   /* Hairline and Radii — restrained, precision-cut corners */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-xs: 8px;
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
 
   /* Spacing Rhythm */
   --space-3xs: 2px;
@@ -67,58 +73,70 @@
   --dur-micro: 120ms;
   --dur-short: 200ms;
   --dur-long: 340ms;
-  --ease-ledger: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ledger: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 [data-mode="dark"] {
   /* Re-derived OKLCH Dark Paper & Ink (Parity, never inverted) */
-  --color-paper: oklch(14.0% 0.012 200);
-  --color-paper-2: oklch(18.0% 0.014 200);
-  --color-paper-3: oklch(22.5% 0.016 200);
-  --color-rule: oklch(27.5% 0.014 200);
-  --color-rule-subtle: oklch(21.0% 0.012 200);
-  --color-rule-strong: oklch(38.0% 0.016 200);
+  --color-paper: oklch(19% 0.02 60);
+  --color-paper-2: oklch(23% 0.025 60);
+  --color-paper-3: oklch(29% 0.03 60);
+  --color-rule: oklch(34% 0.03 60);
+  --color-rule-subtle: oklch(27% 0.025 60);
+  --color-rule-strong: oklch(42% 0.03 60);
 
-  --color-ink: oklch(93.5% 0.008 200);
-  --color-ink-muted: oklch(70.0% 0.012 200);
-  --color-ink-subtle: oklch(50.0% 0.010 200);
+  --color-ink: oklch(95% 0.02 90);
+  --color-ink-muted: oklch(76% 0.025 80);
+  --color-ink-subtle: oklch(64% 0.02 80);
 
   /* Luminous Teal signal (de-saturated for dark canvas) */
-  --color-accent: oklch(65.0% 0.140 205);
-  --color-accent-hover: oklch(70.0% 0.145 205);
-  --color-accent-subtle: oklch(22.0% 0.035 205);
-  --color-accent-ink: oklch(14.0% 0.010 205);
-  --color-focus: oklch(72.0% 0.160 205);
-  --color-scrim: oklch(7.0% 0.008 200 / 0.78);
+  --color-accent: oklch(75% 0.16 145);
+  --color-accent-hover: oklch(80% 0.15 145);
+  --color-accent-subtle: oklch(29% 0.05 145);
+  --color-accent-ink: oklch(20% 0.03 60);
+  --color-focus: oklch(79% 0.15 145);
+  --color-scrim: oklch(12% 0.02 60 / 0.78);
+  --color-shadow: oklch(8% 0.02 60 / 0.22);
+  --color-chart-1: oklch(75% 0.16 145);
+  --color-chart-2: oklch(82% 0.14 78);
+  --color-chart-3: oklch(77% 0.15 30);
+  --color-emerald: oklch(75% 0.16 145);
+  --color-paper-muted: oklch(82% 0.14 78);
 
   /* Dark semantic status */
-  --color-status-on-track: oklch(68.0% 0.135 145);
-  --color-status-on-track-bg: oklch(22.0% 0.035 145);
-  --color-status-at-risk: oklch(74.0% 0.140 75);
-  --color-status-at-risk-bg: oklch(23.0% 0.040 75);
-  --color-status-behind: oklch(64.0% 0.165 25);
-  --color-status-behind-bg: oklch(22.0% 0.040 25);
-  --color-status-paused: oklch(66.0% 0.020 200);
-  --color-status-paused-bg: oklch(21.0% 0.010 200);
+  --color-status-on-track: oklch(75% 0.16 145);
+  --color-status-on-track-bg: oklch(29% 0.05 145);
+  --color-status-at-risk: oklch(82% 0.14 78);
+  --color-status-at-risk-bg: oklch(31% 0.06 78);
+  --color-status-behind: oklch(77% 0.15 30);
+  --color-status-behind-bg: oklch(30% 0.06 30);
+  --color-status-paused: oklch(76% 0.025 80);
+  --color-status-paused-bg: oklch(29% 0.025 60);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-mode]) {
-    --color-paper: oklch(14.0% 0.012 200);
-    --color-paper-2: oklch(18.0% 0.014 200);
-    --color-paper-3: oklch(22.5% 0.016 200);
-    --color-rule: oklch(27.5% 0.014 200);
-    --color-rule-subtle: oklch(21.0% 0.012 200);
-    --color-rule-strong: oklch(38.0% 0.016 200);
-    --color-ink: oklch(93.5% 0.008 200);
-    --color-ink-muted: oklch(70.0% 0.012 200);
-    --color-ink-subtle: oklch(50.0% 0.010 200);
-    --color-accent: oklch(65.0% 0.140 205);
-    --color-accent-hover: oklch(70.0% 0.145 205);
-    --color-accent-subtle: oklch(22.0% 0.035 205);
-    --color-accent-ink: oklch(14.0% 0.010 205);
-    --color-focus: oklch(72.0% 0.160 205);
-    --color-scrim: oklch(7.0% 0.008 200 / 0.78);
+    --color-paper: oklch(19% 0.02 60);
+    --color-paper-2: oklch(23% 0.025 60);
+    --color-paper-3: oklch(29% 0.03 60);
+    --color-rule: oklch(34% 0.03 60);
+    --color-rule-subtle: oklch(27% 0.025 60);
+    --color-rule-strong: oklch(42% 0.03 60);
+    --color-ink: oklch(95% 0.02 90);
+    --color-ink-muted: oklch(76% 0.025 80);
+    --color-ink-subtle: oklch(64% 0.02 80);
+    --color-accent: oklch(75% 0.16 145);
+    --color-accent-hover: oklch(80% 0.15 145);
+    --color-accent-subtle: oklch(29% 0.05 145);
+    --color-accent-ink: oklch(20% 0.03 60);
+    --color-focus: oklch(79% 0.15 145);
+    --color-scrim: oklch(12% 0.02 60 / 0.78);
+    --color-shadow: oklch(8% 0.02 60 / 0.22);
+    --color-chart-1: oklch(75% 0.16 145);
+    --color-chart-2: oklch(82% 0.14 78);
+    --color-chart-3: oklch(77% 0.15 30);
+    --color-emerald: oklch(75% 0.16 145);
+    --color-paper-muted: oklch(82% 0.14 78);
   }
 }
 

@@ -1,8 +1,11 @@
 import React from 'react';
 import { ProjectGoal, Target, Task, Habit, MilestonePhase, TimeSession, ProgressLog } from '../../../types';
 import { SvgBulletChart } from '../charts/SvgBulletChart';
+import { SvgTimePieChart } from '../charts/SvgTimePieChart';
+import { SvgWeeklyFocusChart } from '../charts/SvgWeeklyFocusChart';
 import { calculateProjectProgress, calculateExpectedProgress, calculateScheduleRatio } from '../../../utils/metricEngine';
-import { formatMinutesToHuman } from '../../../utils/timeMath';
+import { getCurrentPeriod } from '../../../utils/periodUtils';
+import { calculateTimeMetrics, formatMinutesToHuman } from '../../../utils/timeMath';
 import {
   Sun,
   Calendar,
@@ -40,6 +43,7 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
 
   const todaySessions = timeSessions.filter((s) => s.startTime.startsWith(todayStr));
   const todayLoggedMinutes = todaySessions.reduce((acc, s) => acc + (s.durationMinutes || 0), 0);
+  const timeMetrics = calculateTimeMetrics(timeSessions, tasks, projects);
 
   const activeHabits = habits.filter((h) => !h.isDeleted && !h.isArchived);
   const habitsDoneToday = activeHabits.filter((h) =>
@@ -72,15 +76,16 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
   }
 
   // 3. Week and Month Target completion rates
+  const currentWeekStr = getCurrentPeriod('week', new Date(`${todayStr}T00:00:00`));
   const currentMonthStr = todayStr.slice(0, 7); // YYYY-MM
 
-  const weekTargets = targets.filter((t) => !t.isDeleted && t.horizon === 'week' && t.period.startsWith(todayStr.slice(0, 4)));
+  const weekTargets = targets.filter((t) => !t.isDeleted && t.horizon === 'week' && t.period === currentWeekStr);
   const weekCompleted = weekTargets.filter((t) => t.currentValue >= t.targetValue).length;
-  const weekRate = weekTargets.length > 0 ? Math.round((weekCompleted / weekTargets.length) * 100) : 75;
+  const weekRate = weekTargets.length > 0 ? Math.round((weekCompleted / weekTargets.length) * 100) : 0;
 
   const monthTargets = targets.filter((t) => !t.isDeleted && t.horizon === 'month' && t.period === currentMonthStr);
   const monthCompleted = monthTargets.filter((t) => t.currentValue >= t.targetValue).length;
-  const monthRate = monthTargets.length > 0 ? Math.round((monthCompleted / monthTargets.length) * 100) : 67;
+  const monthRate = monthTargets.length > 0 ? Math.round((monthCompleted / monthTargets.length) * 100) : 0;
 
   // 4. Project health status roll-up
   const activeProjects = projects.filter((p) => !p.isDeleted && p.status === 'active');
@@ -102,7 +107,7 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
               Today strip (<span className="font-mono tabular-figure">{todayStr}</span>)
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
+          <span className="text-[11px] text-[var(--color-ink-muted)]">
             Execution readiness
           </span>
         </div>
@@ -155,8 +160,8 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
 
         {/* Carry-over triage alert banner */}
         {carryOverTasks.length > 0 && (
-          <div className="flex items-center justify-between p-2.5 rounded-[var(--radius-xs)] bg-amber-500/10 border border-amber-500/30 text-xs">
-            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <div className="flex items-center justify-between p-2.5 rounded-[var(--radius-xs)] bg-[var(--color-status-at-risk-bg)] border border-[var(--color-status-at-risk)]/30 text-xs">
+            <div className="flex items-center gap-2 text-[var(--color-status-at-risk)]">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>
                 <strong className="font-semibold">{carryOverTasks.length} unfinished tasks</strong> carried over from earlier days require triage.
@@ -166,30 +171,56 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigateTab('reviews')}
-                className="font-medium underline hover:text-amber-800 dark:hover:text-amber-300 ml-2"
+                className="font-medium underline hover:text-[var(--color-status-at-risk)] ml-2"
               >
-                Triage in Reviews →
+              Review tasks
               </button>
             )}
           </div>
         )}
       </div>
 
-      {/* 2. Horizon Completion Rates (Bullet Charts) */}
+      <section className="surface-card overview-focus-card" aria-labelledby="overview-focus-heading">
+        <div className="section-heading-row">
+          <div>
+            <h3 id="overview-focus-heading">Your time at a glance</h3>
+            <p>Based on your logged focus sessions</p>
+          </div>
+        </div>
+        <div className="overview-charts">
+          <figure className="overview-chart-block" aria-labelledby="focus-type-heading">
+            <figcaption className="overview-chart-caption">
+              <h4 id="focus-type-heading">Focus by type</h4>
+              <span>{formatMinutesToHuman(timeMetrics.totalMinutes)} logged</span>
+            </figcaption>
+            <SvgTimePieChart items={timeMetrics.kindBreakdown} />
+          </figure>
+          <figure className="overview-chart-block" aria-labelledby="weekly-focus-heading">
+            <figcaption className="overview-chart-caption">
+              <h4 id="weekly-focus-heading">This week</h4>
+              <span>Minutes focused each day</span>
+            </figcaption>
+            <SvgWeeklyFocusChart days={timeMetrics.dailyTrend} />
+          </figure>
+        </div>
+      </section>
+
+      {/* 2. Weekly and monthly goals */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3 border border-[var(--color-rule)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
               <h4 className="font-semibold text-xs text-[var(--color-ink)]">
-                Weekly target pacing (Bullet chart)
+                Weekly goals
               </h4>
             </div>
-            <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-              {weekCompleted}/{weekTargets.length || 4} targets
+            <span className="text-[11px] text-[var(--color-ink-muted)]">
+              {weekCompleted} of {weekTargets.length} complete
             </span>
           </div>
-          <SvgBulletChart actual={weekRate} target={80} max={100} />
+          <SvgBulletChart actual={weekRate} max={100} />
+          {weekTargets.length === 0 && <span className="text-[11px] text-[var(--color-ink-muted)]">No goals set for this week yet.</span>}
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3 border border-[var(--color-rule)]">
@@ -197,14 +228,15 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
               <h4 className="font-semibold text-xs text-[var(--color-ink)]">
-                Monthly target pacing (Bullet chart)
+                Monthly goals
               </h4>
             </div>
-            <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-              {monthCompleted}/{monthTargets.length || 3} targets
+            <span className="text-[11px] text-[var(--color-ink-muted)]">
+              {monthCompleted} of {monthTargets.length} complete
             </span>
           </div>
-          <SvgBulletChart actual={monthRate} target={85} max={100} />
+          <SvgBulletChart actual={monthRate} max={100} />
+          {monthTargets.length === 0 && <span className="text-[11px] text-[var(--color-ink-muted)]">No goals set for this month yet.</span>}
         </div>
       </div>
 
@@ -214,11 +246,11 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
             <h4 className="font-semibold text-xs text-[var(--color-ink)]">
-              Active projects pacing & health
+              Your projects
             </h4>
           </div>
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Schedule ratio (Progress % / Expected %)
+          <span className="text-[11px] text-[var(--color-ink-muted)]">
+            Progress and timing
           </span>
         </div>
 
@@ -232,7 +264,7 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
                 <span className="font-medium text-xs text-[var(--color-ink)] truncate">
                   {project.title}
                 </span>
-                <span className="text-[11px] text-[var(--color-ink-muted)] font-mono">
+                <span className="text-[11px] text-[var(--color-ink-muted)]">
                   {progress.progressPercent}% actual vs {expected.expectedPercent}% expected
                 </span>
               </div>
@@ -241,13 +273,13 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
                 {/* Horizontal mini bar */}
                 <div className="w-32 bg-[var(--color-paper-3)] h-2 rounded-[1px] overflow-hidden border border-[var(--color-rule)]">
                   <div
-                    className="bg-[var(--color-accent)] h-full transition-all duration-300"
+                    className="bg-[var(--color-accent)] h-full transition-colors duration-300"
                     style={{ width: `${progress.progressPercent}%` }}
                   />
                 </div>
 
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--radius-xs)] font-mono text-xs font-semibold ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--radius-xs)] text-xs font-semibold ${
                     sched.status === 'on_track'
                       ? 'bg-[var(--color-status-on-track)]/10 text-[var(--color-status-on-track)] border border-[var(--color-status-on-track)]/30'
                       : sched.status === 'at_risk'

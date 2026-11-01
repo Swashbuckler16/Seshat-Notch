@@ -17,11 +17,11 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
             <div className="flex items-center gap-2">
               <Brain className="w-4 h-4 text-[var(--color-accent)]" />
               <h3 className="font-semibold text-xs text-[var(--color-ink)]">
-                Classification distribution
+                Focus by type
               </h3>
             </div>
-            <span className="text-[11px] font-mono tabular-figure text-[var(--color-ink-muted)]">
-              {metrics.deepWorkRatio}% Deep flow
+            <span className="text-[11px] tabular-figure text-[var(--color-ink-muted)]">
+              {metrics.deepWorkRatio}% deep focus
             </span>
           </div>
 
@@ -30,11 +30,11 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
             {metrics.kindBreakdown.map((kb) => (
               <div
                 key={kb.kind}
-                className={`h-full transition-all duration-300 ${
+                className={`h-full transition-colors duration-300 ${
                   kb.kind === 'deep'
                     ? 'bg-[var(--color-accent)]'
                     : kb.kind === 'learning'
-                    ? 'bg-indigo-500/70'
+                    ? 'bg-[var(--color-chart-2)]'
                     : 'bg-[var(--color-ink-muted)]/40'
                 }`}
                 style={{ width: `${kb.percentage}%` }}
@@ -56,13 +56,13 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
                       kb.kind === 'deep'
                         ? 'bg-[var(--color-accent)]'
                         : kb.kind === 'learning'
-                        ? 'bg-indigo-500/70'
+                        ? 'bg-[var(--color-chart-2)]'
                         : 'bg-[var(--color-ink-muted)]/40'
                     }`}
                   />
                   <span className="text-[var(--color-ink)] font-medium">{kb.label}</span>
                 </div>
-                <div className="flex items-center gap-2 font-mono tabular-figure text-[11px]">
+                <div className="flex items-center gap-2 tabular-figure text-[11px]">
                   <span className="text-[var(--color-ink-muted)]">{kb.hours}h</span>
                   <span className="font-semibold text-[var(--color-ink)] w-8 text-right">
                     {kb.percentage}%
@@ -79,11 +79,11 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
             <div className="flex items-center gap-1.5">
               <BarChart3 className="w-3.5 h-3.5 text-[var(--color-accent)]" />
               <span className="text-xs font-semibold text-[var(--color-ink)]">
-                Daily volume (last 7 days)
+                Last 7 days
               </span>
             </div>
-            <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-              Minutes logged per day
+            <span className="text-[11px] text-[var(--color-ink-muted)]">
+              Minutes focused each day
             </span>
           </div>
 
@@ -102,7 +102,7 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
                   </span>
                   <div className="w-full bg-[var(--color-paper-3)] h-12 flex items-end rounded-[1px] overflow-hidden">
                     <div
-                      className="w-full bg-[var(--color-accent)] transition-all duration-300"
+                      className="w-full bg-[var(--color-accent)] transition-colors duration-300"
                       style={{ height: `${heightPercent}%` }}
                       title={`${day.dateStr}: ${formatMinutesToHuman(day.totalMinutes)} (${day.deepMinutes}m deep)`}
                     />
@@ -125,11 +125,11 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-[var(--color-accent)]" />
               <h3 className="font-semibold text-xs text-[var(--color-ink)]">
-                Hours by project & area
+                Time by project
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-              {metrics.projectBreakdown.length} buckets
+            <span className="text-[11px] text-[var(--color-ink-muted)]">
+              {metrics.projectBreakdown.length} groups
             </span>
           </div>
 
@@ -151,7 +151,7 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 font-mono tabular-figure text-[11px] shrink-0">
+                  <div className="flex items-center gap-2 tabular-figure text-[11px] shrink-0">
                     <span className="text-[var(--color-ink-muted)]">{pb.hours}h</span>
                     <span className="font-semibold text-[var(--color-ink)] w-8 text-right">
                       {pb.percentage}%
@@ -180,13 +180,13 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
           <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-xs flex flex-col gap-1.5">
             <div className="flex items-center justify-between text-[11px]">
               <span className="text-[var(--color-ink-muted)]">Tasks with logged estimates:</span>
-              <span className="font-mono tabular-figure font-semibold text-[var(--color-ink)]">
+              <span className="tabular-figure font-semibold text-[var(--color-ink)]">
                 {metrics.estimateAccuracy.evaluatedTasksCount} tasks
               </span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
               <span className="text-[var(--color-ink-muted)]">Total estimated vs actual:</span>
-              <span className="font-mono tabular-figure text-[var(--color-ink)]">
+              <span className="tabular-figure text-[var(--color-ink)]">
                 {formatMinutesToHuman(metrics.estimateAccuracy.totalEstimatedMinutes)} est /{' '}
                 {formatMinutesToHuman(metrics.estimateAccuracy.totalActualMinutes)} act
               </span>
@@ -196,7 +196,7 @@ export const TimeDistributionWidget: React.FC<TimeDistributionWidgetProps> = ({ 
               <span
                 className={`font-mono tabular-figure font-semibold ${
                   metrics.estimateAccuracy.varianceMinutes > 0
-                    ? 'text-amber-600'
+                    ? 'text-[var(--color-status-at-risk)]'
                     : 'text-[var(--color-status-on-track)]'
                 }`}
               >

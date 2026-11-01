@@ -36,6 +36,12 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
       energy: r.energyRating,
       mood: r.moodRating,
     }));
+  const energyRatings = reviews
+    .map((review) => review.energyRating)
+    .filter((rating): rating is number => rating !== undefined);
+  const meanEnergy = energyRatings.length > 0
+    ? (energyRatings.reduce((total, rating) => total + rating, 0) / energyRatings.length).toFixed(1)
+    : null;
 
   // Streaks & Cadence
   const weeklyReviews = reviews.filter((r) => r.type === 'weekly');
@@ -85,13 +91,9 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Mean Energy Level</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-accent)]">
-              {trendData.length > 0
-                ? (
-                    trendData.reduce((acc, d) => acc + (d.energy || 3), 0) / trendData.length
-                  ).toFixed(1)
-                : '3.0'}
+              {meanEnergy ?? '—'}
             </span>
-            <span className="text-xs text-[var(--color-ink-muted)]">/ 5.0</span>
+            <span className="text-xs text-[var(--color-ink-muted)]">{meanEnergy ? `/ 5.0 · ${energyRatings.length} ratings` : 'No ratings yet'}</span>
           </div>
           <span className="text-[10px] text-[var(--color-ink-muted)]">Self-reported vital energy</span>
         </div>

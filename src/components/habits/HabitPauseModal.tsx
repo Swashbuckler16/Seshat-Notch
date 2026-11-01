@@ -86,7 +86,7 @@ export const HabitPauseModal: React.FC<HabitPauseModalProps> = ({ isOpen, onClos
                   <button
                     type="button"
                     onClick={() => handleRemovePause(idx)}
-                    className="text-[var(--color-ink-muted)] hover:text-red-500 p-1 transition-colors"
+                    className="text-[var(--color-ink-muted)] hover:text-[var(--color-status-behind)] p-1 transition-colors"
                     title="Remove pause range"
                     aria-label="Remove pause range"
                   >

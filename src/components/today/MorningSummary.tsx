@@ -69,7 +69,7 @@ export const MorningSummary: React.FC<MorningSummaryProps> = ({
               </span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
-              Review what is due, track focus time, and notch daily routines.
+              Plan your day, build habits, and keep focus time visible.
             </p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export const MorningSummary: React.FC<MorningSummaryProps> = ({
           <button
             type="button"
             onClick={onToday}
-            className="min-h-11 sm:min-h-8 px-2.5 py-1 text-xs font-mono rounded hover:bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-muted)]"
+            className="min-h-11 sm:min-h-8 px-2.5 py-1 text-xs rounded hover:bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-muted)]"
           >
             Today
           </button>

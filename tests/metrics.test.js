@@ -116,8 +116,8 @@ test('PRD 7.3: calculateVelocityAndForecast gives credible range and honest empt
 
   // Case 2: Active recent velocity (e.g. 14 units in 14 days = 1%/day)
   const recentLogs = [
-    { id: 'l1', entityId: 't1', date: '2026-10-25', value: 7, isDeleted: false },
-    { id: 'l2', entityId: 't1', date: '2026-10-30', value: 7, isDeleted: false },
+    { id: 'l1', entityType: 'target', entityId: 't1', date: '2026-10-25', value: 7, isDeleted: false },
+    { id: 'l2', entityType: 'target', entityId: 't1', date: '2026-10-30', value: 7, isDeleted: false },
   ];
   // 14 units out of 100 total = 14% across 14 days = 1% per day
   // Current progress = 50%, remaining = 50%

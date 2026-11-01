@@ -125,7 +125,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 hairline-b pb-3">
         <div className="flex items-center gap-2.5 flex-wrap">
           {habit.isAvoidance ? (
-            <Shield className="w-4 h-4 text-amber-500 shrink-0" />
+            <Shield className="w-4 h-4 text-[var(--color-status-at-risk)] shrink-0" />
           ) : (
             <Flame className="w-4 h-4 text-[var(--color-accent)] shrink-0" />
           )}
@@ -139,7 +139,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
           </span>
 
           {habit.isAvoidance && (
-            <span className="px-2 py-0.5 text-[11px] font-medium rounded-[var(--radius-xs)] bg-amber-500/10 border border-amber-500/30 text-amber-600">
+            <span className="px-2 py-0.5 text-[11px] font-medium rounded-[var(--radius-xs)] bg-[var(--color-status-at-risk-bg)] border border-[var(--color-status-at-risk)]/30 text-[var(--color-status-at-risk)]">
               Avoidance habit
             </span>
           )}
@@ -152,7 +152,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
           )}
 
           {habit.pausedRanges && habit.pausedRanges.length > 0 && (
-            <span className="px-2 py-0.5 text-[11px] font-mono rounded-[var(--radius-xs)] bg-[var(--color-paper-3)] border border-[var(--color-rule-strong)] text-[var(--color-ink-muted)]">
+            <span className="px-2 py-0.5 text-[11px] rounded-[var(--radius-xs)] bg-[var(--color-paper-3)] border border-[var(--color-rule-strong)] text-[var(--color-ink-muted)]">
               Paused window active
             </span>
           )}
@@ -181,7 +181,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
           <button
             type="button"
             onClick={handleDelete}
-            className="p-1.5 text-[var(--color-ink-muted)] hover:text-red-500 hover:bg-[var(--color-paper-2)] rounded transition-colors"
+            className="p-1.5 text-[var(--color-ink-muted)] hover:text-[var(--color-status-behind)] hover:bg-[var(--color-paper-2)] rounded transition-colors"
             title="Delete habit"
             aria-label="Delete habit"
           >
@@ -313,7 +313,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit, todayStr }) => {
               variant="secondary"
               size="sm"
               onClick={() => setIsRelapseModalOpen(true)}
-              className="min-h-11 sm:min-h-9 text-amber-600 hover:text-amber-700 hover:border-amber-400"
+              className="min-h-11 sm:min-h-9 text-[var(--color-status-at-risk)] hover:text-[var(--color-status-at-risk)] hover:border-[var(--color-status-at-risk)]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Log relapse</span>
