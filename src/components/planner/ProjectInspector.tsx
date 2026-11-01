@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { domainService } from '../../services/domainService';
 import { ProjectGoal, EntityId, Status, Priority } from '../../types';
+import { ProjectHealthCard } from '../metrics/ProjectHealthCard';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
@@ -178,6 +179,9 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
           </div>
         </div>
       </div>
+
+      {/* Pure Metric Engine Health & Formula Inspector Card (PRD Section 7.3 & TR-2) */}
+      <ProjectHealthCard project={project} todayStr={new Date().toISOString().split('T')[0]} />
 
       {/* PRD PL-2: "Why" & Success Criteria Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

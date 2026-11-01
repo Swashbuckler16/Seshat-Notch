@@ -42,7 +42,7 @@ export const StatTile: React.FC<StatTileProps> = ({
       {/* Title & Formula button */}
       <div className="flex items-center justify-between gap-2 text-xs text-[var(--color-ink-muted)]">
         <span className="font-medium truncate">{label}</span>
-        {formula && (
+        {(formula || formulaExplanation) && (
           <button
             type="button"
             onClick={() => setShowFormula(!showFormula)}
@@ -78,7 +78,7 @@ export const StatTile: React.FC<StatTileProps> = ({
       )}
 
       {/* Transparent Formula Popover (PRD Section 7 & 7.3) */}
-      {showFormula && formula && (
+      {showFormula && (formula || formulaExplanation) && (
         <div className="absolute inset-x-0 bottom-full mb-1.5 p-2.5 bg-[var(--color-paper)] border border-[var(--color-rule-strong)] shadow-md rounded-[var(--radius-xs)] z-20 text-xs flex flex-col gap-1">
           <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-accent)] font-semibold">
             <span>Formula Inspector</span>
@@ -90,9 +90,11 @@ export const StatTile: React.FC<StatTileProps> = ({
               ✕
             </button>
           </div>
-          <div className="font-mono text-[11px] bg-[var(--color-paper-2)] p-1.5 rounded-[var(--radius-xs)] text-[var(--color-ink)]">
-            {formula}
-          </div>
+          {formula && (
+            <div className="font-mono text-[11px] bg-[var(--color-paper-2)] p-1.5 rounded-[var(--radius-xs)] text-[var(--color-ink)]">
+              {formula}
+            </div>
+          )}
           {formulaExplanation && (
             <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">
               {formulaExplanation}

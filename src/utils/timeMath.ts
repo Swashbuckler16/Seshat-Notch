@@ -252,3 +252,4 @@ export function formatSecondsToTimer(totalSeconds: number): string {
   const s = totalSeconds % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
+

@@ -75,3 +75,4 @@ export const HeaderTimerPill: React.FC<HeaderTimerPillProps> = ({ onNavigateToTi
     </div>
   );
 };
+

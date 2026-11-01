@@ -119,6 +119,25 @@ export const domainService = {
     });
   },
 
+  async updateProject(id: EntityId, updates: Partial<ProjectGoal>): Promise<ProjectGoal> {
+    const existing = await db.projects.get(id);
+    if (!existing) throw new Error(`Project ${id} not found`);
+
+    const now = getCurrentUTC();
+    const updated: ProjectGoal = { ...existing, ...updates, updatedAt: now };
+    await db.projects.put(updated);
+
+    await recordChange({
+      entityType: 'project',
+      entityId: id,
+      action: 'update',
+      fieldChanged: Object.keys(updates).join(', '),
+      oldValue: existing,
+      newValue: updated,
+    });
+    return updated;
+  },
+
   async softDeleteProject(id: EntityId, reason?: string): Promise<void> {
     const existing = await db.projects.get(id);
     if (!existing) throw new Error(`Project ${id} not found`);

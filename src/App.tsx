@@ -113,14 +113,14 @@ const PHASES: PhaseInfo[] = [
     title: 'Progress calculations',
     scope: 'Calculate progress and pace from your plans, with an explanation for each figure.',
     outcome: 'Understand how each figure is calculated',
-    status: 'in_progress',
+    status: 'completed',
   },
   {
     number: 12,
     title: 'Overview and reports',
     scope: 'Bring projects, goals, habits, time, and reviews into one place with clear charts.',
     outcome: 'A useful overview of your planning data',
-    status: 'queued',
+    status: 'in_progress',
   },
   {
     number: 13,
@@ -139,7 +139,7 @@ const PHASES: PhaseInfo[] = [
 ];
 
 export const App: React.FC = () => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(10);
+  const [selectedPhase, setSelectedPhase] = useState<number>(11);
   const [activeTab, setActiveTab] = useState<'today' | 'planner' | 'habits' | 'time' | 'reviews' | 'quickadd' | 'components' | 'storage' | 'roadmap'>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
 

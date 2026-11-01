@@ -131,3 +131,4 @@ test('PRD 6.5 UI: Time components exist and comply with Hallmark Floor gates', (
     assert.ok(!content.includes('transition: all'), `${f} must not contain transition: all`);
   }
 });
+

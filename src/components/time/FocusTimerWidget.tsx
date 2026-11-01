@@ -328,3 +328,4 @@ export const FocusTimerWidget: React.FC = () => {
     </div>
   );
 };
+

@@ -36,3 +36,4 @@ export function playFocusChime(): void {
     console.debug('Synthetic chime suppressed:', err);
   }
 }
+
