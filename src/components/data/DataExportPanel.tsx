@@ -94,11 +94,11 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
         <div className="flex items-center gap-2">
           <HardDrive className="w-4 h-4 text-[var(--color-accent)]" />
           <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-            Export Your Data
+            Save a copy of your plans
           </h3>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          You own 100% of your data. Export your entire database or individual tables in open formats at any time. Zero lock-in, zero cloud dependency.
+          Save everything in one backup file, or download a simple text copy of your plan.
         </p>
       </div>
 
@@ -109,10 +109,10 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-ink)]">
               <FileJson className="w-4 h-4 text-[var(--color-accent)]" />
-              <span>Full JSON Database File</span>
+              <span>Full backup file</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              Complete, lossless export of all tables, entity relationships, change logs, reviews, and settings to a local `.json` file on disk.
+              Includes your projects, tasks, habits, reviews, and settings so you can restore them later.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
             className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50 min-h-11"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>{downloading === 'json' ? 'Saving…' : 'Save JSON Backup to Disk'}</span>
+            <span>{downloading === 'json' ? 'Saving…' : 'Save backup file'}</span>
           </button>
         </div>
 
@@ -132,10 +132,10 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-ink)]">
               <FileText className="w-4 h-4 text-[var(--color-emerald)]" />
-              <span>Markdown Field Ledger</span>
+              <span>Readable plan</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              Human-readable executive plan document. Outlines projects, why/success criteria, targets, scheduled tasks, and habits in clean Markdown.
+              A text version of your projects, goals, tasks, and habits that is easy to read or share.
             </p>
           </div>
 
@@ -147,7 +147,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
               className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] text-xs font-medium text-[var(--color-ink)] transition-colors disabled:opacity-50 min-h-11"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download .md</span>
+              <span>Download text copy</span>
             </button>
             <button
               type="button"

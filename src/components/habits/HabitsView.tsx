@@ -90,11 +90,11 @@ export const HabitsView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-[var(--color-accent)]" />
             <h1 className="text-xl font-bold tracking-tight text-[var(--color-ink)]">
-              Habits & fair streak ledger
+              Your habits
             </h1>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)]">
-            Flexible schedules with rest days and vacation pauses preserved.
+            Build a routine that fits your week, with room for rest days and breaks.
           </p>
         </div>
 
@@ -118,21 +118,21 @@ export const HabitsView: React.FC = () => {
           formulaExplanation="Total active, unarchived habit routines currently tracked."
         />
         <StatTile
-          label="Average 30d consistency"
+          label="Average completion over 30 days"
           value={`${avg30dConsistency}%`}
-          formulaExplanation="Mean 30-day consistency rate across all active habits, excluding declared rest and pause days."
+          formulaExplanation="Average completion across active habits over the last 30 days. Planned rest days and pauses are not counted."
         />
         <StatTile
-          label="Longest active streak"
+          label="Longest streak"
           value={longestStreak}
-          unit="intervals"
-          formulaExplanation="Highest active streak among all currently tracked habits."
+          unit="days"
+          formulaExplanation="The longest current run across your active habits."
         />
         <StatTile
-          label="Avoidance clean days"
+          label="Days on track"
           value={avoidanceCleanDays}
           unit="days"
-          formulaExplanation="Cumulative days clean across all avoidance targets without recorded relapses."
+          formulaExplanation="Days on track across the habits you are working to change."
         />
       </div>
 
@@ -142,11 +142,11 @@ export const HabitsView: React.FC = () => {
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-[var(--color-accent)]" />
             <span className="text-xs font-semibold text-[var(--color-ink)]">
-              Weekday completion patterns
+              Which days work best for you
             </span>
           </div>
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Historical aggregate by day of week
+            Completion history by day of the week
           </span>
         </div>
 
@@ -198,7 +198,7 @@ export const HabitsView: React.FC = () => {
               : 'border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-rule-strong)]'
           }`}
         >
-          Daily & Weekdays
+          Every day or weekdays
         </button>
         <button
           type="button"
@@ -209,7 +209,7 @@ export const HabitsView: React.FC = () => {
               : 'border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-rule-strong)]'
           }`}
         >
-          Flexible weekly
+          Flexible weekly habits
         </button>
         <button
           type="button"
@@ -220,7 +220,7 @@ export const HabitsView: React.FC = () => {
               : 'border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-rule-strong)]'
           }`}
         >
-          Avoidance targets ({avoidanceHabits.length})
+          Habits you are changing ({avoidanceHabits.length})
         </button>
         <button
           type="button"
@@ -246,7 +246,7 @@ export const HabitsView: React.FC = () => {
             <p className="text-xs text-[var(--color-ink-muted)] max-w-sm">
               {filter === 'archived'
                 ? 'No habits have been archived.'
-                : 'Configure consistent routines and track them with fair streak logic.'}
+              : 'Add a habit you would like to build or change.'}
             </p>
             {filter !== 'archived' && (
               <Button

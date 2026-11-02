@@ -66,40 +66,40 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
       {/* 1. Review Cadence KPI Tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Weekly Reviews</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Weekly reviews</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
               {weeklyReviews.length}
             </span>
             <span className="text-xs text-[var(--color-ink-muted)]">completed</span>
           </div>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Sunday cadence</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Weekly check-ins</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Monthly Reviews</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Monthly reviews</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
               {monthlyReviews.length}
             </span>
             <span className="text-xs text-[var(--color-ink-muted)]">completed</span>
           </div>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">End of month synthesis</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">End-of-month check-ins</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Mean Energy Level</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Average energy</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-accent)]">
               {meanEnergy ?? 'Not rated'}
             </span>
             <span className="text-xs text-[var(--color-ink-muted)]">{meanEnergy ? `/ 5.0, ${energyRatings.length} ratings` : 'No ratings yet'}</span>
           </div>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Self-reported vital energy</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Based on your own ratings</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Open Blockers</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Things getting in the way</span>
           <div className="flex items-baseline gap-1">
             <span
               className={`font-mono tabular-figure text-lg font-bold ${
@@ -110,7 +110,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
             </span>
             <span className="text-xs text-[var(--color-ink-muted)]">active</span>
           </div>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Friction items to unblock</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Current obstacles</span>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-[var(--color-accent)]" />
             <h3 className="text-base font-semibold text-[var(--color-ink)]">
-              Energy & Mood Dual-Line Trend
+              Energy and mood over time
             </h3>
           </div>
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
@@ -130,7 +130,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
 
         {trendData.length < 2 ? (
           <div className="py-6 text-center text-xs text-[var(--color-ink-muted)]">
-            Log at least 2 periodic reviews with energy and mood ratings to display trends.
+            Add ratings to two reviews to see how your energy and mood change over time.
           </div>
         ) : (
           <div className="p-2 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
@@ -145,7 +145,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-[var(--color-accent)]" />
             <h3 className="text-base font-semibold text-[var(--color-ink)]">
-              Periodic Review Reflections & Highlights
+              Your past reviews
             </h3>
           </div>
 
@@ -156,7 +156,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search past reflections..."
+              placeholder="Search past reviews…"
               className="bg-transparent text-xs text-[var(--color-ink)] placeholder-[var(--color-ink-muted)] focus:outline-none w-full"
             />
           </div>
@@ -164,7 +164,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
 
         {filteredReviews.length === 0 ? (
           <div className="py-8 text-center text-xs text-[var(--color-ink-muted)]">
-            {searchQuery ? 'No reviews match your search query.' : 'No reviews recorded yet.'}
+            {searchQuery ? 'No reviews match that search.' : 'Your saved reviews will appear here.'}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -176,21 +176,14 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
                   className="surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)] p-3 flex flex-col gap-2 transition-colors"
                 >
                   {/* Review Header */}
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setSelectedReviewId(isExpanded ? null : review.id)}
-                    className="flex items-center justify-between cursor-pointer select-none"
+                    className="w-full flex items-center justify-between gap-3 p-0 border-0 bg-transparent text-inherit text-left cursor-pointer select-none"
+                    aria-expanded={isExpanded}
                   >
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="p-0.5 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        ) : (
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        )}
-                      </button>
+                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                       <span className="font-semibold text-xs text-[var(--color-ink)]">
                         {review.period}
                       </span>
@@ -213,7 +206,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
                         </span>
                       )}
                     </div>
-                  </div>
+                  </button>
 
                   {/* Top Three Tomorrow if present */}
                   {review.topThreeTomorrow && review.topThreeTomorrow.length > 0 && (

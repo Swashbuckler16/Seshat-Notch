@@ -37,7 +37,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={props.type || 'button'}
         disabled={disabled || isLoading}
-        className={`inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-xs)] select-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-55 active:scale-[0.98] transition-opacity duration-150 ${sizeClasses} ${variantClasses} ${className}`}
+        className={`inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-xs)] select-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-55 ${sizeClasses} ${variantClasses} ${className}`}
         {...props}
       >
         {isLoading && (

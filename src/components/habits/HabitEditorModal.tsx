@@ -89,12 +89,12 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={habitToEdit ? 'Edit habit' : 'Create new habit'}
-      subtitle="Configure cadence, measurable target, and goal links."
+      subtitle="Choose how often to do it and what counts as done."
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Title */}
         <Input
-          label="Habit title"
+          label="Habit name"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Daily Deep Study Block, Strength Training, Sleep Window"
@@ -105,10 +105,10 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
         <div className="flex items-center justify-between p-2.5 surface-card border border-[var(--color-rule)] rounded-[var(--radius-xs)]">
           <div className="flex flex-col gap-0.5">
             <span className="text-xs font-semibold text-[var(--color-ink)]">
-              Avoidance habit (things to stop)
+              A habit you want to change
             </span>
             <span className="text-[11px] text-[var(--color-ink-muted)]">
-              Tracks consecutive clean days and records relapses honestly (HB-6).
+              Track the days you stick with this change and note setbacks without losing past progress.
             </span>
           </div>
           <input
@@ -122,7 +122,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
         {/* Schedule Type */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-[var(--color-ink)]">
-            Cadence & schedule
+            How often?
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
             <button
@@ -156,7 +156,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
                   : 'border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-rule-strong)]'
               }`}
             >
-              N / week
+              Times each week
             </button>
             <button
               type="button"
@@ -167,7 +167,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
                   : 'border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-rule-strong)]'
               }`}
             >
-              Every N days
+              Every set number of days
             </button>
           </div>
         </div>
@@ -175,7 +175,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
         {/* Frequency / Interval parameters */}
         {scheduleType === 'n_per_week' && (
           <Input
-            label="Target times per week"
+            label="How many times a week?"
             type="number"
             min={1}
             max={7}
@@ -187,7 +187,8 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
 
         {scheduleType === 'every_n_days' && (
           <Input
-            label="Day interval (e.g. 2 for every other day)"
+            label="Days between check-ins"
+            helperText="For example, enter 2 for every other day."
             type="number"
             min={2}
             value={intervalDays}
@@ -201,7 +202,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-[var(--color-ink)]">
-                Metric type
+                Track this habit by
               </label>
               <select
                 className="input-field px-2.5 py-1.5 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
@@ -209,13 +210,13 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
                 onChange={(e) => setMetricType(e.target.value as 'boolean' | 'count' | 'duration')}
               >
                 <option value="boolean">Done / Not done</option>
-                <option value="duration">Duration (minutes)</option>
-                <option value="count">Numeric count</option>
+                <option value="duration">Time in minutes</option>
+                <option value="count">Number of times</option>
               </select>
             </div>
 
             <Input
-              label="Target value"
+            label="Goal amount"
               type="number"
               min={1}
               value={targetValue}
@@ -224,7 +225,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
             />
 
             <Input
-              label="Unit label"
+            label="Count as"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               placeholder={metricType === 'duration' ? 'minutes' : 'times'}
@@ -236,14 +237,14 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[var(--color-ink)] flex items-center gap-1.5">
             <TargetIcon className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span>Link to strategic goal (optional)</span>
+            <span>Connect to a goal (optional)</span>
           </label>
           <select
             className="input-field px-2.5 py-1.5 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
             value={linkedGoalId}
             onChange={(e) => setLinkedGoalId(e.target.value)}
           >
-            <option value="">No goal link (standalone habit)</option>
+            <option value="">No goal</option>
             {(goals || []).map((g) => (
               <option key={g.id} value={g.id}>
                 {g.title}
@@ -251,13 +252,13 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
             ))}
           </select>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
-            Habit completions directly contribute to the goal's progress score.
+            Each completed check-in also adds progress to this goal.
           </span>
         </div>
 
         {/* Start Date */}
         <Input
-          label="Habit start date"
+          label="Start date"
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}

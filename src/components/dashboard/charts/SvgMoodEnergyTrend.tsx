@@ -56,6 +56,9 @@ export const SvgMoodEnergyTrend: React.FC<SvgMoodEnergyTrendProps> = ({
   const moodSegments = getSegments('mood');
 
   const activePoint = hoverIndex !== null && data[hoverIndex] ? data[hoverIndex] : data[data.length - 1];
+  const chartSummary = data.map((point) =>
+    `${point.period}: energy ${point.energy ?? 'not rated'} out of 5, mood ${point.mood ?? 'not rated'} out of 5`
+  ).join('; ');
 
   return (
     <div className={`flex flex-col gap-2 w-full ${className}`}>
@@ -86,7 +89,8 @@ export const SvgMoodEnergyTrend: React.FC<SvgMoodEnergyTrendProps> = ({
           viewBox={`0 0 ${chartW} ${height}`}
           className="w-full h-auto overflow-visible select-none"
           preserveAspectRatio="none"
-          aria-hidden="true"
+          role="img"
+          aria-label={`Mood and energy ratings over time. ${chartSummary}`}
         >
           {/* Horizontal Level Guides 1 to 5 */}
           {[1, 2, 3, 4, 5].map((level) => {

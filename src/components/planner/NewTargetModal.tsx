@@ -68,8 +68,8 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="New target"
-      subtitle="Set a measurable milestone or target for this planning period."
+      title="New goal"
+      subtitle="Choose a clear result to work toward this month, week, or day."
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -81,14 +81,14 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
             disabled={!title.trim() || targetValue <= 0 || !period.trim()}
           >
             <Check className="w-3.5 h-3.5" />
-            <span>Create target</span>
+            <span>Create goal</span>
           </Button>
         </>
       }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <Input
-          label="Target title"
+          label="Goal name"
           placeholder="e.g. Document 3 detection rules and test coverage"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -99,7 +99,7 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--color-ink)]">
-              Horizon
+              Time period
             </label>
             <select
               value={horizon}
@@ -113,15 +113,16 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
           </div>
 
           <Input
-            label="Period"
+            label="Choose a period"
+            type={horizon === 'month' ? 'month' : horizon === 'week' ? 'week' : 'date'}
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
             helperText={
               horizon === 'month'
-                ? 'Format: YYYY-MM (e.g. 2026-10)'
+                ? 'Choose the month for this goal.'
                 : horizon === 'week'
-                ? 'Format: YYYY-Www (e.g. 2026-W44)'
-                : 'Format: YYYY-MM-DD (e.g. 2026-10-31)'
+                ? 'Choose the week for this goal.'
+                : 'Choose the day for this goal.'
             }
             required
           />
@@ -130,14 +131,14 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--color-ink)]">
-              Associated project (optional)
+              Add to a project (optional)
             </label>
             <select
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
             >
-              <option value="">None (Independent effort)</option>
+              <option value="">No project</option>
               {(projects || []).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title}
@@ -148,16 +149,16 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
 
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-[var(--color-ink)]">
-              Metric type
+              What do you want to track?
             </label>
             <select
               value={metricType}
               onChange={(e) => setMetricType(e.target.value as MetricType)}
               className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
             >
-              <option value="numeric">Numeric count</option>
-              <option value="duration">Duration (minutes)</option>
-              <option value="percentage">Percentage (0–100)</option>
+              <option value="numeric">Number of items</option>
+              <option value="duration">Time in minutes</option>
+              <option value="percentage">Percentage</option>
               <option value="boolean">Done / Not Done</option>
             </select>
           </div>
@@ -165,7 +166,7 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Target value"
+            label="Goal amount"
             type="number"
             min="0.1"
             step="any"
@@ -174,7 +175,7 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
             required
           />
           <Input
-            label="Unit"
+            label="Count as"
             placeholder="e.g. rules, detections, pages"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}

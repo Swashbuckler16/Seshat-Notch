@@ -68,8 +68,8 @@ export const MorningSummary: React.FC<MorningSummaryProps> = ({
                 {monthDay}
               </span>
             </div>
-            <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
-              Plan your day, build habits, and keep focus time visible.
+            <p className="text-sm text-[var(--color-ink-muted)] mt-0.5">
+              A quick look at what you planned and what you have done.
             </p>
           </div>
         </div>
@@ -105,23 +105,23 @@ export const MorningSummary: React.FC<MorningSummaryProps> = ({
       </div>
 
       {/* 4 Glancable Daily Stat Tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-3">
         {/* Targets Tile */}
-        <div className="bg-[var(--color-paper-2)]/60 p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+        <div className="morning-stat flex flex-col gap-1">
           <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
-            <span>Targets</span>
+            <span>Goals</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-accent)]" />
           </div>
           <div className="font-mono text-base font-semibold tabular-figure text-[var(--color-ink)]">
             {targetsDone} / {targetsTotal}
           </div>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
-            {targetsTotal === 0 ? 'No targets due' : `${Math.round((targetsDone / (targetsTotal || 1)) * 100)}% met`}
+            {targetsTotal === 0 ? 'Nothing due today' : `${Math.round((targetsDone / (targetsTotal || 1)) * 100)}% complete`}
           </span>
         </div>
 
         {/* Tasks Tile */}
-        <div className="bg-[var(--color-paper-2)]/60 p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+        <div className="morning-stat flex flex-col gap-1">
           <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
             <span>Tasks</span>
             <ListTodo className="w-3.5 h-3.5 text-[var(--color-accent)]" />
@@ -130,12 +130,12 @@ export const MorningSummary: React.FC<MorningSummaryProps> = ({
             {tasksDone} / {tasksTotal}
           </div>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
-            {tasksTotal === 0 ? 'No tasks scheduled' : `${Math.round((tasksDone / (tasksTotal || 1)) * 100)}% done`}
+            {tasksTotal === 0 ? 'Nothing planned today' : `${Math.round((tasksDone / (tasksTotal || 1)) * 100)}% complete`}
           </span>
         </div>
 
         {/* Habits Tile */}
-        <div className="bg-[var(--color-paper-2)]/60 p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+        <div className="morning-stat flex flex-col gap-1">
           <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
             <span>Habits</span>
             <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
@@ -149,27 +149,27 @@ export const MorningSummary: React.FC<MorningSummaryProps> = ({
         </div>
 
         {/* Focus Time Tile */}
-        <div className="bg-[var(--color-paper-2)]/60 p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
+        <div className="morning-stat flex flex-col gap-1">
           <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)]">
             <span>Focus time</span>
             <Clock className="w-3.5 h-3.5 text-[var(--color-accent)]" />
           </div>
           <div className="font-mono text-base font-semibold tabular-figure text-[var(--color-ink)]">
-            {minutesLogged}m
+            {minutesLogged} min
           </div>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
-            {minutesEstimated > 0 ? `of ${minutesEstimated}m planned` : 'logged today'}
+            {minutesEstimated > 0 ? `of ${minutesEstimated} min planned` : 'focused today'}
           </span>
         </div>
       </div>
 
       {/* Measuring Cord for Overall Day Fulfillment */}
-      <div className="bg-[var(--color-paper-2)]/40 p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+      <div className="pt-3 hairline-t">
         <CordBar
           current={completedItems}
           total={totalItems || 1}
           unit=" items"
-          label={`Day Completion (${completedItems}/${totalItems || 1})`}
+          label={`Today's progress (${completedItems}/${totalItems || 1})`}
         />
       </div>
     </div>

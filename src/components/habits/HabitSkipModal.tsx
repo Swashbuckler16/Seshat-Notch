@@ -44,8 +44,8 @@ export const HabitSkipModal: React.FC<HabitSkipModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Record excused rest day"
-      subtitle="Preserves your habit streak without penalty per fair streak logic."
+      title="Mark a rest day"
+      subtitle="Your routine can include breaks. This day will not interrupt your progress."
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Fair Streak Protection Notice */}
@@ -62,7 +62,7 @@ export const HabitSkipModal: React.FC<HabitSkipModalProps> = ({
         </div>
 
         <Input
-          label="Skip date"
+          label="Date"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}

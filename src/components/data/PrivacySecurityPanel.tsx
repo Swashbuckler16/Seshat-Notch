@@ -130,7 +130,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
         <div className="flex items-center gap-2.5 hairline-b pb-2.5">
           <Shield className="w-4 h-4 text-[var(--color-emerald)]" />
           <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-            Data Privacy & Offline Integrity
+            Privacy and your data
           </h3>
         </div>
 
@@ -138,30 +138,30 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-ink)]">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-emerald)]" />
-              <span>Zero Telemetry</span>
+              <span>No tracking</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              No tracking pixels, third-party analytics, or external logging SDKs.
+              Your plans are not sent to analytics or advertising services.
             </p>
           </div>
 
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-ink)]">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-emerald)]" />
-              <span>100% Local-First</span>
+              <span>Saved on this device</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              All plans, change history, and metrics reside on your machine in local storage.
+              Your plans and activity stay in this app on your device.
             </p>
           </div>
 
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-ink)]">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-emerald)]" />
-              <span>Total Data Export</span>
+              <span>Take your data with you</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
-              One-click export to JSON, CSV, and Markdown anytime without lock-in.
+              Save a backup file or download a readable copy whenever you need one.
             </p>
           </div>
         </div>
@@ -174,10 +174,10 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
             <Clock className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
               <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-                Local Day Rollover Boundary
+                When your day begins
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
-                Choose when a new planning day starts in your local timezone (helpful for late-night sessions).
+                If you work late, choose when Seshat should start counting a new day.
               </span>
             </div>
           </div>
@@ -205,12 +205,12 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
             <Bell className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
               <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-                Reminders & Scheduled Prompts
+                Reminders
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
                 {shellStatus.isDesktopApp
-                  ? 'Fires native Windows notifications even when minimized to the system tray.'
-                  : 'Checked every 60 seconds while Seshat Notch is open in your browser (use the Tauri Windows Desktop app for background tray notifications).'}
+                  ? 'The Windows app can remind you while it is minimized.'
+                  : 'Reminders appear while this browser tab is open.'}
               </span>
             </div>
           </div>
@@ -228,7 +228,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-xs">
           <div className="flex flex-col gap-1">
             <label htmlFor="morning-reminder-time" className="font-medium text-[var(--color-ink)]">
-              Morning Plan Reminder
+              Morning reminder
             </label>
             <input
               id="morning-reminder-time"
@@ -241,7 +241,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
 
           <div className="flex flex-col gap-1">
             <label htmlFor="evening-reminder-time" className="font-medium text-[var(--color-ink)]">
-              Evening Check-In Reminder
+              Evening reminder
             </label>
             <input
               id="evening-reminder-time"
@@ -260,7 +260,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
                 onChange={(e) => handleUpdateReminders({ sundayReviewReminder: e.target.checked })}
                 className="accent-[var(--color-accent)]"
               />
-              <span>Sunday 17:00 Review Prompt</span>
+              <span>Sunday weekly review reminder</span>
             </label>
           </div>
         </div>
@@ -273,46 +273,46 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
             <Monitor className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
               <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-                Windows Desktop Shell Integration
+                Desktop app options
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
-                Runtime environment: {shellStatus.modeLabel}
+                {shellStatus.isDesktopApp ? 'You are using the Windows app.' : 'You are using the browser version.'}
               </span>
             </div>
           </div>
           <span className="px-2 py-0.5 rounded-[var(--radius-xs)] text-[11px] font-mono border border-[var(--color-rule)] bg-[var(--color-paper-2)] text-[var(--color-ink)]">
-            {shellStatus.isDesktopApp ? 'Native Shell' : 'Web / PWA'}
+            {shellStatus.isDesktopApp ? 'Windows app' : 'Browser'}
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
-            <span className="font-semibold text-[var(--color-ink)]">System Tray & Close-to-Tray</span>
+            <span className="font-semibold text-[var(--color-ink)]">Run in the background</span>
             <span className="text-[var(--color-ink-muted)]">
               {shellStatus.traySupported
-                ? 'Active — closing the window keeps Seshat Notch running in the Windows tray.'
-                : 'Available via the Tauri Windows build (npm run tauri:build).'}
+                ? 'Closing the window keeps reminders running in the background.'
+                : 'Available in the Windows app.'}
             </span>
           </div>
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
-            <span className="font-semibold text-[var(--color-ink)]">Quick-Add Shortcuts</span>
+            <span className="font-semibold text-[var(--color-ink)]">Keyboard shortcut</span>
             <span className="text-[var(--color-ink-muted)] font-mono">
               {shellStatus.globalHotkey}
             </span>
           </div>
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
-            <span className="font-semibold text-[var(--color-ink)]">Local Disk Backups</span>
+            <span className="font-semibold text-[var(--color-ink)]">Backup copies</span>
             <span className="text-[var(--color-ink-muted)]">
               {shellStatus.silentDiskBackupSupported
-                ? 'Automatic writes to Documents/SeshatNotch/Backups/'
-                : 'Daily prompt on Today + 1-click JSON file save'}
+                ? 'Saved in Documents > SeshatNotch > Backups.'
+                : 'Save a backup file from the Today page.'}
             </span>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2 hairline-t text-xs">
           <span className="text-[var(--color-ink-muted)]">
-            Note: The browser app and the native desktop app keep separate local databases. Use <strong>Save backup (.json)</strong> and <strong>Import Plans</strong> to move data between them.
+            The browser version and the Windows app keep separate copies of your plans. Use <strong>Save backup file</strong> and <strong>Restore a copy</strong> to move plans between them.
           </span>
           {shellStatus.isDesktopApp && (
             <label className="inline-flex items-center gap-2 font-medium text-[var(--color-ink)] cursor-pointer">

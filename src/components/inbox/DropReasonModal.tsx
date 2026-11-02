@@ -38,8 +38,8 @@ export const DropReasonModal: React.FC<DropReasonModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Reason required: Dropping item"
-      subtitle="Dropping an item requires an explicit reason stored permanently in your audit log."
+      title="Remove from your plan?"
+      subtitle="Add a short note so you remember why this was removed."
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
@@ -51,7 +51,7 @@ export const DropReasonModal: React.FC<DropReasonModalProps> = ({
             disabled={!reason.trim() || isSubmitting}
           >
             <Check className="w-3.5 h-3.5" />
-            <span>Confirm drop with reason</span>
+            <span>Remove from plan</span>
           </Button>
         </>
       }
@@ -64,13 +64,13 @@ export const DropReasonModal: React.FC<DropReasonModalProps> = ({
               {itemTitle}
             </span>
             <span className="text-[var(--color-ink-muted)] text-[11px] mt-0.5">
-              Honest tracking keeps your plan realistic. Explain why this work is being dropped.
+              A brief note can help when you review your plan later.
             </span>
           </div>
         </div>
 
         <Input
-          label="Why is this item being dropped?"
+          label="Why are you removing this?"
           placeholder="e.g. Deprecated in favor of alternative approach / Scope reduced"
           value={reason}
           onChange={(e) => setReason(e.target.value)}

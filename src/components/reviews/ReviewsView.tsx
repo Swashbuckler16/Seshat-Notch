@@ -50,6 +50,10 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ currentDateStr }) => {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="page-heading">
+        <h1>Review and plan ahead</h1>
+        <p>See what still needs attention, look back on your week, or revisit past reviews.</p>
+      </div>
       {/* Sub-navigation bar */}
       <div className="flex items-center gap-1 bg-[var(--color-paper-2)] p-1 rounded-[var(--radius-xs)] border border-[var(--color-rule)] w-fit text-xs">
         <button
@@ -62,7 +66,7 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ currentDateStr }) => {
           }`}
         >
           <Inbox className="w-3.5 h-3.5" />
-          <span>Carry-over inbox</span>
+          <span>Unfinished tasks</span>
           {totalOverdue > 0 && (
             <span className="px-1.5 py-0.2 text-[10px] font-mono rounded bg-[var(--color-status-at-risk-bg)] text-[var(--color-status-at-risk)] border border-[var(--color-status-at-risk)] font-semibold">
               {totalOverdue}
@@ -80,7 +84,7 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ currentDateStr }) => {
           }`}
         >
           <HeartHandshake className="w-3.5 h-3.5" />
-          <span>Reflect & review</span>
+          <span>Weekly review</span>
         </button>
 
         <button

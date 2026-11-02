@@ -171,7 +171,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                                       : 'text-[var(--color-ink-muted)] border-[var(--color-rule)]'
                                   }`}
                                 >
-                                  {project.isGoal ? 'Strategic Goal' : 'Project'}
+                                  {project.isGoal ? 'Goal' : 'Project'}
                                 </span>
                               </div>
                             </div>
@@ -245,7 +245,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                           {isGoalExpanded && (
                             <div className="pl-6 pt-2 border-t border-[var(--color-rule)] flex flex-col gap-2">
                               <span className="text-xs text-[var(--color-ink-muted)]">
-                                Horizon Targets & Milestones
+                                Goals and steps
                               </span>
 
                               {projTargets.length === 0 && projMilestones.length === 0 ? (
@@ -297,7 +297,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                                               {t.title}
                                             </span>
                                             <span className="text-[10px] font-mono text-[var(--color-ink-muted)]">
-                                              Horizon: {t.horizon} ({t.period})
+                                              {t.horizon === 'day' ? 'Daily' : t.horizon === 'week' ? 'Weekly' : 'Monthly'} goal, {t.period}
                                             </span>
                                           </div>
                                         </div>

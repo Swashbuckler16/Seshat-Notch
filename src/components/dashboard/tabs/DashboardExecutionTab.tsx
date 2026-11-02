@@ -94,7 +94,7 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
             <h3 className="font-semibold text-xs text-[var(--color-ink)]">
-              Target completion rate by horizon
+              Goals completed by time period
             </h3>
           </div>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
@@ -112,7 +112,7 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
             <div className="flex items-center gap-2">
               <Activity className="w-4 h-4 text-[var(--color-accent)]" />
               <h4 className="font-semibold text-xs text-[var(--color-ink)]">
-                Completion rate by weekday
+                Tasks finished by the day of the week
               </h4>
             </div>
             <span className="text-[11px] text-[var(--color-ink-muted)]">
@@ -187,18 +187,18 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-[var(--color-accent)]" />
             <h4 className="font-semibold text-xs text-[var(--color-ink)]">
-              Carry-over & drop audit ledger
+              Past tasks and changes
             </h4>
           </div>
           <span className="text-[11px] text-[var(--color-ink-muted)]">
-            Task history
+            Recent activity
           </span>
         </div>
 
         <div className="flex flex-col divide-y divide-[var(--color-rule)] max-h-48 overflow-y-auto">
           {dropEntries.length === 0 && carriedOverTasks.length === 0 ? (
             <div className="py-6 text-center text-xs text-[var(--color-ink-muted)]">
-              No dropped items or carry-over events logged.
+              No unfinished or removed tasks to show yet.
             </div>
           ) : (
             <>

@@ -51,10 +51,10 @@ export const DataManagementView: React.FC = () => {
   };
 
   const subTabs: { id: DataSubTab; label: string; icon: React.FC<{ className?: string }>; badge?: number }[] = [
-    { id: 'export', label: 'Export Data', icon: Download },
-    { id: 'import', label: 'Import & Restore', icon: Upload },
-    { id: 'backups', label: 'Snapshots', icon: Camera },
-    { id: 'recovery', label: 'Recovery Bin', icon: Trash2, badge: totalRecoveryBinCount },
+    { id: 'export', label: 'Save a copy', icon: Download },
+    { id: 'import', label: 'Restore a copy', icon: Upload },
+    { id: 'backups', label: 'Backup history', icon: Camera },
+    { id: 'recovery', label: 'Recently deleted', icon: Trash2, badge: totalRecoveryBinCount },
     { id: 'privacy', label: 'Privacy & Security', icon: Shield },
   ];
 
@@ -69,14 +69,14 @@ export const DataManagementView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-semibold text-sm text-[var(--color-ink)]">
-                Settings & Data Ownership
+                Settings and backups
               </h1>
               <span className="text-[11px] font-mono px-1.5 py-0.2 bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded text-[var(--color-accent)]">
-                Local-First
+                Saved on this device
               </span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)]">
-              Your data belongs completely to you. Kept offline in your browser with multi-format export, restore, and snapshot backups.
+              Your plans stay on this device. Save a backup, restore a saved copy, or adjust reminders.
             </p>
           </div>
         </div>
@@ -88,7 +88,7 @@ export const DataManagementView: React.FC = () => {
             className="min-h-11 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--color-paper-3)] hover:bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-[var(--color-ink)] transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span>Load Example Plan</span>
+            <span>Load sample plan</span>
           </button>
         </div>
       </div>

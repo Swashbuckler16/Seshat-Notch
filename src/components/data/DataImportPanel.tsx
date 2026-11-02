@@ -49,7 +49,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
     if (
       importMode === 'replace' &&
       !window.confirm(
-        'REPLACE MODE will clear current local data and restore the backup. An automatic safety snapshot will be created before applying. Proceed?'
+        'Replace your current plans with this backup? A safety copy of your current plans will be saved first.'
       )
     ) {
       return;
@@ -96,11 +96,11 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
         <div className="flex items-center gap-2">
           <Upload className="w-4 h-4 text-[var(--color-accent)]" />
           <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-            Import Data & Plans
+            Restore a backup or checklist
           </h3>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          Restore a previous backup or bulk-import tasks and plans from Markdown checklists using the grammar engine.
+          Bring back a saved backup or add tasks from a checklist.
         </p>
       </div>
 
@@ -116,7 +116,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           }`}
         >
           <FileJson className="w-3.5 h-3.5" />
-          <span>Full data backup (JSON)</span>
+          <span>Backup file</span>
         </button>
 
         <button
@@ -129,7 +129,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
-          <span>Markdown checklist</span>
+          <span>Checklist</span>
         </button>
       </div>
 
@@ -139,16 +139,16 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <span className="font-semibold text-xs text-[var(--color-ink)]">
-                Restore or Merge Database Snapshot
+                Restore or add to your plans
               </span>
               <p className="text-[11px] text-[var(--color-ink-muted)]">
-                Upload or paste a `.json` backup file exported from Seshat Notch.
+                Choose a backup file you saved earlier. You can replace your plans or add the saved items to them.
               </p>
             </div>
 
             {/* Mode Selector */}
             <div className="flex items-center gap-2 text-xs font-mono">
-              <span className="text-[var(--color-ink-muted)] text-[11px]">Mode:</span>
+              <span className="text-[var(--color-ink-muted)] text-[11px]">What should happen?</span>
               <label className="inline-flex items-center gap-1 cursor-pointer">
                 <input
                   type="radio"
@@ -158,7 +158,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
                   onChange={() => setImportMode('merge')}
                   className="accent-[var(--color-accent)]"
                 />
-                <span>Merge (LWW)</span>
+                <span>Add to my plans</span>
               </label>
               <label className="inline-flex items-center gap-1 cursor-pointer">
                 <input
@@ -178,7 +178,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           <div>
             <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] cursor-pointer text-[var(--color-ink)] transition-colors">
               <Upload className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              <span>Choose JSON Backup File…</span>
+              <span>Choose a backup file…</span>
               <input type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>
@@ -186,7 +186,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           <textarea
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}
-            placeholder="Or paste JSON snapshot content here directly…"
+            placeholder="Or paste the contents of a backup file here…"
             rows={6}
             className="w-full text-xs font-mono p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] placeholder-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)]"
           />
@@ -194,7 +194,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           <div className="flex items-center justify-between">
             <span className="text-[11px] text-[var(--color-ink-muted)] flex items-center gap-1">
               <HelpCircle className="w-3.5 h-3.5" />
-              <span>A safety snapshot is always taken before importing.</span>
+              <span>A backup is saved before your plans are changed.</span>
             </span>
 
             <button
@@ -204,7 +204,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
               className="inline-flex items-center gap-1.5 py-2 px-4 rounded-[var(--radius-xs)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-50 min-h-11"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>{isProcessing ? 'Processing…' : `Apply ${importMode === 'replace' ? 'Replace' : 'Merge'} Import`}</span>
+              <span>{isProcessing ? 'Restoring…' : importMode === 'replace' ? 'Replace my plans' : 'Add saved items'}</span>
             </button>
           </div>
         </div>
@@ -225,7 +225,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           <div>
             <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] cursor-pointer text-[var(--color-ink)] transition-colors">
               <Upload className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              <span>Upload Markdown File…</span>
+              <span>Choose checklist file…</span>
               <input type="file" accept=".md,.txt" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>

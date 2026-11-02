@@ -48,7 +48,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
   };
 
   const handlePermanentDelete = async (item: RecoveryBinItem) => {
-    if (!window.confirm(`Permanently purge "${item.title}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete “${item.title}” permanently? This cannot be undone.`)) return;
 
     try {
       setActionLoadingId(item.id);
@@ -64,7 +64,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
 
   const handleEmptyBin = async () => {
     if (items.length === 0) return;
-    if (!window.confirm(`Permanently purge all ${items.length} items from the Recovery Bin? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete all ${items.length} recently deleted items permanently? This cannot be undone.`)) return;
 
     try {
       setLoading(true);
@@ -91,7 +91,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
           <Trash2 className="w-4 h-4 text-[var(--color-status-behind)]" />
           <div className="flex flex-col">
             <h3 className="text-xs font-bold text-[var(--color-ink)] ">
-              Recovery Bin (Soft-Delete Ledger)
+              Recently deleted
             </h3>
             <span className="text-[11px] text-[var(--color-ink-muted)]">
               Soft-deleted items are held here safely until restored or permanently erased.
@@ -125,7 +125,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
               className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-status-behind)]/30 text-[var(--color-status-behind)] hover:bg-[var(--color-status-behind)]/10 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Empty Bin</span>
+              <span>Delete all</span>
             </button>
           )}
         </div>
@@ -135,16 +135,16 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
       <div className="surface-card rounded-[var(--radius-sm)] border border-[var(--color-rule)] overflow-hidden">
         {loading ? (
           <div className="py-12 text-center text-xs text-[var(--color-ink-muted)] font-mono">
-            Scanning local database for deleted records…
+            Checking recently deleted items…
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="py-12 flex flex-col items-center justify-center gap-2 text-center">
             <CheckCircle2 className="w-8 h-8 text-[var(--color-emerald)] stroke-1" />
             <span className="text-xs font-semibold text-[var(--color-ink)]">
-              Recovery Bin is empty
+              Nothing has been deleted
             </span>
             <span className="text-[11px] text-[var(--color-ink-muted)] max-w-sm">
-              When projects, targets, tasks, or habits are dropped or deleted, they appear here and can be restored at any time.
+              Deleted projects, goals, tasks, and habits stay here so you can restore them.
             </span>
           </div>
         ) : (
@@ -152,10 +152,10 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="hairline-b bg-[var(--color-paper-2)] text-[11px] font-mono text-[var(--color-ink-muted)]">
-                  <th className="py-2.5 px-3">Item Title</th>
+                  <th className="py-2.5 px-3">Name</th>
                   <th className="py-2.5 px-3">Type</th>
-                  <th className="py-2.5 px-3">Deleted Date</th>
-                  <th className="py-2.5 px-3">Deletion Reason</th>
+                  <th className="py-2.5 px-3">Deleted</th>
+                  <th className="py-2.5 px-3">Why it was deleted</th>
                   <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
@@ -204,7 +204,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
                             disabled={isBusy}
                             onClick={() => handlePermanentDelete(item)}
                             className="p-1 rounded-[var(--radius-xs)] text-[var(--color-ink-muted)] hover:text-[var(--color-status-behind)] transition-colors disabled:opacity-50"
-                            title="Permanently purge this item"
+                          title="Delete permanently"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

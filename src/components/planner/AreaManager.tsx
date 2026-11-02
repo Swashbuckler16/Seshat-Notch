@@ -66,12 +66,12 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
         <div className="flex items-center gap-2">
           <Folder className="w-4 h-4 text-[var(--color-accent)]" />
           <h3 className="font-semibold text-xs tracking-tight text-[var(--color-ink-muted)]">
-            Areas
+            Life areas
           </h3>
         </div>
-        <Button size="sm" variant="ghost" onClick={() => setIsAddModalOpen(true)} title="Add Area">
+        <Button size="sm" variant="ghost" onClick={() => setIsAddModalOpen(true)} title="Add life area">
           <Plus className="w-3.5 h-3.5" />
-          <span>New Area</span>
+          <span>New life area</span>
         </Button>
       </div>
 
@@ -87,7 +87,7 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
               : 'hover:bg-[var(--color-paper-2)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
           }`}
         >
-          <span>All areas</span>
+          <span>All life areas</span>
           <span className="font-mono text-[11px] tabular-figure opacity-80">
             {projects?.length ?? 0}
           </span>
@@ -184,8 +184,8 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="New area"
-        subtitle="Group related projects, certifications, habits, and routines."
+        title="New life area"
+        subtitle="Group related projects, goals, and habits, such as work, health, or learning."
         footer={
           <>
             <Button variant="ghost" onClick={() => setIsAddModalOpen(false)}>
@@ -193,14 +193,14 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
             </Button>
             <Button variant="primary" onClick={handleCreateArea} disabled={!newAreaName.trim()}>
               <Check className="w-3.5 h-3.5" />
-              <span>Create Area</span>
+              <span>Create life area</span>
             </Button>
           </>
         }
       >
         <form onSubmit={handleCreateArea} className="flex flex-col gap-3">
           <Input
-            label="Area Name"
+            label="Life area name"
             placeholder="e.g. Career & Engineering, Health, Learning"
             value={newAreaName}
             onChange={(e) => setNewAreaName(e.target.value)}
@@ -208,8 +208,8 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
             autoFocus
           />
           <Input
-            label="Description (Optional)"
-            placeholder="Brief scope of efforts contained within this area"
+            label="Description (optional)"
+            placeholder="What belongs in this area?"
             value={newAreaDesc}
             onChange={(e) => setNewAreaDesc(e.target.value)}
           />

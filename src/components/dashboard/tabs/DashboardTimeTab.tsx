@@ -35,7 +35,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
       {/* 1. Time KPI Tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Cumulative Focus</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Total focus time</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
               {metrics.totalHours}
@@ -48,7 +48,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Deep Work Ratio</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Time in deep focus</span>
           <div className="flex items-baseline gap-1">
             <span
               className={`font-mono tabular-figure text-lg font-bold ${
@@ -57,7 +57,6 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
             >
               {metrics.deepWorkRatio}%
             </span>
-            <span className="text-xs text-[var(--color-ink-muted)]">ratio</span>
           </div>
           <span className="text-[10px] text-[var(--color-ink-muted)]">Standard target ≥ 60%</span>
         </div>
@@ -70,16 +69,15 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
             </span>
             <span className="text-xs text-[var(--color-ink-muted)]">min</span>
           </div>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Focus endurance</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Average time per session</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Estimate Accuracy</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">How close your time estimates are</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
               {metrics.estimateAccuracy.overallAccuracyRate}%
             </span>
-            <span className="text-xs text-[var(--color-ink-muted)]">accuracy</span>
           </div>
           <span className="text-[10px] text-[var(--color-ink-muted)]">
             {metrics.estimateAccuracy.evaluatedTasksCount} tasks evaluated
@@ -224,7 +222,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
 
           <div className="surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-2">
             <div className="flex justify-between items-center text-xs">
-              <span className="font-medium text-[var(--color-ink)]">Estimated vs Actual</span>
+              <span className="font-medium text-[var(--color-ink)]">Planned time and time spent</span>
               <span className="font-mono tabular-figure text-[11px] font-bold text-[var(--color-ink)]">
                 {formatMinutesToHuman(metrics.estimateAccuracy.totalActualMinutes)} act /{' '}
                 {formatMinutesToHuman(metrics.estimateAccuracy.totalEstimatedMinutes)} est
@@ -243,7 +241,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
           {/* 14d Activity Sparkline */}
           <div className="flex flex-col gap-1.5 pt-1">
             <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-ink-muted)]">
-              <span>Daily Focus Trend (Past 14 Days)</span>
+              <span>Daily focus time over the past 14 days</span>
               <span>{metrics.dailyTrend.length} days active</span>
             </div>
             <div className="p-2 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex justify-center">

@@ -13,6 +13,9 @@
     <script>
       (function() {
         const saved = localStorage.getItem('seshat-theme');
+        const savedPalette = localStorage.getItem('seshat-palette');
+        const palettes = ['seshat', 'ocean', 'berry'];
+        document.documentElement.dataset.palette = palettes.includes(savedPalette) ? savedPalette : 'seshat';
         if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
           document.documentElement.dataset.mode = 'dark';
         } else {

@@ -157,10 +157,10 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
             </div>
             <div>
               <h3 className="font-semibold text-xs text-[var(--color-ink)]">
-                Daily backup due
+                Save a copy of your plans
               </h3>
               <p className="text-xs text-[var(--color-ink-muted)]">
-                Save a local .json backup of your plans, logs, and settings to disk.
+                Keep a backup file of your plans, activity, and settings on your computer.
                 {lastBackupDate ? ` Last saved: ${lastBackupDate}.` : ' No disk backup saved yet.'}
               </p>
             </div>
@@ -173,7 +173,7 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-accent)] text-[var(--color-accent-ink)] rounded-[var(--radius-xs)] hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               <HardDriveDownload className="w-3.5 h-3.5" />
-              <span>{savingBackup ? 'Saving…' : 'Save backup (.json)'}</span>
+              <span>{savingBackup ? 'Saving…' : 'Save backup file'}</span>
             </button>
             <button
               type="button"
@@ -211,10 +211,10 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
             </div>
             <div>
               <h3 className="font-semibold text-xs text-[var(--color-ink)]">
-                Sunday Weekly Review & Triage
+                Review this week
               </h3>
               <p className="text-xs text-[var(--color-ink-muted)]">
-                It's Sunday. Reflect on this week's progress and review any carry-over tasks.
+                Look back at what got done and choose what to carry into next week.
               </p>
             </div>
           </div>
@@ -224,14 +224,14 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
               onClick={() => onNavigateTab('reviews')}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[var(--color-accent)] text-[var(--color-accent-ink)] rounded-[var(--radius-xs)] hover:opacity-90 transition-opacity"
             >
-              <span>Start Review</span>
+              <span>Review the week</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
       )}
 
-      {/* 2. Rapid Execution & Focus Strip */}
+      {/* Recent focus sessions and quick task actions */}
       <ExecutionStrip tasks={tasks || []} dateStr={dateStr} />
 
       {/* 3. Main Operational Grid: Tasks & Targets (Left) | Habits (Right) */}

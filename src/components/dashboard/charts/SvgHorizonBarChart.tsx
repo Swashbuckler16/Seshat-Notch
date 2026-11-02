@@ -17,8 +17,8 @@ export const SvgHorizonBarChart: React.FC<SvgHorizonBarChartProps> = ({ records,
   return (
     <div className={`flex flex-col gap-3 w-full ${className}`}>
       {records.map((r) => (
-        <div key={r.horizon} className="flex flex-col gap-1 surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-          <div className="flex items-center justify-between text-xs font-mono">
+        <div key={r.horizon} className="flex flex-col gap-1 surface-well p-3 rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+          <div className="flex items-center justify-between text-sm">
             <span className="font-medium text-[var(--color-ink)]">{r.label}</span>
             <div className="flex items-center gap-2">
               <span className="text-[var(--color-ink-muted)]">

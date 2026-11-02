@@ -101,13 +101,13 @@ export const PlannerView: React.FC = () => {
               <Calendar className="w-4 h-4 text-[var(--color-accent)]" />
             )}
             <h3 className="font-semibold text-sm">
-              {plannerMode === 'projects' ? 'Your projects' : 'Planning horizons & targets'}
+              {plannerMode === 'projects' ? 'Your projects' : 'Goals by time period'}
             </h3>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] mt-1">
             {plannerMode === 'projects'
-              ? 'Group work by area, keep its purpose in view, and map the milestones ahead.'
-              : 'Set monthly, weekly, and daily targets; distribute them across periods or adjust timelines.'}
+              ? 'Keep related work together and see how each project is moving forward.'
+              : 'Set goals for the month, week, or day and keep them in view.'}
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export const PlannerView: React.FC = () => {
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Time horizons</span>
+              <span>By time period</span>
             </button>
           </div>
 
@@ -183,7 +183,7 @@ export const PlannerView: React.FC = () => {
                   {areas.length > 0 ? <button type="button" className="min-h-11 text-[var(--color-accent)] underline underline-offset-2 focus-visible:outline-2" onClick={() => {
                     setAreaId(selectedAreaId !== 'all' ? selectedAreaId : areas?.[0]?.id || '');
                     setIsNewProjectModalOpen(true);
-                  }}>Create a project</button> : <p>Create an area first using “New Area”.</p>}
+                  }}>Create a project</button> : <p>Create a life area first using “New life area”.</p>}
                 </div>
               ) : (
                 filteredProjects.map((p) => {
@@ -244,7 +244,7 @@ export const PlannerView: React.FC = () => {
               {areas.length > 0 ? <button type="button" className="mt-2 min-h-11 text-[var(--color-accent)] underline underline-offset-2 focus-visible:outline-2" onClick={() => {
                 setAreaId(selectedAreaId !== 'all' ? selectedAreaId : areas?.[0]?.id || '');
                 setIsNewProjectModalOpen(true);
-              }}>Create a project</button> : <p className="mt-2">Create an area first using “New Area”.</p>}
+              }}>Create a project</button> : <p className="mt-2">Create a life area first using “New life area”.</p>}
             </div>
           )}
         </div>
@@ -330,7 +330,7 @@ export const PlannerView: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-3">
             <Input
-              label="Start Date"
+              label="Start date"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}

@@ -2,6 +2,8 @@
 
 :root,
 [data-mode="light"] {
+  --palette-preview-one: oklch(58% 0.17 145);
+  --palette-preview-two: oklch(67% 0.14 25);
   /* Color system — OKLCH Light Paper & Ink */
   --color-paper: oklch(98.5% 0.018 93);
   --color-paper-2: oklch(96.0% 0.025 94);
@@ -136,5 +138,110 @@
     --color-emerald: oklch(75% 0.16 145);
     --color-paper-muted: oklch(82% 0.14 78);
   }
+}
+
+/* Optional color palettes. The Seshat leaf-and-earth palette remains the default. */
+[data-palette="ocean"]:not([data-mode="dark"]) {
+  --palette-preview-one: oklch(52% 0.16 245);
+  --palette-preview-two: oklch(72% 0.12 195);
+  --color-paper: oklch(98.5% 0.012 235);
+  --color-paper-2: oklch(96% 0.02 230);
+  --color-paper-3: oklch(92.5% 0.032 225);
+  --color-rule: oklch(87.5% 0.025 230);
+  --color-rule-subtle: oklch(93% 0.018 230);
+  --color-rule-strong: oklch(78% 0.035 235);
+  --color-ink: oklch(24% 0.035 250);
+  --color-ink-muted: oklch(42% 0.035 245);
+  --color-ink-subtle: oklch(54% 0.035 245);
+  --color-accent: oklch(49% 0.17 245);
+  --color-accent-hover: oklch(43% 0.17 245);
+  --color-accent-subtle: oklch(94% 0.04 240);
+  --color-accent-ink: oklch(99% 0.008 240);
+  --color-focus: oklch(43% 0.18 245);
+  --color-scrim: oklch(24% 0.035 250 / 0.5);
+  --color-shadow: oklch(24% 0.035 250 / 0.05);
+  --color-chart-1: oklch(49% 0.17 245);
+  --color-chart-2: oklch(67% 0.13 190);
+  --color-chart-3: oklch(70% 0.16 55);
+  --color-emerald: oklch(55% 0.13 160);
+  --color-paper-muted: oklch(72% 0.13 190);
+}
+
+[data-mode="dark"][data-palette="ocean"] {
+  --palette-preview-one: oklch(76% 0.14 245);
+  --palette-preview-two: oklch(78% 0.12 195);
+  --color-paper: oklch(18% 0.025 245);
+  --color-paper-2: oklch(23% 0.03 245);
+  --color-paper-3: oklch(29% 0.035 240);
+  --color-rule: oklch(35% 0.03 240);
+  --color-rule-subtle: oklch(28% 0.025 240);
+  --color-rule-strong: oklch(43% 0.035 240);
+  --color-ink: oklch(95% 0.015 230);
+  --color-ink-muted: oklch(76% 0.025 230);
+  --color-ink-subtle: oklch(65% 0.02 230);
+  --color-accent: oklch(76% 0.14 245);
+  --color-accent-hover: oklch(82% 0.12 245);
+  --color-accent-subtle: oklch(30% 0.06 245);
+  --color-accent-ink: oklch(19% 0.025 245);
+  --color-focus: oklch(80% 0.14 245);
+  --color-scrim: oklch(10% 0.025 245 / 0.8);
+  --color-shadow: oklch(8% 0.025 245 / 0.24);
+  --color-chart-1: oklch(76% 0.14 245);
+  --color-chart-2: oklch(78% 0.12 195);
+  --color-chart-3: oklch(80% 0.15 65);
+  --color-emerald: oklch(76% 0.13 160);
+  --color-paper-muted: oklch(78% 0.12 195);
+}
+
+[data-palette="berry"]:not([data-mode="dark"]) {
+  --palette-preview-one: oklch(50% 0.18 350);
+  --palette-preview-two: oklch(70% 0.15 35);
+  --color-paper: oklch(98.5% 0.012 350);
+  --color-paper-2: oklch(96% 0.02 350);
+  --color-paper-3: oklch(92.5% 0.032 350);
+  --color-rule: oklch(87.5% 0.03 350);
+  --color-rule-subtle: oklch(93% 0.02 350);
+  --color-rule-strong: oklch(78% 0.04 350);
+  --color-ink: oklch(24% 0.04 350);
+  --color-ink-muted: oklch(42% 0.04 350);
+  --color-ink-subtle: oklch(54% 0.035 350);
+  --color-accent: oklch(49% 0.18 350);
+  --color-accent-hover: oklch(43% 0.18 350);
+  --color-accent-subtle: oklch(94% 0.045 350);
+  --color-accent-ink: oklch(99% 0.008 350);
+  --color-focus: oklch(43% 0.18 350);
+  --color-scrim: oklch(24% 0.04 350 / 0.5);
+  --color-shadow: oklch(24% 0.04 350 / 0.05);
+  --color-chart-1: oklch(49% 0.18 350);
+  --color-chart-2: oklch(68% 0.15 35);
+  --color-chart-3: oklch(63% 0.13 275);
+  --color-emerald: oklch(55% 0.13 160);
+  --color-paper-muted: oklch(68% 0.15 35);
+}
+
+[data-mode="dark"][data-palette="berry"] {
+  --palette-preview-one: oklch(76% 0.14 350);
+  --palette-preview-two: oklch(79% 0.13 35);
+  --color-paper: oklch(18% 0.025 350);
+  --color-paper-2: oklch(23% 0.03 350);
+  --color-paper-3: oklch(29% 0.035 350);
+  --color-rule: oklch(35% 0.03 350);
+  --color-rule-subtle: oklch(28% 0.025 350);
+  --color-rule-strong: oklch(43% 0.035 350);
+  --color-ink: oklch(95% 0.015 350);
+  --color-ink-muted: oklch(76% 0.025 350);
+  --color-ink-subtle: oklch(65% 0.02 350);
+  --color-accent: oklch(76% 0.14 350);
+  --color-accent-hover: oklch(82% 0.13 350);
+  --color-accent-subtle: oklch(30% 0.06 350);
+  --color-accent-ink: oklch(19% 0.025 350);
+  --color-focus: oklch(80% 0.14 350);
+  --color-scrim: oklch(10% 0.025 350 / 0.8);
+  --color-shadow: oklch(8% 0.025 350 / 0.24);
+  --color-chart-1: oklch(76% 0.14 350);
+  --color-chart-2: oklch(79% 0.13 35);
+  --color-chart-3: oklch(78% 0.12 275);
+  --color-emerald: oklch(76% 0.13 160);
+  --color-paper-muted: oklch(79% 0.13 35);
 }
 

@@ -125,10 +125,10 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
               <thead>
                 <tr className="hairline-b text-[11px] font-mono text-[var(--color-ink-muted)] bg-[var(--color-paper-2)]">
                   <th className="py-2 px-3 font-medium">Project</th>
-                  <th className="py-2 px-3 font-medium">Status & Ratio</th>
+                  <th className="py-2 px-3 font-medium">Status</th>
                   <th className="py-2 px-3 font-medium">Progress</th>
-                  <th className="py-2 px-3 font-medium">Forecast Date</th>
-                  <th className="py-2 px-3 font-medium">Time (Log/Est)</th>
+                  <th className="py-2 px-3 font-medium">Estimated finish</th>
+                  <th className="py-2 px-3 font-medium">Time spent / planned</th>
                   <th className="py-2 px-3 font-medium">Blockers</th>
                   <th className="py-2 px-3 font-medium">Last Activity</th>
                   <th className="py-2 px-2 text-right font-medium">Audit</th>
@@ -208,7 +208,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
                             {metrics.forecast.forecastDateExpected}
                           </span>
                         ) : (
-                          <span className="text-[var(--color-ink-muted)] italic">Insufficient logs</span>
+                          <span className="text-[var(--color-ink-muted)]">Add more progress updates to estimate this date</span>
                         )}
                       </td>
 
@@ -328,27 +328,27 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
           {/* Forecast Range & Methodology Footnote */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
             <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
-              <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Optimistic Finish</span>
+              <span className="text-[11px] text-[var(--color-ink-muted)]">Fastest estimate</span>
               <span className="font-mono tabular-figure font-bold text-[var(--color-ink)]">
                 {selectedItem.metrics.forecast.forecastDateOptimistic || 'No estimate'}
               </span>
-              <span className="text-[10px] text-[var(--color-ink-muted)]">Top historical velocity rate</span>
+              <span className="text-[10px] text-[var(--color-ink-muted)]">Based on your fastest past pace</span>
             </div>
 
             <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
-              <span className="text-[11px] font-mono text-[var(--color-accent)] font-semibold">Expected Finish</span>
+              <span className="text-[11px] text-[var(--color-accent)] font-semibold">Likely finish</span>
               <span className="font-mono tabular-figure font-bold text-sm text-[var(--color-accent)]">
                 {selectedItem.metrics.forecast.forecastDateExpected || 'Pending logs'}
               </span>
-              <span className="text-[10px] text-[var(--color-ink-muted)]">Rolling 4-week average</span>
+              <span className="text-[10px] text-[var(--color-ink-muted)]">Based on your average pace over 4 weeks</span>
             </div>
 
             <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
-              <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Pessimistic Finish</span>
+              <span className="text-[11px] text-[var(--color-ink-muted)]">Slower estimate</span>
               <span className="font-mono tabular-figure font-bold text-[var(--color-ink)]">
                 {selectedItem.metrics.forecast.forecastDatePessimistic || 'No estimate'}
               </span>
-              <span className="text-[10px] text-[var(--color-ink-muted)]">Slowest historical velocity</span>
+              <span className="text-[10px] text-[var(--color-ink-muted)]">Based on your slowest past pace</span>
             </div>
           </div>
         </div>

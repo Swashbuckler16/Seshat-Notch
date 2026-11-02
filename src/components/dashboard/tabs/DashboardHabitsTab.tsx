@@ -83,7 +83,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
           <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
             {activeHabits.length}
           </span>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Tracked daily & weekly</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Daily and weekly routines</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
@@ -94,7 +94,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
             </span>
             <span className="text-xs text-[var(--color-ink-muted)]">intervals</span>
           </div>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Fair streak logic</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Rest days are okay</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
@@ -102,7 +102,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
           <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
             {avgConsistency30d}%
           </span>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Excused days excluded</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Rest days are not counted</span>
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
@@ -110,7 +110,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
           <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
             {activeHabits.filter((h) => h.isAvoidance).length}
           </span>
-          <span className="text-[10px] text-[var(--color-ink-muted)]">Relapse resistance</span>
+          <span className="text-[10px] text-[var(--color-ink-muted)]">Habits you are working to change</span>
         </div>
       </div>
 
@@ -138,11 +138,11 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
               <thead>
                 <tr className="hairline-b text-[11px] font-mono text-[var(--color-ink-muted)] bg-[var(--color-paper-2)]">
                   <th className="py-2 px-3 font-medium">Habit</th>
-                  <th className="py-2 px-3 font-medium">Cadence</th>
+                  <th className="py-2 px-3 font-medium">How often</th>
                   <th className="py-2 px-3 font-medium">14d Trend</th>
-                  <th className="py-2 px-3 font-medium">Streak (Current / Best)</th>
+                  <th className="py-2 px-3 font-medium">Days in a row (now / best)</th>
                   <th className="py-2 px-3 font-medium">7d / 30d / 90d</th>
-                  <th className="py-2 px-3 font-medium">Weekday Rhythm (M-S)</th>
+                  <th className="py-2 px-3 font-medium">By day of the week</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-rule)]">
@@ -261,7 +261,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
           <div className="flex items-center gap-2 hairline-b pb-2">
             <Info className="w-3.5 h-3.5 text-[var(--color-ink-muted)]" />
             <h3 className="text-xs font-semibold text-[var(--color-ink)]">
-              Fair Streak Ledger: Recent Excused Pauses & Relapses
+              Rest days, breaks, and setbacks
             </h3>
           </div>
           <div className="flex flex-col divide-y divide-[var(--color-rule)] text-xs">

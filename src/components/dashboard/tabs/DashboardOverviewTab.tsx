@@ -228,7 +228,7 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
                   }`}
                 >
                   <span>{sched.glyph}</span>
-                  <span>{sched.statusLabel} ({sched.scheduleRatio})</span>
+                  <span>{sched.statusLabel}</span>
                 </span>
               </div>
             </div>

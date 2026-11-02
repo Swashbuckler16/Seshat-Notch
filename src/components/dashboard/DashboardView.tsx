@@ -161,7 +161,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     { id: 'time', label: 'Focus time', icon: Clock },
     { id: 'execution', label: 'Activity', icon: Activity },
     { id: 'reviews', label: 'Reviews', icon: BookOpen },
-    { id: 'insights', label: 'Insights', icon: Lightbulb },
+    { id: 'insights', label: 'Patterns', icon: Lightbulb },
   ];
 
   return (

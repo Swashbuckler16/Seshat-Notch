@@ -179,7 +179,7 @@ export const App: React.FC = () => {
             title="Press Ctrl+K or N to open Quick Add"
           >
             <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span className="text-xs">Quick Add</span>
+            <span className="text-xs">Add</span>
             <kbd className="ml-1 px-1 py-0.2 text-[11px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded font-mono">
               Ctrl+K
             </kbd>
@@ -311,7 +311,7 @@ export const App: React.FC = () => {
 
         {/* Tab 1: Today View */}
         {activeTab === 'today' && (
-          <section>
+            <section className="app-screen-enter">
             <TodayView
               onOpenQuickAdd={() => setQuickAddModalOpen(true)}
               onNavigateTab={(tab) => setActiveTab(tab as AppTab)}
@@ -328,19 +328,19 @@ export const App: React.FC = () => {
           }
         >
           {activeTab === 'planner' && (
-            <section>
+            <section className="app-screen-enter">
               <PlannerView />
             </section>
           )}
 
           {activeTab === 'habits' && (
-            <section>
+            <section className="app-screen-enter">
               <HabitsView />
             </section>
           )}
 
           {activeTab === 'progress' && (
-            <section>
+            <section className="app-screen-enter">
               <DashboardView
                 onNavigateTab={(tab) => {
                   if (tab === 'reviews') {
@@ -355,13 +355,13 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'settings' && (
-            <section>
+            <section className="app-screen-enter">
               <DataManagementView />
             </section>
           )}
 
           {activeTab === 'reviews' && (
-            <section>
+            <section className="app-screen-enter">
               <div className="mb-4">
                 <button
                   type="button"
@@ -410,7 +410,7 @@ export const App: React.FC = () => {
       {/* Desktop Footer */}
       <footer className="app-footer hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
         <div>Seshat Notch. Every day, a notch. Every goal, measured.</div>
-        <div>All data stays offline on your machine</div>
+        <div>Your plans stay on this device.</div>
       </footer>
     </div>
   );

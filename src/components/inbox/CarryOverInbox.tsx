@@ -102,13 +102,13 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
         <div>
           <div className="flex items-center gap-2">
             <Inbox className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="font-semibold text-sm">Carry-over inbox</h3>
+            <h3 className="font-semibold text-sm">Unfinished tasks</h3>
             <span className="font-mono text-xs tabular-figure px-1.5 py-0.2 bg-[var(--color-paper-3)] border border-[var(--color-rule)] rounded text-[var(--color-ink)]">
               {totalOverdue} item{totalOverdue === 1 ? '' : 's'}
             </span>
           </div>
           <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-            Unfinished work from previous days. Decide whether to reschedule, split, drop with an explicit reason, or move to backlog.
+            Tasks from earlier days. Reschedule them, break them into smaller steps, or save them for later.
           </p>
         </div>
 
@@ -128,10 +128,10 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
           <div className="surface-card rounded-[var(--radius-sm)] p-12 text-center flex flex-col items-center gap-2.5">
             <CheckCircle2 className="w-8 h-8 text-[var(--color-status-on-track)] opacity-60" />
             <span className="text-sm font-semibold text-[var(--color-ink)]">
-              Inbox zero: no plan drift
+              You are all caught up
             </span>
             <span className="text-xs text-[var(--color-ink-muted)] max-w-sm">
-              All tasks and targets from previous dates have been completed, rescheduled, or cleanly triaged.
+              Nothing from earlier days needs your attention.
             </span>
           </div>
         ) : (
@@ -140,7 +140,7 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
             {overdueTasks && overdueTasks.length > 0 && (
               <div className="flex flex-col gap-2.5">
                 <span className="text-xs font-semibold text-[var(--color-ink-muted)] ">
-                  Overdue tasks ({overdueTasks.length})
+                  Past due ({overdueTasks.length})
                 </span>
 
                 <div className="flex flex-col divide-y divide-[var(--color-rule)] border border-[var(--color-rule)] rounded-[var(--radius-sm)] overflow-hidden bg-[var(--color-paper)]">
@@ -232,7 +232,7 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
                             title="Move to project backlog without scheduled date"
                           >
                             <Archive className="w-3.5 h-3.5 text-[var(--color-ink-muted)]" />
-                            <span>Backlog</span>
+                              <span>Save for later</span>
                           </Button>
 
                           {/* Drop Action (PRD TR-3) */}
@@ -244,7 +244,7 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
                             className="text-[var(--color-status-behind)] hover:text-[var(--color-status-behind)]"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
-                            <span>Drop</span>
+                            <span>Remove</span>
                           </Button>
                         </div>
                       </div>
@@ -258,7 +258,7 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
             {overdueTargets && overdueTargets.length > 0 && (
               <div className="flex flex-col gap-2.5 mt-2">
                 <span className="text-xs font-semibold text-[var(--color-ink-muted)] ">
-                  Past daily targets ({overdueTargets.length})
+                  Past daily goals ({overdueTargets.length})
                 </span>
 
                 <div className="flex flex-col divide-y divide-[var(--color-rule)] border border-[var(--color-rule)] rounded-[var(--radius-sm)] overflow-hidden bg-[var(--color-paper)]">

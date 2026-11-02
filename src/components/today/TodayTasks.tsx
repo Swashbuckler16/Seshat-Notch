@@ -34,6 +34,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
   const [newPriority, setNewPriority] = useState<Priority>('medium');
   const [isAddingInline, setIsAddingInline] = useState(false);
   const [expandedTaskIds, setExpandedTaskIds] = useState<string[]>([]);
+  const [recentlyCompletedTaskIds, setRecentlyCompletedTaskIds] = useState<Set<string>>(() => new Set());
 
   // Query projects for labels
   const projects = useLiveQuery(() => db.projects.toArray());
@@ -41,6 +42,17 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
 
   const handleToggleTask = async (taskId: string) => {
     await domainService.toggleTaskStatus(taskId);
+    const task = tasks.find((item) => item.id === taskId);
+    if (task && task.status !== 'done') {
+      setRecentlyCompletedTaskIds((current) => new Set(current).add(taskId));
+      window.setTimeout(() => {
+        setRecentlyCompletedTaskIds((current) => {
+          const next = new Set(current);
+          next.delete(taskId);
+          return next;
+        });
+      }, 400);
+    }
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -87,7 +99,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-2 hairline-b pb-2.5">
         <div className="flex items-center gap-2">
           <ListTodo className="w-4 h-4 text-[var(--color-accent)]" />
-          <h3 className="font-semibold text-xs text-[var(--color-ink)]">
+          <h3 className="font-semibold text-sm text-[var(--color-ink)]">
             Tasks for today
           </h3>
           <span className="font-mono text-xs tabular-figure text-[var(--color-ink-muted)]">
@@ -98,7 +110,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
         <div className="flex items-center gap-2">
           <Button size="sm" variant="secondary" onClick={onOpenQuickAdd}>
             <Sparkles className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-            <span>Quick add (Ctrl+K)</span>
+            <span>Add anywhere</span>
           </Button>
 
           <Button
@@ -159,7 +171,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
       <div className="flex flex-col divide-y divide-[var(--color-rule)]">
         {tasks.length === 0 ? (
           <div className="py-8 text-center text-xs text-[var(--color-ink-muted)]">
-            No tasks scheduled for today. Click "Add task" or press <kbd className="px-1 py-0.5 rounded bg-[var(--color-paper-2)] border border-[var(--color-rule)] font-mono text-[10px]">Ctrl+K</kbd> to quick-add.
+                Nothing planned for today yet. Add a task here or press <kbd className="px-1 py-0.5 rounded bg-[var(--color-paper-2)] border border-[var(--color-rule)] font-mono text-[10px]">Ctrl+K</kbd> to add one from anywhere.
           </div>
         ) : (
           tasks.map((task) => {
@@ -180,7 +192,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
             return (
               <div
                 key={task.id}
-                className="py-3 flex flex-col gap-2 hover:bg-[var(--color-paper-2)]/40 px-2 rounded-[var(--radius-xs)] transition-colors"
+                className={`task-row py-3 flex flex-col gap-2 hover:bg-[var(--color-paper-2)]/40 px-2 rounded-[var(--radius-xs)] transition-colors ${recentlyCompletedTaskIds.has(task.id) && isDone ? 'task-row--just-completed' : ''}`}
               >
                 <div className="flex items-start justify-between gap-3">
                   {/* Checkbox & Title */}
@@ -188,9 +200,10 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                     <button
                       type="button"
                       onClick={() => handleToggleTask(task.id)}
-                      className="mt-0.5 text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] focus-visible:outline-2"
-                      title={isDone ? 'Mark active' : 'Mark done'}
-                      aria-label={isDone ? 'Mark active' : 'Mark done'}
+                      className={`task-completion-button text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] ${recentlyCompletedTaskIds.has(task.id) && isDone ? 'task-completion-button--celebrate' : ''}`}
+                      title={isDone ? 'Mark as not done' : 'Mark complete'}
+                      aria-label={isDone ? `Mark “${task.title}” as not done` : `Mark “${task.title}” complete`}
+                      aria-pressed={isDone}
                     >
                       {isDone ? (
                         <CheckCircle2 className="w-4 h-4 text-[var(--color-status-on-track)]" />

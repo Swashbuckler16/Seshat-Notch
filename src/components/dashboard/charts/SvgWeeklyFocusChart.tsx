@@ -30,11 +30,12 @@ export const SvgWeeklyFocusChart: React.FC<SvgWeeklyFocusChartProps> = ({ days }
         const x = step * index + (step - barWidth) / 2 + 18;
         const height = Math.max(0, (day.totalMinutes / maxMinutes) * chartRange);
         const y = chartBottom - height;
+        const valueLabel = formatMinutesToHuman(day.totalMinutes);
         return (
           <g key={day.dateStr}>
             <rect x={x} y={y} width={barWidth} height={height} rx="7" fill="var(--color-accent)" />
             <text x={x + barWidth / 2} y="174" textAnchor="middle" fill="var(--color-ink-muted)" fontSize="12">{day.dayLabel}</text>
-            {height > 22 && <text x={x + barWidth / 2} y={Math.max(12, y - 6)} textAnchor="middle" fill="var(--color-ink)" fontSize="12">{day.totalMinutes}m</text>}
+            <text x={x + barWidth / 2} y={Math.max(chartTop + 12, y - 6)} textAnchor="middle" fill="var(--color-ink)" fontSize="11" fontWeight="600">{valueLabel}</text>
             <title>{`${day.dateStr}: ${formatMinutesToHuman(day.totalMinutes)}`}</title>
           </g>
         );

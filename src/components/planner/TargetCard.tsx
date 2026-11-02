@@ -81,8 +81,8 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
               type="button"
               onClick={() => setIsExpanded(!isExpanded)}
               className="mt-0.5 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] p-0.5 rounded focus-visible:outline-2"
-              title={isExpanded ? 'Collapse sub-targets' : 'Expand sub-targets'}
-              aria-label={isExpanded ? 'Collapse sub-targets' : 'Expand sub-targets'}
+              title={isExpanded ? 'Hide smaller goals' : 'Show smaller goals'}
+              aria-label={isExpanded ? 'Hide smaller goals' : 'Show smaller goals'}
             >
               {isExpanded ? (
                 <ChevronDown className="w-4 h-4" />
@@ -106,14 +106,14 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
             </div>
 
             <div className="flex items-center gap-2 text-[11px] text-[var(--color-ink-muted)] mt-0.5 font-mono">
-              <span className="capitalize">{target.horizon}</span>
-              <span>·</span>
+              <span>{target.horizon === 'day' ? 'Daily' : target.horizon === 'week' ? 'Weekly' : 'Monthly'}</span>
+              <span>,</span>
               <span className="tabular-figure">{target.period}</span>
               {hasChildren && (
                 <>
                   <span>·</span>
                   <span className="text-[var(--color-accent)]">
-                    {children.length} sub-target{children.length === 1 ? '' : 's'}
+                    {children.length} smaller goal{children.length === 1 ? '' : 's'}
                   </span>
                 </>
               )}
@@ -128,7 +128,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
             value={target.status}
             onChange={(e) => handleStatusChange(e.target.value as Status)}
             className="text-[11px] h-7 px-1.5 bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[var(--color-ink)] font-mono"
-            aria-label="Target status"
+            aria-label="Goal status"
           >
             <option value="not_started">Not started</option>
             <option value="active">Active</option>
@@ -145,7 +145,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
         current={target.currentValue}
         total={target.targetValue}
         unit={target.unit ? ` ${target.unit}` : ''}
-        label="Target Progress"
+        label="Goal progress"
       />
 
       {/* Action Row */}
@@ -199,8 +199,8 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
           type="button"
           onClick={handleDelete}
           className="text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)] p-1 rounded focus-visible:outline-2"
-          title="Delete target"
-          aria-label="Delete target"
+          title="Delete goal"
+          aria-label="Delete goal"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

@@ -46,8 +46,8 @@ export const HabitRelapseModal: React.FC<HabitRelapseModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Log relapse event"
-      subtitle="Record an occurrence honestly to reset your clean-days ledger."
+      title="Record a setback"
+      subtitle="Add a note to help you notice patterns. Your past progress stays in your history."
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="surface-well border border-[var(--color-rule)] rounded-[var(--radius-xs)] p-3 text-xs flex items-start gap-2.5">
@@ -57,13 +57,13 @@ export const HabitRelapseModal: React.FC<HabitRelapseModalProps> = ({
               {habit.title}
             </span>
             <span>
-              Honest logging maintains ledger trust. Your previous clean streaks remain permanently in your history.
+              A setback does not erase the effort you have already put in.
             </span>
           </div>
         </div>
 
         <Input
-          label="Relapse date"
+          label="Date"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
@@ -72,14 +72,14 @@ export const HabitRelapseModal: React.FC<HabitRelapseModalProps> = ({
 
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-[var(--color-ink)]">
-            Trigger / Context note
+            What was going on?
           </label>
           <textarea
             rows={2}
             className="input-field px-3 py-2 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
             value={trigger}
             onChange={(e) => setTrigger(e.target.value)}
-            placeholder="What triggered this? (e.g. fatigue, late-night stress, social pressure)"
+            placeholder="Add anything that might help you understand what happened."
           />
         </div>
 
@@ -89,7 +89,7 @@ export const HabitRelapseModal: React.FC<HabitRelapseModalProps> = ({
           </Button>
           <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? 'Recording...' : 'Record relapse'}</span>
+            <span>{isSubmitting ? 'Saving…' : 'Save note'}</span>
           </Button>
         </div>
       </form>

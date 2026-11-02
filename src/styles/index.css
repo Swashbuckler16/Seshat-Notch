@@ -146,6 +146,187 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.app-shell button:not(:disabled) {
+  transition-property: transform;
+  transition-duration: var(--dur-micro);
+  transition-timing-function: var(--ease-ledger);
+}
+
+.app-shell button:not(:disabled):active,
+.app-shell summary:active {
+  transform: scale(0.98);
+}
+
+.appearance-picker {
+  position: relative;
+  z-index: 60;
+}
+
+.appearance-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-xs);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+}
+
+.appearance-picker-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.appearance-picker-trigger:hover {
+  background: var(--color-paper-3);
+}
+
+.appearance-chevron {
+  transition: transform var(--dur-micro) var(--ease-ledger);
+}
+
+.appearance-picker[open] .appearance-chevron {
+  transform: rotate(180deg);
+}
+
+.appearance-picker-panel {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  width: min(21rem, calc(100vw - 24px));
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+.appearance-picker-heading {
+  padding: 0;
+  color: var(--color-ink-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.appearance-palette-option {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.appearance-palette-option:hover,
+.appearance-palette-option[aria-pressed="true"] {
+  background: var(--color-paper-2);
+}
+
+.appearance-palette-option[aria-pressed="true"] {
+  border-color: var(--color-rule);
+}
+
+.appearance-swatches {
+  display: flex;
+  align-items: center;
+  width: 38px;
+  flex: 0 0 38px;
+}
+
+.appearance-swatches span {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-paper);
+  border-radius: 50%;
+  background: var(--palette-preview-one);
+}
+
+.appearance-swatches span + span {
+  margin-left: -6px;
+  background: var(--palette-preview-two);
+}
+
+.appearance-mode-row,
+.appearance-mode-row > span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.appearance-mode-row {
+  justify-content: space-between;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-rule);
+  font-size: var(--text-caption);
+}
+
+.appearance-mode-row > span {
+  color: var(--color-ink-muted);
+}
+
+.appearance-mode-toggle {
+  min-height: 40px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-xs);
+  color: var(--color-ink);
+  background: var(--color-paper-2);
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-screen-enter {
+  animation: app-screen-enter var(--dur-short) var(--ease-ledger) both;
+}
+
+@keyframes app-screen-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.task-completion-button {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.task-completion-button--celebrate svg {
+  animation: task-check-enter 240ms var(--ease-ledger) both;
+}
+
+.task-row--just-completed {
+  animation: task-row-complete 240ms var(--ease-ledger) both;
+}
+
+@keyframes task-row-complete {
+  from { opacity: 0.78; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes task-check-enter {
+  from { opacity: 0.5; transform: scale(0.72); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .app-shell button:focus-visible,
 .app-shell a:focus-visible,
 .app-shell select:focus-visible,

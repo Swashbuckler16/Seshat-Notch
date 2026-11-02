@@ -112,10 +112,10 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
               size="sm"
               variant="secondary"
               onClick={() => setIsCopyModalOpen(true)}
-              title="Copy targets from previous period"
+              title="Copy goals from the previous period"
             >
               <Copy className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Copy forward</span>
+              <span className="hidden sm:inline">Copy previous goals</span>
             </Button>
 
             <Button
@@ -123,10 +123,10 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
               variant="secondary"
               onClick={() => setIsShiftModalOpen(true)}
               disabled={!targets || targets.length === 0}
-              title="Shift schedule forward by days"
+              title="Move your plan to later dates"
             >
               <Clock className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Shift plan</span>
+              <span className="hidden sm:inline">Move dates</span>
             </Button>
 
             <Button
@@ -135,7 +135,7 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
               onClick={() => setIsNewModalOpen(true)}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>New target</span>
+              <span>New goal</span>
             </Button>
           </div>
         </div>
@@ -158,7 +158,7 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
               onClick={handleTodayPeriod}
               className="min-h-11 sm:min-h-8 px-2.5 py-1 text-xs font-mono rounded hover:bg-[var(--color-paper-2)] border border-[var(--color-rule)] text-[var(--color-ink-muted)]"
             >
-              Current
+              This period
             </button>
 
             <button
@@ -177,8 +177,8 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
           </div>
 
           <div className="text-xs text-[var(--color-ink-muted)] font-mono">
-            <span className="tabular-figure">{completedCount}</span> /{' '}
-            <span className="tabular-figure">{targets?.length ?? 0}</span> done
+            <span className="tabular-figure">{completedCount}</span> of{' '}
+            <span className="tabular-figure">{targets?.length ?? 0}</span> goals complete
           </div>
         </div>
 
@@ -189,7 +189,7 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
               current={totalCurrentSum}
               total={totalTargetSum || 1}
               unit=" units"
-              label={`Cumulative Progress for ${periodLabel}`}
+              label={`Progress for ${periodLabel}`}
             />
           </div>
         )}
@@ -199,23 +199,23 @@ export const HorizonPlanner: React.FC<HorizonPlannerProps> = ({
       <div className="flex flex-col gap-3">
         {targets === undefined ? (
           <div role="status" className="surface-well p-6 text-sm text-[var(--color-ink-muted)]">
-            Loading targets…
+            Loading goals…
           </div>
         ) : targets.length === 0 ? (
           <div className="surface-card rounded-[var(--radius-sm)] p-10 text-center flex flex-col items-center gap-3">
             <Calendar className="w-8 h-8 text-[var(--color-accent)] opacity-50" />
             <div className="flex flex-col gap-1">
               <span className="text-sm font-semibold text-[var(--color-ink)]">
-                No targets for {periodLabel}
+                No goals planned for {periodLabel}
               </span>
               <span className="text-xs text-[var(--color-ink-muted)]">
-                Create a new target for this horizon or copy forward from last period.
+                Add a goal for this time period or copy one from the last period.
               </span>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <Button size="sm" variant="primary" onClick={() => setIsNewModalOpen(true)}>
                 <Plus className="w-3.5 h-3.5" />
-                <span>Create target</span>
+                <span>Add a goal</span>
               </Button>
               <Button size="sm" variant="secondary" onClick={() => setIsCopyModalOpen(true)}>
                 <Copy className="w-3.5 h-3.5" />

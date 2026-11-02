@@ -45,12 +45,12 @@ export const SvgBulletChart: React.FC<SvgBulletChartProps> = ({
       </svg>
 
       {/* Direct Value Labels */}
-      <div className="flex items-center justify-between text-[11px] font-mono tabular-figure text-[var(--color-ink-muted)] px-0.5">
+      <div className="flex items-center justify-between text-xs tabular-figure text-[var(--color-ink-muted)] px-0.5">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-[1px] bg-[var(--color-accent)] inline-block" />
-          <span className="font-semibold text-[var(--color-ink)]">{actual}% complete</span>
+          <span className="w-2.5 h-2.5 rounded-sm bg-[var(--color-accent)] inline-block" aria-hidden="true" />
+          <span className="font-semibold text-[var(--color-ink)]">{actual}% of goals complete</span>
         </span>
-        <span>Based on completed goals</span>
+        <span>Completed goals</span>
       </div>
     </div>
   );
