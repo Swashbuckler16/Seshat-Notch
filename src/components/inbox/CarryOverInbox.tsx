@@ -139,7 +139,7 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
             {/* Overdue Tasks */}
             {overdueTasks && overdueTasks.length > 0 && (
               <div className="flex flex-col gap-2.5">
-                <span className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
+                <span className="text-xs font-semibold text-[var(--color-ink-muted)] ">
                   Overdue tasks ({overdueTasks.length})
                 </span>
 
@@ -257,7 +257,7 @@ export const CarryOverInbox: React.FC<CarryOverInboxProps> = ({ todayStr }) => {
             {/* Overdue Targets */}
             {overdueTargets && overdueTargets.length > 0 && (
               <div className="flex flex-col gap-2.5 mt-2">
-                <span className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
+                <span className="text-xs font-semibold text-[var(--color-ink-muted)] ">
                   Past daily targets ({overdueTargets.length})
                 </span>
 

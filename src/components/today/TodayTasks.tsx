@@ -222,7 +222,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                       {/* Meta stats row */}
                       <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-[var(--color-ink-muted)] mt-1">
                         <span
-                          className={`px-1.5 py-0.2 rounded border text-[10px] uppercase font-semibold ${priorityBadgeColors[task.priority]}`}
+                          className={`px-1.5 py-0.2 rounded border text-[10px]  font-semibold ${priorityBadgeColors[task.priority]}`}
                         >
                           {task.priority}
                         </span>

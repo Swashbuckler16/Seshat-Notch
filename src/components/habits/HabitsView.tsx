@@ -161,8 +161,8 @@ export const HabitsView: React.FC = () => {
               </span>
               <div className="w-full bg-[var(--color-paper-3)] h-2 rounded-[1px] overflow-hidden">
                 <div
-                  className="bg-[var(--color-accent)] h-full transition-all duration-300"
-                  style={{ width: `${item.rate}%` }}
+                  className="chart-fill-transition bg-[var(--color-accent)] h-full"
+                  style={{ transform: `scaleX(${Math.max(0, Math.min(100, item.rate)) / 100})` }}
                 />
               </div>
               <span className="text-[11px] font-mono tabular-figure font-semibold text-[var(--color-ink)]">

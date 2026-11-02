@@ -167,16 +167,16 @@ export const FocusTimerWidget: React.FC = () => {
         {state.mode === 'countdown' && (
           <div className="w-full max-w-md h-2 rounded-[1px] bg-[var(--color-paper-3)] overflow-hidden border border-[var(--color-rule)]">
             <div
-              className="h-full bg-[var(--color-accent)] transition-all duration-500 ease-out"
-              style={{ width: `${Math.round(progressRatio * 100)}%` }}
+              className="chart-fill-transition h-full bg-[var(--color-accent)]"
+              style={{ transform: `scaleX(${Math.max(0, Math.min(100, progressRatio * 100)) / 100})` }}
             />
           </div>
         )}
 
         {isCompleted && (
-          <div className="text-xs font-semibold text-[var(--color-status-on-track)] flex items-center gap-1.5 animate-bounce mt-1">
+          <div className="focus-complete text-xs font-semibold text-[var(--color-status-on-track)] flex items-center gap-1.5 mt-1">
             <CheckCircle2 className="w-4 h-4" />
-            <span>Focus interval reached! Click Finish to log your session.</span>
+            <span>Focus interval complete. Finish to save your session.</span>
           </div>
         )}
       </div>

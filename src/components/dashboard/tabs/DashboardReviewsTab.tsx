@@ -91,9 +91,9 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Mean Energy Level</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-accent)]">
-              {meanEnergy ?? '—'}
+              {meanEnergy ?? 'Not rated'}
             </span>
-            <span className="text-xs text-[var(--color-ink-muted)]">{meanEnergy ? `/ 5.0 · ${energyRatings.length} ratings` : 'No ratings yet'}</span>
+            <span className="text-xs text-[var(--color-ink-muted)]">{meanEnergy ? `/ 5.0, ${energyRatings.length} ratings` : 'No ratings yet'}</span>
           </div>
           <span className="text-[10px] text-[var(--color-ink-muted)]">Self-reported vital energy</span>
         </div>
@@ -103,7 +103,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
           <div className="flex items-baseline gap-1">
             <span
               className={`font-mono tabular-figure text-lg font-bold ${
-                activeBlockers.length > 0 ? 'text-[var(--color-rose)]' : 'text-[var(--color-ink)]'
+                activeBlockers.length > 0 ? 'text-[var(--color-status-behind)]' : 'text-[var(--color-ink)]'
               }`}
             >
               {activeBlockers.length}
@@ -119,7 +119,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
         <div className="flex items-center justify-between hairline-b pb-2">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <h3 className="text-base font-semibold text-[var(--color-ink)]">
               Energy & Mood Dual-Line Trend
             </h3>
           </div>
@@ -144,7 +144,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 hairline-b pb-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <h3 className="text-base font-semibold text-[var(--color-ink)]">
               Periodic Review Reflections & Highlights
             </h3>
           </div>
@@ -194,7 +194,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
                       <span className="font-semibold text-xs text-[var(--color-ink)]">
                         {review.period}
                       </span>
-                      <span className="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded-[1px] bg-[var(--color-paper-3)] text-[var(--color-ink-muted)]">
+                      <span className="text-[10px] font-mono  px-1.5 py-0.2 rounded-[1px] bg-[var(--color-paper-3)] text-[var(--color-ink-muted)]">
                         {review.type}
                       </span>
                     </div>
@@ -218,7 +218,7 @@ export const DashboardReviewsTab: React.FC<DashboardReviewsTabProps> = ({
                   {/* Top Three Tomorrow if present */}
                   {review.topThreeTomorrow && review.topThreeTomorrow.length > 0 && (
                     <div className="pl-6 text-[11px] flex flex-wrap gap-1.5 items-center">
-                      <span className="font-mono text-[10px] uppercase text-[var(--color-ink-muted)]">
+                      <span className="font-mono text-[10px]  text-[var(--color-ink-muted)]">
                         Focus Priorities:
                       </span>
                       {review.topThreeTomorrow.map((p, idx) => (

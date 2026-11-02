@@ -243,12 +243,12 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-4 h-4 text-[var(--color-accent)]" />
-          <h2 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Insights & Pattern Analysis
+          <h2 className="text-base font-semibold text-[var(--color-ink)]">
+            Patterns in your progress
           </h2>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          Observations are derived from your execution logs with transparent mathematical formulas and clear thresholds.
+          These notes come from the activity you have logged. Open a note to see how it was calculated.
         </p>
       </div>
 
@@ -260,12 +260,12 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
           </div>
           <h3 className="font-semibold text-xs text-[var(--color-ink)]">Needs more data</h3>
           <p className="text-xs text-[var(--color-ink-muted)] max-w-md">
-            Pattern analysis requires at least 14 days of logged activity and 10 completed tasks to detect genuine trends without false assumptions. You currently have {allDates.size} of 14 active day{allDates.size === 1 ? '' : 's'} and {completedTasksCount} of 10 completed task{completedTasksCount === 1 ? '' : 's'} recorded.
+            We need at least 14 days with activity and 10 completed tasks before showing patterns. You have logged activity on {allDates.size} of 14 days and completed {completedTasksCount} of 10 tasks.
           </p>
         </div>
       ) : insights.length === 0 ? (
         <div className="surface-card rounded-[var(--radius-sm)] p-8 border border-[var(--color-rule)] text-center text-xs text-[var(--color-ink-muted)]">
-          All systems operating smoothly within expected bounds. Continue logging sessions and tasks to reveal advanced observations.
+            Nothing unusual stands out in your recent activity yet. Keep using your planner and new patterns will appear as your history grows.
         </div>
       ) : (
         <div className="flex flex-col gap-3">
@@ -276,9 +276,9 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
             if (insight.severity === 'positive') {
               badgeClass = 'text-[var(--color-emerald)] bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30';
             } else if (insight.severity === 'warning') {
-              badgeClass = 'text-[var(--color-amber)] bg-[var(--color-amber)]/10 border-[var(--color-amber)]/30';
+              badgeClass = 'text-[var(--color-status-at-risk)] bg-[var(--color-status-at-risk)]/10 border-[var(--color-status-at-risk)]/30';
             } else if (insight.severity === 'alert') {
-              badgeClass = 'text-[var(--color-rose)] bg-[var(--color-rose)]/10 border-[var(--color-rose)]/30';
+              badgeClass = 'text-[var(--color-status-behind)] bg-[var(--color-status-behind)]/10 border-[var(--color-status-behind)]/30';
             }
 
             return (
@@ -289,8 +289,8 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
                 {/* Header Row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[10px] font-mono border uppercase tracking-wider ${badgeClass}`}>
-                      {insight.category} · {insight.severity}
+                    <span className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-xs border capitalize ${badgeClass}`}>
+                      {insight.category}, {insight.severity}
                     </span>
                     <h3 className="font-semibold text-xs text-[var(--color-ink)]">
                       {insight.title}
@@ -310,7 +310,7 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
                   <div className="p-2.5 rounded-[var(--radius-xs)] bg-[var(--color-paper-2)] border border-[var(--color-rule)] flex items-start gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-accent)] shrink-0 mt-0.5" />
                     <span className="text-[11px] text-[var(--color-ink)]">
-                      <span className="font-semibold">Action: </span>
+                      <span className="font-semibold">Try: </span>
                       {insight.recommendation}
                     </span>
                   </div>
@@ -324,13 +324,13 @@ export const DashboardInsightsTab: React.FC<DashboardInsightsTabProps> = ({
                     className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] transition-colors"
                   >
                     <Calculator className="w-3.5 h-3.5" />
-                    <span>{isExpanded ? 'Hide mathematical rule' : 'Inspect rule formula & condition'}</span>
+                    <span>{isExpanded ? 'Hide calculation' : 'How this is calculated'}</span>
                     {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                   </button>
 
                   {isExpanded && (
                     <div className="mt-2 p-2.5 rounded-[var(--radius-xs)] surface-well border border-[var(--color-rule)] flex flex-col gap-1 text-[11px] font-mono text-[var(--color-ink-muted)]">
-                      <span className="font-semibold text-[var(--color-ink)]">Underlying Rule:</span>
+                      <span className="font-semibold text-[var(--color-ink)]">How the pattern is found</span>
                       <code className="text-[var(--color-ink)] bg-[var(--color-paper)] p-1.5 rounded-[1px] border border-[var(--color-rule)] overflow-x-auto">
                         {insight.ruleFormula}
                       </code>

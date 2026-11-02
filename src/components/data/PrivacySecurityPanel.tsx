@@ -129,7 +129,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-3">
         <div className="flex items-center gap-2.5 hairline-b pb-2.5">
           <Shield className="w-4 h-4 text-[var(--color-emerald)]" />
-          <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-[var(--color-ink)] ">
             Data Privacy & Offline Integrity
           </h3>
         </div>
@@ -173,7 +173,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
           <div className="flex items-center gap-2.5">
             <Clock className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
-              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] ">
                 Local Day Rollover Boundary
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
@@ -204,7 +204,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
           <div className="flex items-center gap-2.5">
             <Bell className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
-              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] ">
                 Reminders & Scheduled Prompts
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
@@ -272,7 +272,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
           <div className="flex items-center gap-2.5">
             <Monitor className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
-              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] ">
                 Windows Desktop Shell Integration
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
@@ -334,7 +334,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
           <div className="flex items-center gap-2.5">
             <Lock className="w-4 h-4 text-[var(--color-accent)]" />
             <div className="flex flex-col">
-              <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-[var(--color-ink)] ">
                 Local App Lock
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
@@ -344,7 +344,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
           </div>
 
           <span
-            className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[11px] font-mono border uppercase tracking-wider ${
+            className={`px-2 py-0.5 rounded-[var(--radius-xs)] text-[11px] font-mono border  ${
               appLockEnabled
                 ? 'bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30 text-[var(--color-emerald)]'
                 : 'bg-[var(--color-paper-3)] border-[var(--color-rule)] text-[var(--color-ink-muted)]'

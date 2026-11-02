@@ -123,7 +123,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
         <div className="flex items-center gap-2.5">
           <HardDriveDownload className="w-4 h-4 text-[var(--color-accent)]" />
           <div className="flex flex-col gap-1">
-            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-[var(--color-ink)] ">
               Daily Backup to Local File (.json)
             </h3>
             <span className="text-xs text-[var(--color-ink-muted)]">
@@ -158,7 +158,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
         <div className="flex items-center gap-2.5">
           <ShieldCheck className="w-4 h-4 text-[var(--color-accent)]" />
           <div className="flex flex-col">
-            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-[var(--color-ink)] ">
               In-App Restore Points
             </h3>
             <span className="text-xs text-[var(--color-ink-muted)]">
@@ -219,7 +219,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
                       </td>
                       <td className="py-2.5 px-3 font-mono">
                         <span
-                          className={`px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[11px] uppercase border ${
+                          className={`px-1.5 py-0.5 rounded-[var(--radius-xs)] text-[11px]  border ${
                             snap.isAutomated
                               ? 'bg-[var(--color-paper-3)] border-[var(--color-rule)] text-[var(--color-ink-muted)]'
                               : 'bg-[var(--color-accent)]/10 border-[var(--color-accent)]/30 text-[var(--color-accent)]'
@@ -246,7 +246,7 @@ export const SnapshotsPanel: React.FC<SnapshotsPanelProps> = ({ onNotify, onRefr
                           <button
                             type="button"
                             onClick={() => handleDeleteSnapshot(snap)}
-                            className="p-1 rounded-[var(--radius-xs)] text-[var(--color-ink-muted)] hover:text-[var(--color-rose)] transition-colors"
+                            className="p-1 rounded-[var(--radius-xs)] text-[var(--color-ink-muted)] hover:text-[var(--color-status-behind)] transition-colors"
                             title="Delete this snapshot"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

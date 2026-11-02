@@ -131,8 +131,8 @@ export const DashboardExecutionTab: React.FC<DashboardExecutionTabProps> = ({
                 </span>
                 <div className="w-full bg-[var(--color-paper-3)] h-10 flex items-end rounded-[1px] overflow-hidden">
                   <div
-                    className="w-full bg-[var(--color-accent)] transition-colors duration-300"
-                    style={{ height: `${item.rate}%` }}
+                    className="chart-fill-transition h-full w-full bg-[var(--color-accent)]"
+                    style={{ transform: `scaleY(${Math.max(0, Math.min(100, item.rate)) / 100})`, transformOrigin: 'bottom center' }}
                     title={`${item.dayLabel}: ${item.rate}% (${item.completed}/${item.total})`}
                   />
                 </div>

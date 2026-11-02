@@ -1,7 +1,7 @@
 import React from 'react';
 import { ProjectGoal, Target, Task, Habit, MilestonePhase, TimeSession, ProgressLog } from '../../../types';
 import { SvgBulletChart } from '../charts/SvgBulletChart';
-import { SvgTimePieChart } from '../charts/SvgTimePieChart';
+import { SvgTimeBreakdownChart } from '../charts/SvgTimePieChart';
 import { SvgWeeklyFocusChart } from '../charts/SvgWeeklyFocusChart';
 import {
   calculateProjectProgress,
@@ -122,7 +122,7 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
                 <h4 id="focus-type-heading">Focus by type</h4>
                 <span>{formatMinutesToHuman(timeMetrics.totalMinutes)} logged</span>
               </figcaption>
-              <SvgTimePieChart items={timeMetrics.kindBreakdown} />
+              <SvgTimeBreakdownChart items={timeMetrics.kindBreakdown} />
             </figure>
             <figure className="overview-chart-block" aria-labelledby="weekly-focus-heading">
               <figcaption className="overview-chart-caption">
@@ -149,8 +149,12 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
               {weekCompleted} of {weekTargets.length} complete
             </span>
           </div>
-          <SvgBulletChart actual={weekRate} max={100} />
-          {weekTargets.length === 0 && <span className="text-[11px] text-[var(--color-ink-muted)]">No goals set for this week yet.</span>}
+          {weekTargets.length > 0 ? <SvgBulletChart actual={weekRate} max={100} /> : (
+            <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--color-ink-muted)]" role="status">
+              <span>No goals set for this week yet.</span>
+              {onNavigateTab && <button type="button" onClick={() => onNavigateTab('planner')} className="min-h-11 text-[var(--color-accent)] underline underline-offset-2">Open your plan</button>}
+            </div>
+          )}
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col gap-3 border border-[var(--color-rule)]">
@@ -165,8 +169,12 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
               {monthCompleted} of {monthTargets.length} complete
             </span>
           </div>
-          <SvgBulletChart actual={monthRate} max={100} />
-          {monthTargets.length === 0 && <span className="text-[11px] text-[var(--color-ink-muted)]">No goals set for this month yet.</span>}
+          {monthTargets.length > 0 ? <SvgBulletChart actual={monthRate} max={100} /> : (
+            <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--color-ink-muted)]" role="status">
+              <span>No goals set for this month yet.</span>
+              {onNavigateTab && <button type="button" onClick={() => onNavigateTab('planner')} className="min-h-11 text-[var(--color-accent)] underline underline-offset-2">Open your plan</button>}
+            </div>
+          )}
         </div>
       </div>
 
@@ -184,7 +192,9 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
           </span>
         </div>
 
-        <div className="flex flex-col divide-y divide-[var(--color-rule)]">
+        {projectHealths.length === 0 ? (
+          <p className="py-4 text-sm text-[var(--color-ink-muted)]" role="status">No active projects match these filters.</p>
+        ) : <div className="flex flex-col divide-y divide-[var(--color-rule)]">
           {projectHealths.map(({ project, progress, expected, sched }) => (
             <div
               key={project.id}
@@ -203,8 +213,8 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
                 {/* Horizontal mini bar */}
                 <div className="w-32 bg-[var(--color-paper-3)] h-2 rounded-[1px] overflow-hidden border border-[var(--color-rule)]">
                   <div
-                    className="bg-[var(--color-accent)] h-full transition-colors duration-300"
-                    style={{ width: `${progress.progressPercent}%` }}
+                    className="chart-fill-transition bg-[var(--color-accent)] h-full"
+                    style={{ transform: `scaleX(${Math.max(0, Math.min(100, progress.progressPercent)) / 100})` }}
                   />
                 </div>
 
@@ -223,7 +233,7 @@ export const DashboardOverviewTab: React.FC<DashboardOverviewTabProps> = ({
               </div>
             </div>
           ))}
-        </div>
+        </div>}
       </div>
     </div>
   );

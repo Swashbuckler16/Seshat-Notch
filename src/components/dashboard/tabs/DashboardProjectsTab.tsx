@@ -106,12 +106,12 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
         <div className="flex items-center justify-between hairline-b pb-2.5">
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-[var(--color-accent)]" />
-            <h2 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-              Project Health & Schedule Ledger
+            <h2 className="text-base font-semibold text-[var(--color-ink)]">
+              Project progress and timing
             </h2>
           </div>
           <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Progress and schedule pacing
+            Progress and timing
           </span>
         </div>
 
@@ -144,9 +144,9 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
                   if (sched.status === 'on_track') {
                     statusBadgeClass = 'text-[var(--color-emerald)] bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30';
                   } else if (sched.status === 'at_risk') {
-                    statusBadgeClass = 'text-[var(--color-amber)] bg-[var(--color-amber)]/10 border-[var(--color-amber)]/30';
+                    statusBadgeClass = 'text-[var(--color-status-at-risk)] bg-[var(--color-status-at-risk)]/10 border-[var(--color-status-at-risk)]/30';
                   } else if (sched.status === 'behind') {
-                    statusBadgeClass = 'text-[var(--color-rose)] bg-[var(--color-rose)]/10 border-[var(--color-rose)]/30';
+                    statusBadgeClass = 'text-[var(--color-status-behind)] bg-[var(--color-status-behind)]/10 border-[var(--color-status-behind)]/30';
                   }
 
                   return (
@@ -164,7 +164,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
                             {isSelected && <ChevronRight className="w-3.5 h-3.5 text-[var(--color-accent)] inline shrink-0" />}
                             {project.title}
                           </span>
-                          <span className="text-[10px] text-[var(--color-ink-muted)] uppercase tracking-wide">
+                          <span className="text-xs text-[var(--color-ink-muted)]">
                             {areaName}
                           </span>
                         </div>
@@ -194,8 +194,8 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
                           </div>
                           <div className="w-full h-1.5 bg-[var(--color-paper-3)] rounded-[1px] overflow-hidden">
                             <div
-                              className="h-full bg-[var(--color-accent)] transition-all duration-300"
-                              style={{ width: `${metrics.progress.progressPercent}%` }}
+                              className="chart-fill-transition h-full bg-[var(--color-accent)]"
+                              style={{ transform: `scaleX(${Math.max(0, Math.min(100, metrics.progress.progressPercent)) / 100})` }}
                             />
                           </div>
                         </div>
@@ -225,8 +225,8 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
                       {/* Blockers */}
                       <td className="py-2.5 px-3 font-mono text-[11px]">
                         {activeBlockersCount > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-[var(--color-rose)] font-semibold">
-                            <AlertTriangle className="w-3 h-3 text-[var(--color-rose)]" />
+                          <span className="inline-flex items-center gap-1 text-[var(--color-status-behind)] font-semibold">
+                            <AlertTriangle className="w-3 h-3 text-[var(--color-status-behind)]" />
                             {activeBlockersCount}
                           </span>
                         ) : (
@@ -240,14 +240,14 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
                           <span
                             className={
                               daysSinceLastActivity >= 5
-                                ? 'text-[var(--color-amber)] font-medium'
+                                ? 'text-[var(--color-status-at-risk)] font-medium'
                                 : 'text-[var(--color-ink-muted)]'
                             }
                           >
                             {daysSinceLastActivity === 0 ? 'Today' : `${daysSinceLastActivity}d ago`}
                           </span>
                         ) : (
-                          <span className="text-[var(--color-ink-muted)]">—</span>
+                          <span className="text-[var(--color-ink-muted)]">Not available</span>
                         )}
                       </td>
 
@@ -321,7 +321,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
               aria-valuemax={100}
               aria-valuenow={selectedItem.metrics.progress.progressPercent}
             >
-              <div className="h-full rounded-full bg-[var(--color-accent)] transition-all duration-300" style={{ width: `${selectedItem.metrics.progress.progressPercent}%` }} />
+              <div className="chart-fill-transition h-full rounded-full bg-[var(--color-accent)]" style={{ transform: `scaleX(${Math.max(0, Math.min(100, selectedItem.metrics.progress.progressPercent)) / 100})` }} />
             </div>
           </div>
 
@@ -330,7 +330,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
             <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
               <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Optimistic Finish</span>
               <span className="font-mono tabular-figure font-bold text-[var(--color-ink)]">
-                {selectedItem.metrics.forecast.forecastDateOptimistic || '—'}
+                {selectedItem.metrics.forecast.forecastDateOptimistic || 'No estimate'}
               </span>
               <span className="text-[10px] text-[var(--color-ink-muted)]">Top historical velocity rate</span>
             </div>
@@ -346,7 +346,7 @@ export const DashboardProjectsTab: React.FC<DashboardProjectsTabProps> = ({
             <div className="surface-well p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-1">
               <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Pessimistic Finish</span>
               <span className="font-mono tabular-figure font-bold text-[var(--color-ink)]">
-                {selectedItem.metrics.forecast.forecastDatePessimistic || '—'}
+                {selectedItem.metrics.forecast.forecastDatePessimistic || 'No estimate'}
               </span>
               <span className="text-[10px] text-[var(--color-ink-muted)]">Slowest historical velocity</span>
             </div>

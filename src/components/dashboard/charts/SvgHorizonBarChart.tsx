@@ -42,10 +42,11 @@ export const SvgHorizonBarChart: React.FC<SvgHorizonBarChartProps> = ({ records,
             <rect
               x="0"
               y="0"
-              width={r.rate}
+              width="100"
               height="10"
               fill="var(--color-accent)"
-              className="transition-all duration-300"
+              className="chart-fill-transition"
+              style={{ transform: `scaleX(${Math.max(0, Math.min(100, r.rate)) / 100})` }}
             />
           </svg>
         </div>

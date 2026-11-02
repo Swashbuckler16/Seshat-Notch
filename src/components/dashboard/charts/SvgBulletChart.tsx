@@ -36,10 +36,11 @@ export const SvgBulletChart: React.FC<SvgBulletChartProps> = ({
         <rect
           x="0"
           y="5"
-          width={actualPct}
+          width="100"
           height="10"
           fill="var(--color-accent)"
-          className="transition-all duration-300"
+          className="chart-fill-transition"
+          style={{ transform: `scaleX(${actualPct / 100})` }}
         />
       </svg>
 

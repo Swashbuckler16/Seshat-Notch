@@ -93,7 +93,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <HardDrive className="w-4 h-4 text-[var(--color-accent)]" />
-          <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-[var(--color-ink)] ">
             Export Your Data
           </h3>
         </div>
@@ -165,7 +165,7 @@ export const DataExportPanel: React.FC<DataExportPanelProps> = ({ onNotify }) =>
         <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col justify-between gap-3">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-ink)]">
-              <FileSpreadsheet className="w-4 h-4 text-[var(--color-amber)]" />
+              <FileSpreadsheet className="w-4 h-4 text-[var(--color-status-at-risk)]" />
               <span>Table-by-Table CSV</span>
             </div>
             <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">

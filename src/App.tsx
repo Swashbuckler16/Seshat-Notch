@@ -19,6 +19,7 @@ import {
   Sun,
   Flame,
   BarChart2,
+  BookOpen,
   Settings,
   Bell,
   X,
@@ -116,7 +117,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      // Alt+1..Alt+5 for switching top-level tabs
+      // Alt+1..Alt+6 for switching top-level tabs
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
         const tabMap: Record<string, AppTab> = {
           '1': 'today',
@@ -124,6 +125,7 @@ export const App: React.FC = () => {
           '3': 'habits',
           '4': 'progress',
           '5': 'settings',
+          '6': 'reviews',
         };
         if (tabMap[e.key]) {
           e.preventDefault();
@@ -183,9 +185,9 @@ export const App: React.FC = () => {
             </kbd>
           </Button>
 
-          {/* Top Navigation (5 primary tabs, always visible on laptop/desktop) */}
+          {/* Primary navigation stays visible on every screen size. */}
           <nav
-            className="flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs"
+            className="app-primary-nav flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs"
             aria-label="Main navigation"
           >
             <button
@@ -193,6 +195,7 @@ export const App: React.FC = () => {
               onClick={() => setActiveTab('today')}
               aria-current={activeTab === 'today' ? 'page' : undefined}
               title="Today (Alt+1)"
+              aria-label="Today"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
                 activeTab === 'today'
                   ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
@@ -200,13 +203,14 @@ export const App: React.FC = () => {
               }`}
             >
               <Sun className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              <span>Today</span>
+              <span className="app-nav-label">Today</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('planner')}
               aria-current={activeTab === 'planner' ? 'page' : undefined}
               title="Plan (Alt+2)"
+              aria-label="Plan"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
                 activeTab === 'planner'
                   ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
@@ -214,27 +218,29 @@ export const App: React.FC = () => {
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
-              <span>Plan</span>
+              <span className="app-nav-label">Plan</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('habits')}
               aria-current={activeTab === 'habits' ? 'page' : undefined}
               title="Habits (Alt+3)"
+              aria-label="Habits"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
                 activeTab === 'habits'
                   ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
                   : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
               }`}
             >
-              <Flame className="w-3.5 h-3.5 text-[var(--color-amber)]" />
-              <span>Habits</span>
+              <Flame className="w-3.5 h-3.5 text-[var(--color-status-at-risk)]" />
+              <span className="app-nav-label">Habits</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('progress')}
               aria-current={activeTab === 'progress' ? 'page' : undefined}
               title="Progress (Alt+4)"
+              aria-label="Progress"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
                 activeTab === 'progress'
                   ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
@@ -242,13 +248,14 @@ export const App: React.FC = () => {
               }`}
             >
               <BarChart2 className="w-3.5 h-3.5" />
-              <span>Progress</span>
+              <span className="app-nav-label">Progress</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('settings')}
               aria-current={activeTab === 'settings' ? 'page' : undefined}
               title="Settings (Alt+5)"
+              aria-label="Settings"
               className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
                 activeTab === 'settings'
                   ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
@@ -256,7 +263,22 @@ export const App: React.FC = () => {
               }`}
             >
               <Settings className="w-3.5 h-3.5" />
-              <span>Settings</span>
+              <span className="app-nav-label">Settings</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('reviews')}
+              aria-current={activeTab === 'reviews' ? 'page' : undefined}
+              title="Reviews (Alt+6)"
+              aria-label="Reviews"
+              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
+                activeTab === 'reviews'
+                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span className="app-nav-label">Reviews</span>
             </button>
           </nav>
 
@@ -360,7 +382,7 @@ export const App: React.FC = () => {
         >
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-[var(--color-accent)]" />
-            <span>Desktop keyboard shortcuts</span>
+            <span>Keyboard shortcuts</span>
           </div>
           <div className="flex items-center gap-2">
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
@@ -370,7 +392,7 @@ export const App: React.FC = () => {
               N
             </kbd>
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
-              Alt+1..5
+              Alt+1..6
             </kbd>
             <kbd className="px-1.5 py-0.5 bg-[var(--color-paper-2)] border border-[var(--color-rule)] rounded text-[11px]">
               Esc
@@ -387,7 +409,7 @@ export const App: React.FC = () => {
 
       {/* Desktop Footer */}
       <footer className="app-footer hairline-t px-6 py-4 bg-[var(--color-paper)] mt-auto flex flex-wrap items-center justify-between text-xs text-[var(--color-ink-muted)]">
-        <div>Seshat Notch — Every day, a notch. Every goal, measured.</div>
+        <div>Seshat Notch. Every day, a notch. Every goal, measured.</div>
         <div>All data stays offline on your machine</div>
       </footer>
     </div>

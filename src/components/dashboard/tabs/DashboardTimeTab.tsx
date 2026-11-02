@@ -92,7 +92,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
         <div className="flex items-center justify-between hairline-b pb-2">
           <div className="flex items-center gap-2">
             <BrainCircuit className="w-4 h-4 text-[var(--color-accent)]" />
-            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <h3 className="text-base font-semibold text-[var(--color-ink)]">
               Focus Classification Distribution
             </h3>
           </div>
@@ -115,7 +115,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
                   key={item.kind}
                   style={{ width: `${item.percentage}%` }}
                   title={`${item.label}: ${item.percentage}% (${formatMinutesToHuman(item.minutes)})`}
-                  className={`h-full ${bg} transition-all duration-300`}
+                  className={`h-full ${bg}`}
                 />
               );
             })}
@@ -181,7 +181,7 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
                       <span className="font-semibold text-[var(--color-ink)]">
                         {pb.projectTitle}
                       </span>
-                      <span className="text-[10px] font-mono text-[var(--color-ink-muted)] uppercase">
+                      <span className="text-xs text-[var(--color-ink-muted)]">
                         {pb.areaName}
                       </span>
                     </div>
@@ -198,8 +198,8 @@ export const DashboardTimeTab: React.FC<DashboardTimeTabProps> = ({
                   {/* Horizontal mini bar */}
                   <div className="w-full h-1 bg-[var(--color-paper-3)] rounded-[1px] overflow-hidden">
                     <div
-                      className="h-full bg-[var(--color-accent)] transition-all duration-300"
-                      style={{ width: `${pb.percentage}%` }}
+                      className="chart-fill-transition h-full bg-[var(--color-accent)]"
+                      style={{ transform: `scaleX(${Math.max(0, Math.min(100, pb.percentage)) / 100})` }}
                     />
                   </div>
                 </div>

@@ -88,9 +88,9 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
       {/* Top Controls Bar */}
       <div className="surface-card rounded-[var(--radius-sm)] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[var(--color-rule)]">
         <div className="flex items-center gap-2.5">
-          <Trash2 className="w-4 h-4 text-[var(--color-rose)]" />
+          <Trash2 className="w-4 h-4 text-[var(--color-status-behind)]" />
           <div className="flex flex-col">
-            <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-[var(--color-ink)] ">
               Recovery Bin (Soft-Delete Ledger)
             </h3>
             <span className="text-[11px] text-[var(--color-ink-muted)]">
@@ -122,7 +122,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
             <button
               type="button"
               onClick={handleEmptyBin}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-rose)]/30 text-[var(--color-rose)] hover:bg-[var(--color-rose)]/10 transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-status-behind)]/30 text-[var(--color-status-behind)] hover:bg-[var(--color-status-behind)]/10 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Empty Bin</span>
@@ -171,7 +171,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
 
                       {/* Type Badge */}
                       <td className="py-2.5 px-3 font-mono">
-                        <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[10px] uppercase text-[var(--color-ink)]">
+                        <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-[10px]  text-[var(--color-ink)]">
                           {item.entityType}
                         </span>
                       </td>
@@ -203,7 +203,7 @@ export const RecoveryBinPanel: React.FC<RecoveryBinPanelProps> = ({ onNotify }) 
                             type="button"
                             disabled={isBusy}
                             onClick={() => handlePermanentDelete(item)}
-                            className="p-1 rounded-[var(--radius-xs)] text-[var(--color-ink-muted)] hover:text-[var(--color-rose)] transition-colors disabled:opacity-50"
+                            className="p-1 rounded-[var(--radius-xs)] text-[var(--color-ink-muted)] hover:text-[var(--color-status-behind)] transition-colors disabled:opacity-50"
                             title="Permanently purge this item"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

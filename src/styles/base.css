@@ -1,10 +1,10 @@
-
-/* hallmark v2.0.0 */
+/* Hallmark · v2.0.0 · built: the project · redesign: polish */
 html,
 body {
   margin: 0;
   padding: 0;
-  overflow-x: clip;   background-color: var(--color-paper);
+  overflow-x: clip;
+  background-color: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 16px;

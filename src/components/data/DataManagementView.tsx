@@ -119,7 +119,7 @@ export const DataManagementView: React.FC = () => {
               <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[var(--color-accent)]' : ''}`} />
               <span>{tab.label}</span>
               {Boolean(tab.badge && tab.badge > 0) && (
-                <span className="px-1.5 py-0.2 rounded-full font-mono text-[10px] bg-[var(--color-rose)]/15 text-[var(--color-rose)] font-bold">
+                <span className="px-1.5 py-0.2 rounded-full font-mono text-[10px] bg-[var(--color-status-behind)]/15 text-[var(--color-status-behind)] font-bold">
                   {tab.badge}
                 </span>
               )}

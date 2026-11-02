@@ -156,8 +156,8 @@ export const ProjectHealthCard: React.FC<ProjectHealthCardProps> = ({ project, t
         <div className="relative w-full h-3 rounded-[1px] bg-[var(--color-paper-3)] border border-[var(--color-rule)] overflow-hidden">
           {/* Actual Progress Fill */}
           <div
-            className="h-full bg-[var(--color-accent)] transition-colors duration-300"
-            style={{ width: `${Math.min(100, metrics.progress.progressPercent)}%` }}
+            className="chart-fill-transition h-full bg-[var(--color-accent)]"
+            style={{ transform: `scaleX(${Math.max(0, Math.min(100, metrics.progress.progressPercent)) / 100})` }}
           />
 
           {/* Expected Pacing Pin Marker */}

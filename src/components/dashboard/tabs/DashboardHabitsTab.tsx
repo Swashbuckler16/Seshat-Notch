@@ -79,7 +79,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
       {/* 1. Habit KPI Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Active Habits</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Active habits</span>
           <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
             {activeHabits.length}
           </span>
@@ -87,7 +87,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Longest Streak</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Longest streak</span>
           <div className="flex items-baseline gap-1">
             <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-accent)]">
               {maxStreak}
@@ -98,7 +98,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">30d Consistency</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">30-day consistency</span>
           <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
             {avgConsistency30d}%
           </span>
@@ -106,7 +106,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
         </div>
 
         <div className="surface-card rounded-[var(--radius-sm)] p-3 border border-[var(--color-rule)] flex flex-col gap-1">
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">Avoidance Habits</span>
+          <span className="text-[11px] text-[var(--color-ink-muted)]">Habits to avoid</span>
           <span className="font-mono tabular-figure text-lg font-bold text-[var(--color-ink)]">
             {activeHabits.filter((h) => h.isAvoidance).length}
           </span>
@@ -119,12 +119,12 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
         <div className="flex items-center justify-between hairline-b pb-2.5">
           <div className="flex items-center gap-2">
             <Flame className="w-4 h-4 text-[var(--color-accent)]" />
-            <h2 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-              Habit Performance & Streak Consistency Matrix
+            <h2 className="text-base font-semibold text-[var(--color-ink)]">
+              Your habit history
             </h2>
           </div>
-          <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
-            Fair Streaks
+          <span className="text-[11px] text-[var(--color-ink-muted)]">
+            Streaks with grace days
           </span>
         </div>
 
@@ -156,7 +156,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
                       <td className="py-2.5 px-3">
                         <div className="flex items-center gap-2">
                           {habit.isAvoidance ? (
-                            <ShieldAlert className="w-3.5 h-3.5 text-[var(--color-rose)] shrink-0" />
+                            <ShieldAlert className="w-3.5 h-3.5 text-[var(--color-status-behind)] shrink-0" />
                           ) : (
                             <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-accent)] shrink-0" />
                           )}
@@ -165,8 +165,8 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
                               {habit.title}
                             </span>
                             {habit.unit && (
-                              <span className="text-[10px] text-[var(--color-ink-muted)] font-mono">
-                                Target: {habit.targetValue} {habit.unit}
+                              <span className="text-[10px] text-[var(--color-ink-muted)]">
+                                Target: <span className="tabular-figure">{habit.targetValue}</span> {habit.unit}
                               </span>
                             )}
                           </div>
@@ -175,7 +175,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
 
                       {/* Cadence Tag */}
                       <td className="py-2.5 px-3 font-mono text-[11px]">
-                        <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-[var(--color-paper-3)] text-[var(--color-ink)] uppercase text-[10px]">
+                        <span className="px-1.5 py-0.5 rounded-[var(--radius-xs)] bg-[var(--color-paper-3)] text-[var(--color-ink)]  text-[10px]">
                           {habit.isAvoidance
                             ? 'Avoidance'
                             : habit.scheduleType === 'n_per_week'
@@ -190,7 +190,7 @@ export const DashboardHabitsTab: React.FC<DashboardHabitsTabProps> = ({
                           data={sparklineData}
                           width={100}
                           height={22}
-                          color={habit.isAvoidance ? 'var(--color-rose)' : 'var(--color-accent)'}
+                          color={habit.isAvoidance ? 'var(--color-status-behind)' : 'var(--color-accent)'}
                           showEndpoints={true}
                         />
                       </td>

@@ -58,12 +58,12 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-[var(--color-accent)]" />
-          <h2 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
-            Strategic Goal Tree & Multi-Horizon Alignment
+          <h2 className="text-base font-semibold text-[var(--color-ink)]">
+            Goals and milestones
           </h2>
         </div>
         <p className="text-xs text-[var(--color-ink-muted)]">
-          Hierarchical tree cascading from Life Areas down to Project Goals, Horizons, and supporting Habits.
+          Keep each project connected to the area and habits it supports.
         </p>
       </div>
 
@@ -165,7 +165,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                                   {project.title}
                                 </span>
                                 <span
-                                  className={`text-[9px] font-mono px-1.5 py-0.2 rounded-[1px] border uppercase ${
+                                  className={`text-xs px-1.5 py-0.5 rounded-[var(--radius-xs)] border capitalize ${
                                     project.isGoal
                                       ? 'text-[var(--color-accent)] border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10'
                                       : 'text-[var(--color-ink-muted)] border-[var(--color-rule)]'
@@ -181,8 +181,8 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                               <div className="flex items-center gap-2 w-32">
                                 <div className="w-full h-1.5 bg-[var(--color-paper-3)] rounded-[1px] overflow-hidden">
                                   <div
-                                    className="h-full bg-[var(--color-accent)] transition-all duration-300"
-                                    style={{ width: `${progress.progressPercent}%` }}
+                                    className="chart-fill-transition h-full bg-[var(--color-accent)]"
+                                    style={{ transform: `scaleX(${Math.max(0, Math.min(100, progress.progressPercent)) / 100})` }}
                                   />
                                 </div>
                                 <span className="font-mono tabular-figure text-xs font-bold text-[var(--color-ink)] w-8 text-right">
@@ -213,8 +213,8 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                           {/* Linked Habits (PRD HB-7) */}
                           {linkedHabits.length > 0 && (
                             <div className="pl-6 flex flex-wrap gap-2 items-center text-[11px]">
-                              <span className="text-[var(--color-ink-muted)] flex items-center gap-1 font-mono text-[10px] uppercase">
-                                <Zap className="w-3 h-3 text-[var(--color-amber)]" />
+                              <span className="text-[var(--color-ink-muted)] flex items-center gap-1 text-xs">
+                                <Zap className="w-3 h-3 text-[var(--color-status-at-risk)]" />
                                 <span>Supporting Habits:</span>
                               </span>
                               {linkedHabits.map((habit) => {
@@ -227,7 +227,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--radius-xs)] font-mono text-[10px] border ${
                                       isHealthy
                                         ? 'text-[var(--color-emerald)] bg-[var(--color-emerald)]/10 border-[var(--color-emerald)]/30'
-                                        : 'text-[var(--color-amber)] bg-[var(--color-amber)]/10 border-[var(--color-amber)]/30'
+                                        : 'text-[var(--color-status-at-risk)] bg-[var(--color-status-at-risk)]/10 border-[var(--color-status-at-risk)]/30'
                                     }`}
                                   >
                                     <Flame className="w-2.5 h-2.5" />
@@ -244,7 +244,7 @@ export const DashboardGoalsTab: React.FC<DashboardGoalsTabProps> = ({
                           {/* Expanded Targets & Milestones */}
                           {isGoalExpanded && (
                             <div className="pl-6 pt-2 border-t border-[var(--color-rule)] flex flex-col gap-2">
-                              <span className="text-[10px] font-mono uppercase text-[var(--color-ink-muted)] tracking-wider">
+                              <span className="text-xs text-[var(--color-ink-muted)]">
                                 Horizon Targets & Milestones
                               </span>
 

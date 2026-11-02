@@ -209,7 +209,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
       {/* Cascaded Sub-Targets Drawer */}
       {hasChildren && isExpanded && (
         <div className="bg-[var(--color-paper-2)]/60 rounded-[var(--radius-xs)] border border-[var(--color-rule)] p-3 flex flex-col gap-2 mt-1">
-          <div className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
+          <div className="text-[11px] font-medium text-[var(--color-ink-muted)] ">
             Sub-targets ({children.length})
           </div>
           <div className="flex flex-col divide-y divide-[var(--color-rule)]">

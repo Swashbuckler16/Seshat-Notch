@@ -95,7 +95,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
       <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-rule)] flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <Upload className="w-4 h-4 text-[var(--color-accent)]" />
-          <h3 className="text-xs font-bold text-[var(--color-ink)] uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-[var(--color-ink)] ">
             Import Data & Plans
           </h3>
         </div>
@@ -116,7 +116,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           }`}
         >
           <FileJson className="w-3.5 h-3.5" />
-          <span>Full JSON Database Backup</span>
+          <span>Full data backup (JSON)</span>
         </button>
 
         <button
@@ -129,7 +129,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
-          <span>Markdown Plan / Checklist</span>
+          <span>Markdown checklist</span>
         </button>
       </div>
 
@@ -169,7 +169,7 @@ export const DataImportPanel: React.FC<DataImportPanelProps> = ({ onNotify, onRe
                   onChange={() => setImportMode('replace')}
                   className="accent-[var(--color-accent)]"
                 />
-                <span className="text-[var(--color-rose)]">Replace all</span>
+                <span className="text-[var(--color-status-behind)]">Replace all</span>
               </label>
             </div>
           </div>

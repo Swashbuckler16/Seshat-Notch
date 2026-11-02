@@ -12,7 +12,7 @@ import { DashboardReviewsTab } from './tabs/DashboardReviewsTab';
 import { DashboardInsightsTab } from './tabs/DashboardInsightsTab';
 import { calculateProjectProgress } from '../../utils/metricEngine';
 import { calculateHabitMetrics } from '../../utils/habitMath';
-import { getLocalDateString } from '../../utils/dateUtils';
+import { formatLocalDate, getLocalDateString, parseLocalDate } from '../../utils/dateUtils';
 import {
   LayoutDashboard,
   Activity,
@@ -50,6 +50,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   // Derive today local date string YYYY-MM-DD
   const todayStr = useMemo(() => getLocalDateString(), []);
+
+  const hoursRangeStart = useMemo(() => {
+    const start = parseLocalDate(todayStr);
+    if (dateRange === 'week') {
+      start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    } else if (dateRange === 'month') {
+      start.setDate(1);
+    } else if (dateRange === 'quarter') {
+      start.setMonth(Math.floor(start.getMonth() / 3) * 3, 1);
+    } else if (dateRange === 'year') {
+      start.setMonth(0, 1);
+    }
+    return formatLocalDate(start);
+  }, [dateRange, todayStr]);
 
   // Live queries from Dexie database
   const areas = useLiveQuery(() => db.areas.filter((a) => !a.isArchived).sortBy('order'), []) || [];
@@ -109,9 +123,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }, [filteredProjects, filteredTargets, milestones, filteredTasks]);
 
   const totalHoursLogged = useMemo(() => {
-    const totalMinutes = timeSessions.reduce((acc, s) => acc + (s.durationMinutes || 0), 0);
+    const taskById = new Map(tasks.map((task) => [task.id, task]));
+    const projectById = new Map(projects.map((project) => [project.id, project]));
+    const totalMinutes = timeSessions.reduce((total, session) => {
+      const sessionDate = getLocalDateString(new Date(session.startTime));
+      if (sessionDate < hoursRangeStart || sessionDate > todayStr) return total;
+
+      const projectId = session.entityType === 'project'
+        ? session.entityId
+        : session.entityType === 'task'
+          ? taskById.get(session.entityId)?.projectId
+          : undefined;
+      const project = projectId ? projectById.get(projectId) : undefined;
+
+      if (selectedProjectId !== 'all' && projectId !== selectedProjectId) return total;
+      if (selectedAreaId !== 'all' && project?.areaId !== selectedAreaId) return total;
+      return total + (session.durationMinutes || 0);
+    }, 0);
     return Math.round((totalMinutes / 60) * 10) / 10;
-  }, [timeSessions]);
+  }, [timeSessions, tasks, projects, hoursRangeStart, todayStr, selectedAreaId, selectedProjectId]);
 
   const activeHabitStreak = useMemo(() => {
     const activeHabits = habits.filter((h) => !h.isDeleted && !h.isArchived);
@@ -141,7 +171,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         selectedAreaId={selectedAreaId}
-        onAreaChange={setSelectedAreaId}
+        onAreaChange={(areaId) => {
+          setSelectedAreaId(areaId);
+          setSelectedProjectId('all');
+        }}
         selectedProjectId={selectedProjectId}
         onProjectChange={setSelectedProjectId}
         areas={areas}
@@ -153,8 +186,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       />
 
       {/* 2. Sub-Tab Navigation Bar */}
-      <div className="dashboard-tabs flex flex-wrap items-center gap-1 overflow-x-auto p-1 surface-card rounded-[var(--radius-sm)] border border-[var(--color-rule)] select-none" role="group" aria-label="Progress views">
-        {subTabs.map((tab) => {
+      <div className="dashboard-tabs flex flex-nowrap items-center gap-1 overflow-x-auto select-none" role="tablist" aria-label="Progress views">
+        {subTabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeSubTab === tab.id;
           return (
@@ -162,8 +195,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               key={tab.id}
               type="button"
               onClick={() => setActiveSubTab(tab.id)}
-              aria-pressed={isActive}
-              className={`dashboard-tab flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium whitespace-nowrap transition-colors min-h-8 ${
+              id={`progress-tab-${tab.id}`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls="progress-tab-panel"
+              tabIndex={isActive ? 0 : -1}
+              onKeyDown={(event) => {
+                let nextIndex = index;
+                if (event.key === 'ArrowRight') nextIndex = (index + 1) % subTabs.length;
+                else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + subTabs.length) % subTabs.length;
+                else if (event.key === 'Home') nextIndex = 0;
+                else if (event.key === 'End') nextIndex = subTabs.length - 1;
+                else return;
+                event.preventDefault();
+                const nextTab = subTabs[nextIndex];
+                setActiveSubTab(nextTab.id);
+                document.getElementById(`progress-tab-${nextTab.id}`)?.focus();
+              }}
+              className={`dashboard-tab flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-[var(--radius-xs)] text-xs font-medium whitespace-nowrap transition-colors min-h-11 sm:min-h-9 ${
                 isActive
                   ? 'bg-[var(--color-paper-3)] text-[var(--color-ink)] font-semibold shadow-xs'
                   : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-2)]'
@@ -177,7 +226,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* 3. Sub-Tab Content */}
-      <div className="flex flex-col">
+      <div key={activeSubTab} id="progress-tab-panel" className="dashboard-tab-panel dashboard-panel-enter flex flex-col" role="tabpanel" aria-labelledby={`progress-tab-${activeSubTab}`} tabIndex={0}>
         {activeSubTab === 'overview' && (
           <DashboardOverviewTab
             todayStr={todayStr}

@@ -136,7 +136,7 @@ export const FormulaInspectorModal: React.FC<FormulaInspectorModalProps> = ({
                       <td className="py-2 px-3 font-medium text-[var(--color-ink)] truncate max-w-xs">
                         {entry.title}
                       </td>
-                      <td className="py-2 px-3 font-mono text-[11px] text-[var(--color-ink-muted)] uppercase">
+                      <td className="py-2 px-3 font-mono text-[11px] text-[var(--color-ink-muted)] ">
                         {entry.type}
                       </td>
                       <td className="py-2 px-3 font-mono tabular-figure text-right text-[var(--color-ink)] whitespace-nowrap">

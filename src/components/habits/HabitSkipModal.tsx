@@ -88,7 +88,7 @@ export const HabitSkipModal: React.FC<HabitSkipModalProps> = ({
             >
               Rest day
             </button>
-            <span className="text-[11px] text-[var(--color-ink-muted)]">·</span>
+            <span className="text-[11px] text-[var(--color-ink-muted)]" aria-hidden="true">or</span>
             <button
               type="button"
               onClick={() => setReason('Recovery / Feeling unwell')}
