@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
+import { purgePreAddedSeedData } from './db/seedData';
 import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
 import { QuickAddModal } from './components/QuickAddModal';
@@ -47,6 +48,13 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
   const [activeReminder, setActiveReminder] = useState<{ title: string; body: string } | null>(null);
+  const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('seshat_onboarding_completed') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   // Check if database has any areas or projects
   const hasData = useLiveQuery(
@@ -60,6 +68,9 @@ export const App: React.FC = () => {
 
   // Active local reminder scheduler check & Tauri desktop shell event wiring
   useEffect(() => {
+    // Automatically clean out any legacy pre-added example goals/projects on startup
+    void purgePreAddedSeedData();
+
     const checkReminders = () => {
       const due = reminderService.checkDueReminders();
       if (due) {
@@ -145,9 +156,21 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Show onboarding wizard if completely empty
-  if (hasData === false) {
-    return <OnboardingView onComplete={() => setActiveTab('today')} />;
+  // Show onboarding wizard if completely empty and not yet completed/dismissed
+  if (hasData === false && !onboardingDismissed) {
+    return (
+      <OnboardingView
+        onComplete={() => {
+          try {
+            localStorage.setItem('seshat_onboarding_completed', 'true');
+          } catch {
+            // ignore storage errors
+          }
+          setOnboardingDismissed(true);
+          setActiveTab('planner');
+        }}
+      />
+    );
   }
 
   return (

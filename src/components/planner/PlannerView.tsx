@@ -31,6 +31,7 @@ export const PlannerView: React.FC = () => {
   const [title, setTitle] = useState('');
   const [isGoal, setIsGoal] = useState(false);
   const [areaId, setAreaId] = useState<string>('');
+  const [newAreaName, setNewAreaName] = useState('');
   const [why, setWhy] = useState('');
   const [successCriteria, setSuccessCriteria] = useState('');
   const [startDate, setStartDate] = useState(() => getLocalDateString());
@@ -60,7 +61,17 @@ export const PlannerView: React.FC = () => {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !areaId) return;
+    if (!title.trim()) return;
+
+    let resolvedAreaId = areaId;
+    if (!resolvedAreaId || resolvedAreaId === '__new__') {
+      const areaTitle = newAreaName.trim() || 'General';
+      const createdArea = await domainService.createArea({
+        name: areaTitle,
+        order: (areas?.length || 0) + 1,
+      });
+      resolvedAreaId = createdArea.id;
+    }
 
     const tags = tagsInput
       .split(/[,\s]+/)
@@ -68,7 +79,7 @@ export const PlannerView: React.FC = () => {
       .filter(Boolean);
 
     const created = await domainService.createProject({
-      areaId,
+      areaId: resolvedAreaId,
       title: title.trim(),
       isGoal,
       why: why.trim() || undefined,
@@ -82,6 +93,7 @@ export const PlannerView: React.FC = () => {
     });
 
     setTitle('');
+    setNewAreaName('');
     setWhy('');
     setSuccessCriteria('');
     setTagsInput('');
@@ -265,10 +277,10 @@ export const PlannerView: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleCreateProject}
-              disabled={!title.trim() || !areaId}
+              disabled={!title.trim() || (areaId === '__new__' && !newAreaName.trim())}
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Create project</span>
+              <span>{isGoal ? 'Create goal' : 'Create project'}</span>
             </Button>
           </>
         }
@@ -287,17 +299,18 @@ export const PlannerView: React.FC = () => {
             <div className="flex flex-col gap-1">
               <label className="text-xs font-medium text-[var(--color-ink)]">Area</label>
               <select
-                value={areaId}
+                value={areaId || ((areas || []).length === 0 ? '__new__' : '')}
                 onChange={(e) => setAreaId(e.target.value)}
                 className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
                 required
               >
-                <option value="">Choose an area</option>
+                {(areas || []).length > 0 && <option value="">Choose an area</option>}
                 {(areas || []).map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}
                   </option>
                 ))}
+                <option value="__new__">+ New life area…</option>
               </select>
             </div>
 
@@ -313,6 +326,16 @@ export const PlannerView: React.FC = () => {
               </select>
             </div>
           </div>
+
+          {(areaId === '__new__' || (areas || []).length === 0) && (
+            <Input
+              label="New life area name"
+              placeholder="e.g. Career, Studies, Health, Personal"
+              value={newAreaName}
+              onChange={(e) => setNewAreaName(e.target.value)}
+              required={areaId === '__new__'}
+            />
+          )}
 
           <Input
             label="Why it matters"

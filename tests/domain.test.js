@@ -44,22 +44,23 @@ test('Dexie database configuration includes all PRD 5.2 stores', () => {
   assert.ok(content.includes('changeLogs:'), 'Must index changeLogs');
 });
 
-test('PRD Section 16 Seed Data contains Heimdall SOC Lab with 8 phases', () => {
+test('Clean workspace seedData purges pre-added example goals and projects', () => {
   const seedPath = path.resolve(process.cwd(), 'src/db/seedData.ts');
   assert.ok(fs.existsSync(seedPath), 'src/db/seedData.ts must exist');
 
   const content = fs.readFileSync(seedPath, 'utf-8');
-  assert.ok(content.includes('Heimdall SOC Lab'), 'Must seed Heimdall SOC Lab');
-  assert.ok(content.includes('ms_prep'), 'Must include Phase 1 Prep');
-  assert.ok(content.includes('ms_ad_build'), 'Must include Phase 2 AD build');
-  assert.ok(content.includes('ms_telemetry'), 'Must include Phase 3 Telemetry');
-  assert.ok(content.includes('ms_siem'), 'Must include Phase 4 SIEM');
-  assert.ok(content.includes('ms_baseline'), 'Must include Phase 5 Baseline');
-  assert.ok(content.includes('ms_attack_detect'), 'Must include Phase 6 Attack and Detect');
-  assert.ok(content.includes('ms_dashboards'), 'Must include Phase 7 Dashboards');
-  assert.ok(content.includes('ms_reporting'), 'Must include Phase 8 Reporting');
-  assert.ok(content.includes('12 MITRE ATT&CK techniques'), 'Must include 12 techniques target');
-  assert.ok(content.includes('Document 3 detection rules'), 'Must include weekly detection target');
+  assert.ok(
+    content.includes('purgePreAddedSeedData'),
+    'Must export purgePreAddedSeedData to clean pre-added example items'
+  );
+  assert.ok(
+    !content.includes("title: 'Heimdall SOC Lab'"),
+    'Must not pre-add example project Heimdall SOC Lab'
+  );
+  assert.ok(
+    !content.includes("title: 'CompTIA Security+ Certification'"),
+    'Must not pre-add example goal CompTIA Security+ Certification'
+  );
 });
 
 test('Domain Service enforces PRD TR-3 drop reason requirement', () => {
