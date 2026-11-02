@@ -1,5 +1,5 @@
 // Service Worker for Seshat Notch Offline Desktop App
-const CACHE_NAME = 'seshat-notch-v3';
+const CACHE_NAME = 'seshat-notch-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -50,27 +50,48 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
-  // Cache-first for static same-origin shell assets, bundled self-hosted fonts, and icons
-  if (url.origin === self.location.origin) {
+  const isHtmlNavigation =
+    event.request.mode === 'navigate' ||
+    event.request.headers.get('accept')?.includes('text/html') ||
+    url.pathname.endsWith('/') ||
+    url.pathname.endsWith('/index.html');
+
+  // 1. Network-first for HTML navigation so deployed updates are picked up automatically without reinstalling
+  if (isHtmlNavigation) {
     event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
           return response;
-        }).catch(() => {
-          if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('./index.html');
-          }
-        });
-      })
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached || caches.match('./index.html'))
+        )
     );
+    return;
   }
+
+  // 2. Stale-while-revalidate for static assets, icons, and self-hosted fonts
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => cached);
+
+      return cached || networkFetch;
+    })
+  );
 });
