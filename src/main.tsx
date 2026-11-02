@@ -21,10 +21,12 @@ if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.p
   });
 }
 
-// Register offline Service Worker (registers on deployed sites and local static servers; skips Vite HMR dev server)
+// Register offline Service Worker (registers on deployed sites and local static servers; skips Vite HMR dev server and Tauri desktop shell)
 if (
   typeof window !== 'undefined' &&
   'serviceWorker' in navigator &&
+  !('__TAURI_INTERNALS__' in window) &&
+  !('__TAURI__' in window) &&
   !document.querySelector('script[src*="/@vite/client"]')
 ) {
   window.addEventListener('load', () => {

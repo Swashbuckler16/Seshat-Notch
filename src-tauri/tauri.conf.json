@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "label": "main",
@@ -22,13 +23,8 @@
         "center": true
       }
     ],
-    "trayIcon": {
-      "id": "seshat-tray",
-      "iconPath": "icons/icon.png",
-      "tooltip": "Seshat Notch — Every day, a notch. Every goal, measured."
-    },
     "security": {
-      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:;"
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:;"
     }
   },
   "bundle": {
@@ -44,4 +40,3 @@
     }
   }
 }
-

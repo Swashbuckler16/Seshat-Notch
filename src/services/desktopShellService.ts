@@ -130,6 +130,32 @@ export const desktopShellService = {
   },
 
   /**
+   * Queries whether "Start with Windows" autostart is enabled (Tauri desktop shell).
+   */
+  async getAutostartEnabled(): Promise<boolean> {
+    if (!isTauriDesktop()) return false;
+    try {
+      const res = await invokeTauri<boolean>('get_autostart_enabled');
+      return Boolean(res);
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * Enables or disables "Start with Windows" autostart (Tauri desktop shell).
+   */
+  async setAutostartEnabled(enabled: boolean): Promise<boolean> {
+    if (!isTauriDesktop()) return false;
+    try {
+      const res = await invokeTauri<boolean>('set_autostart_enabled', { enabled });
+      return Boolean(res);
+    } catch {
+      return false;
+    }
+  },
+
+  /**
    * Subscribes to global shortcut and system tray menu events emitted by the
    * Windows Tauri shell (`seshat://quick-add`, `seshat://trigger-backup`, `seshat://navigate`).
    */

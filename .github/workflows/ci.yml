@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -77,3 +78,35 @@ jobs:
         uses: actions/deploy-pages@v4
         continue-on-error: true
 
+  build-windows-installer:
+    name: Build Windows Desktop Installer (.msi / .exe)
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: verify-and-build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Setup Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build & Package Tauri Windows Installer
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Seshat Notch v__VERSION__ (Windows Desktop)'
+          releaseBody: 'Windows Desktop installer (.msi and .exe) with System Tray persistence, global Ctrl+Shift+K Quick-Add hotkey, native notifications, and automatic disk backups.'
+          releaseDraft: false
+          prerelease: false

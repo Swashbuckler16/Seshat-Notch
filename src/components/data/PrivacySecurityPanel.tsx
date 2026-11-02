@@ -28,7 +28,24 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
     reminderService.getSettings()
   );
   const [boundaryHour, setBoundaryHourState] = useState<number>(() => getDayBoundaryHour());
+  const [autostartEnabled, setAutostartEnabled] = useState<boolean>(false);
   const shellStatus = desktopShellService.getStatus();
+
+  useEffect(() => {
+    if (shellStatus.isDesktopApp) {
+      void desktopShellService.getAutostartEnabled().then(setAutostartEnabled);
+    }
+  }, [shellStatus.isDesktopApp]);
+
+  const handleToggleAutostart = async (checked: boolean) => {
+    const updated = await desktopShellService.setAutostartEnabled(checked);
+    setAutostartEnabled(updated);
+    onNotify(
+      updated
+        ? 'Start with Windows enabled — background reminders will resume after reboot.'
+        : 'Start with Windows disabled.'
+    );
+  };
 
   const loadSettings = async () => {
     try {
@@ -291,6 +308,23 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
                 : 'Daily prompt on Today + 1-click JSON file save'}
             </span>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 hairline-t text-xs">
+          <span className="text-[var(--color-ink-muted)]">
+            Note: The browser app and the native desktop app keep separate local databases. Use <strong>Save backup (.json)</strong> and <strong>Import Plans</strong> to move data between them.
+          </span>
+          {shellStatus.isDesktopApp && (
+            <label className="inline-flex items-center gap-2 font-medium text-[var(--color-ink)] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autostartEnabled}
+                onChange={(e) => handleToggleAutostart(e.target.checked)}
+                className="accent-[var(--color-accent)]"
+              />
+              <span>Start with Windows</span>
+            </label>
+          )}
         </div>
       </div>
 

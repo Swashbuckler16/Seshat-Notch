@@ -204,12 +204,28 @@ test('Phase 14: Windows Desktop Shell (Tauri) configuration and bridge service e
 
   const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, 'utf8'));
   assert.equal(tauriConf.productName, 'Seshat Notch');
-  assert.ok(tauriConf.app.trayIcon, 'Tauri config must configure system tray icon');
+  assert.equal(
+    tauriConf.app.withGlobalTauri,
+    true,
+    'tauri.conf.json must enable app.withGlobalTauri so window.__TAURI__.event is available'
+  );
+  assert.equal(
+    tauriConf.app.trayIcon,
+    undefined,
+    'tauri.conf.json must not declare a duplicate trayIcon alongside TrayIconBuilder in main.rs'
+  );
+  assert.ok(
+    tauriConf.app.security.csp.includes('connect-src') &&
+      tauriConf.app.security.csp.includes('ipc:'),
+    'Tauri CSP must allow connect-src ipc: http://ipc.localhost'
+  );
 
   const mainRs = fs.readFileSync(mainRsPath, 'utf8');
   assert.ok(mainRs.includes('save_backup_to_disk'), 'main.rs must expose save_backup_to_disk command');
   assert.ok(mainRs.includes('send_native_notification'), 'main.rs must expose send_native_notification command');
   assert.ok(mainRs.includes('seshat://quick-add'), 'main.rs must emit seshat://quick-add for global hotkey');
+  assert.ok(mainRs.includes('tauri_plugin_single_instance'), 'main.rs must register single-instance plugin');
+  assert.ok(mainRs.includes('set_autostart_enabled'), 'main.rs must expose start-with-Windows autostart command');
 
   const status = desktopShellService.getStatus();
   assert.equal(typeof status.isDesktopApp, 'boolean');

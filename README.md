@@ -25,10 +25,12 @@
 
 ### Option 2: Native Windows Desktop Shell (Tauri v2 — `src-tauri/`)
 For background system tray persistence when the window is closed:
-- **System Tray & Close-to-Tray:** Closing the window minimizes Seshat Notch to the Windows system tray (`Open`, `Quick Add`, `Save Backup Now`, `Quit`).
+- **Install from Releases (or build locally):** Download the `.msi` or `.exe` installer from **GitHub Releases** (triggered automatically on `v*` tags or via the `Build Windows Desktop Installer` workflow action). *Note: Because this open-source installer is unsigned, Windows SmartScreen may show an "Unknown publisher" prompt on first run — click **More info → Run anyway**.*
+- **System Tray & Close-to-Tray:** Closing the window minimizes Seshat Notch to the Windows system tray (`Open`, `Quick Add`, `Save Backup Now`, `Quit`) and shows a first-close tray notification hint.
+- **Single-Instance & Start with Windows:** Launching a second copy focuses the existing window, and an optional **Start with Windows** toggle in **Settings → Privacy & Preferences** keeps reminders active across reboots.
 - **Global Quick-Add Hotkey:** Press `Ctrl+Shift+K` from any Windows application to summon Quick Add.
-- **Native Toast Notifications:** Fires scheduled reminders even when minimized to the system tray.
-- **Silent Automatic Disk Backups:** Writes daily `.json` backups directly to `Documents/SeshatNotch/Backups/`.
+- **Native Toast Notifications & Silent Disk Backups:** Fires scheduled reminders even when minimized to the system tray and writes daily `.json` backups to `Documents/SeshatNotch/Backups/`.
+- **Moving Data Between Browser & Desktop App:** The browser PWA and the native desktop app maintain separate local databases. To move your data between them, click **Save backup (.json)** on Today (or in Settings) and import that file under **Settings → Import Plans**.
 
 ---
 

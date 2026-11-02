@@ -3,13 +3,17 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, WindowEvent,
 };
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt as AutostartExt};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 use tauri_plugin_notification::NotificationExt;
+
+static FIRST_CLOSE_NOTIFIED: AtomicBool = AtomicBool::new(false);
 
 /// Writes a JSON backup file directly to the user's Documents/SeshatNotch/Backups directory on Windows.
 #[tauri::command]
@@ -51,6 +55,32 @@ fn send_native_notification(app: AppHandle, title: String, body: String) -> Resu
         .map_err(|e| format!("Notification error: {}", e))
 }
 
+/// Checks whether "Start with Windows" autostart is enabled.
+#[tauri::command]
+fn get_autostart_enabled(app: AppHandle) -> Result<bool, String> {
+    app.autolaunch()
+        .is_enabled()
+        .map_err(|e| format!("Autostart query error: {}", e))
+}
+
+/// Enables or disables "Start with Windows" autostart so background reminders survive reboots.
+#[tauri::command]
+fn set_autostart_enabled(app: AppHandle, enabled: bool) -> Result<bool, String> {
+    let manager = app.autolaunch();
+    if enabled {
+        manager
+            .enable()
+            .map_err(|e| format!("Failed to enable autostart: {}", e))?;
+    } else {
+        manager
+            .disable()
+            .map_err(|e| format!("Failed to disable autostart: {}", e))?;
+    }
+    manager
+        .is_enabled()
+        .map_err(|e| format!("Autostart status error: {}", e))
+}
+
 fn show_and_focus_main(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
@@ -63,8 +93,18 @@ fn main() {
     let quick_add_shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::KeyK);
 
     tauri::Builder::default()
+        // 1. Single-instance guard: launching a second copy focuses the existing window
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            show_and_focus_main(app);
+        }))
+        // 2. Start-with-Windows autostart plugin
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            None,
+        ))
+        // 3. Native notifications plugin
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_fs::init())
+        // 4. Global OS-wide shortcut plugin (Ctrl+Shift+K)
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(move |app, shortcut, event| {
@@ -79,7 +119,7 @@ fn main() {
             // Register global Ctrl+Shift+K shortcut for Quick Add
             let _ = app.global_shortcut().register(quick_add_shortcut);
 
-            // Build Windows System Tray Menu
+            // Build single Windows System Tray Icon & Menu (no duplicate config trayIcon)
             let open_item = MenuItem::with_id(app, "open", "Open Seshat Notch", true, None::<&str>)?;
             let quick_add_item = MenuItem::with_id(
                 app,
@@ -99,7 +139,8 @@ fn main() {
 
             let menu = Menu::with_items(app, &[&open_item, &quick_add_item, &backup_item, &quit_item])?;
 
-            let _tray = TrayIconBuilder::new()
+            let mut tray_builder = TrayIconBuilder::with_id("seshat-tray")
+                .tooltip("Seshat Notch — Every day, a notch. Every goal, measured.")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
@@ -128,8 +169,13 @@ fn main() {
                     {
                         show_and_focus_main(tray.app_handle());
                     }
-                })
-                .build(app)?;
+                });
+
+            if let Some(default_icon) = app.default_window_icon().cloned() {
+                tray_builder = tray_builder.icon(default_icon);
+            }
+
+            let _tray = tray_builder.build(app)?;
 
             Ok(())
         })
@@ -138,13 +184,25 @@ fn main() {
             if let WindowEvent::CloseRequested { api, .. } = event {
                 let _ = window.hide();
                 api.prevent_close();
+
+                // Show a one-time notification hint the first time the window is closed to tray
+                if !FIRST_CLOSE_NOTIFIED.swap(true, Ordering::SeqCst) {
+                    let _ = window
+                        .app_handle()
+                        .notification()
+                        .builder()
+                        .title("Seshat Notch is still running in the tray")
+                        .body("Press Ctrl+Shift+K anytime for Quick Add, or right-click the tray icon to Quit.")
+                        .show();
+                }
             }
         })
         .invoke_handler(tauri::generate_handler![
             save_backup_to_disk,
-            send_native_notification
+            send_native_notification,
+            get_autostart_enabled,
+            set_autostart_enabled
         ])
         .run(tauri::generate_context!())
         .expect("error while running Seshat Notch Windows desktop application");
 }
-
