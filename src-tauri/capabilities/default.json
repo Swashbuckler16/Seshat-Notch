@@ -1,5 +1,4 @@
 {
-  "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Default Windows desktop capabilities for Seshat Notch: window management, system tray, single-instance, autostart, global quick-add hotkey, and notifications.",
   "windows": ["main"],
