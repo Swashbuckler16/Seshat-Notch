@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
+import { migrateActivities } from './activityMigration.ts';
 import type {
   Area,
   ProjectGoal,
@@ -65,6 +66,10 @@ export class SeshatDatabase extends Dexie {
     this.version(2).stores({
       backups: 'id, name, timestamp, isAutomated',
     });
+    this.version(3).stores({
+      habits: 'id, areaId, linkedGoalId, scheduleType, kind, isAvoidance, isArchived, isDeleted',
+      progressLogs: 'id, entityType, entityId, date, [entityId+date], timestamp, isDeleted',
+    }).upgrade(migrateActivities);
   }
 }
 

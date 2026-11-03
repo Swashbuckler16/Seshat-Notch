@@ -69,7 +69,7 @@ test('Domain Service enforces PRD TR-3 drop reason requirement', () => {
 
   const content = fs.readFileSync(servicePath, 'utf-8');
   assert.ok(
-    content.includes('PRD Requirement TR-3: Dropping'),
+    content.includes('Add a short reason before dropping'),
     'Must guard against dropping items without a mandatory reason'
   );
   assert.ok(

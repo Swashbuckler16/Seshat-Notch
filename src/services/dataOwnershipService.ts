@@ -1,4 +1,5 @@
 import { db } from '../db/index.ts';
+import { migrateActivities } from '../db/activityMigration.ts';
 import type {
   EntityId,
   RecoveryBinItem,
@@ -172,6 +173,7 @@ export interface BackupPreferencesPayload {
   reminderSettings?: ReminderSettings;
   dailyBackupPromptEnabled?: boolean;
   theme?: string | null;
+  palette?: string | null;
 }
 
 export interface FullBackupPayload {
@@ -481,12 +483,13 @@ export const dataOwnershipService = {
       app: 'Seshat Notch',
       version: '1.0.0',
       exportedAt: getCurrentUTC(),
-      schemaVersion: 2,
+      schemaVersion: 3,
       preferences: {
         dayBoundaryHour: getDayBoundaryHour(),
         reminderSettings: reminderService.getSettings(),
         dailyBackupPromptEnabled: this.isDailyBackupPromptEnabled(),
         theme: currentTheme,
+        palette: typeof localStorage !== 'undefined' ? localStorage.getItem('seshat-palette') : null,
       },
       data: {
         areas,
@@ -820,6 +823,7 @@ export const dataOwnershipService = {
       throw new Error('Invalid backup structure: missing data container.');
     }
 
+    if (parsed.schemaVersion > 3) throw new Error('This backup was made by a newer version of Seshat Notch. Please update the app first.');
     // Auto-create snapshot safety backup before applying import
     await this.createSnapshotBackup('Pre-Import Safety Snapshot', true);
 
@@ -858,7 +862,7 @@ export const dataOwnershipService = {
         db.changeLogs,
         db.settings,
       ],
-      async () => {
+      async (tx) => {
         if (mode === 'replace') {
           for (const tbl of tables) {
             const records = parsed.data[tbl] || [];
@@ -915,11 +919,13 @@ export const dataOwnershipService = {
             tablesUpdated.push('settings');
           }
         }
+        await migrateActivities(tx);
       }
     );
 
     // Restore user preferences (day rollover boundary, reminder schedule, daily backup prompt, theme)
     if (parsed.preferences) {
+      if (parsed.preferences.palette && typeof localStorage !== 'undefined') localStorage.setItem('seshat-palette', parsed.preferences.palette);
       if (typeof parsed.preferences.dayBoundaryHour === 'number') {
         setDayBoundaryHour(parsed.preferences.dayBoundaryHour);
       }
@@ -1097,26 +1103,24 @@ export const dataOwnershipService = {
   },
 
   async setAppLockPin(pin: string): Promise<void> {
-    const hashed = hashPin(pin);
+    if (!/^\d{4,8}$/.test(pin)) throw new Error('Choose a PIN with 4 to 8 digits.');
+    const salt = crypto.randomUUID();
+    const hashed = `sn_salted_${salt}:${sha256Hex(`${salt}:${pin}`)}`;
     const now = getCurrentUTC();
     await db.transaction('rw', [db.settings], async () => {
       await db.settings.put({ key: 'app_lock_pin_hash', value: hashed, updatedAt: now });
       await db.settings.put({ key: 'app_lock_enabled', value: 'true', updatedAt: now });
+      await db.settings.delete('app_lock_attempts');
     });
   },
 
   async disableAppLock(currentPin: string): Promise<boolean> {
+    if (!(await this.verifyAppLockPin(currentPin))) return false;
     return await db.transaction('rw', [db.settings], async () => {
       const pinSetting = await db.settings.get('app_lock_pin_hash');
       if (!pinSetting) {
         await db.settings.put({ key: 'app_lock_enabled', value: 'false', updatedAt: getCurrentUTC() });
         return true;
-      }
-
-      const hashedInput = hashPin(currentPin);
-      const legacyInput = legacyHashPin(currentPin);
-      if (hashedInput !== pinSetting.value && legacyInput !== pinSetting.value) {
-        return false;
       }
 
       const now = getCurrentUTC();
@@ -1127,8 +1131,25 @@ export const dataOwnershipService = {
   },
 
   async verifyAppLockPin(pin: string): Promise<boolean> {
-    const pinSetting = await db.settings.get('app_lock_pin_hash');
-    if (!pinSetting) return true;
-    return hashPin(pin) === pinSetting.value || legacyHashPin(pin) === pinSetting.value;
+    return db.transaction('rw', db.settings, async () => {
+      const pinSetting = await db.settings.get('app_lock_pin_hash');
+      if (!pinSetting) return true;
+      const attemptSetting = await db.settings.get('app_lock_attempts');
+      const attempts = attemptSetting ? JSON.parse(attemptSetting.value) as { count: number; until: number } : { count: 0, until: 0 };
+      if (attempts.until > Date.now()) return false;
+      if (attempts.until) attempts.count = 0;
+      const stored = pinSetting.value;
+      const salted = stored.startsWith('sn_salted_');
+      const salt = salted ? stored.slice(10).split(':')[0] : '';
+      const valid = salted ? stored === `sn_salted_${salt}:${sha256Hex(`${salt}:${pin}`)}` : hashPin(pin) === stored || legacyHashPin(pin) === stored;
+      if (valid) {
+        await db.settings.delete('app_lock_attempts');
+        if (!salted) await this.setAppLockPin(pin);
+        return true;
+      }
+      const count = attempts.count + 1;
+      await db.settings.put({ key: 'app_lock_attempts', value: JSON.stringify({ count, until: count >= 5 ? Date.now() + 60_000 : 0 }), updatedAt: getCurrentUTC() });
+      return false;
+    });
   },
 };
