@@ -1,0 +1,430 @@
+{
+  "sample": {
+    "done": 29,
+    "scheduled": 33,
+    "streak": 8
+  },
+  "checks": [
+    {
+      "width": 1440,
+      "screen": "Today",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Today",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Today",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Today",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Activities",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Activities",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Activities",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Activities",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Analytics",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Analytics",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Analytics",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Analytics",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Plan",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Plan",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Plan",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Plan",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Settings",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Settings",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Settings",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "screen": "Settings",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Today",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Today",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Today",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Today",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Activities",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Activities",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Activities",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Activities",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Analytics",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Analytics",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Analytics",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Analytics",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Plan",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Plan",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Plan",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Plan",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Settings",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Settings",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Settings",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 900,
+      "screen": "Settings",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Today",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Today",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Today",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Today",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Activities",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Activities",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Activities",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Activities",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Analytics",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Analytics",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Analytics",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Analytics",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Plan",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Plan",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Plan",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Plan",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Settings",
+      "palette": "seshat",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Settings",
+      "palette": "seshat",
+      "mode": "dark",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Settings",
+      "palette": "ocean",
+      "mode": "light",
+      "violations": []
+    },
+    {
+      "width": 375,
+      "screen": "Settings",
+      "palette": "berry",
+      "mode": "light",
+      "violations": []
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,61 @@
+{
+  "summary": {
+    "fails": 0,
+    "reflex": 0,
+    "warns": 0,
+    "waived": 2,
+    "rejected": 0,
+    "answered": 1,
+    "dismissed": 2,
+    "notes": 0,
+    "files": 13,
+    "render": "ran"
+  },
+  "findings": [
+    {
+      "gate": "47b",
+      "grade": "WAIVED",
+      "tier": "reflex",
+      "file": "src\\components\\activities\\NotchGrid.tsx",
+      "line": 51,
+      "evidence": "re-drawn chrome class \"notch\" (class=\"notch-box notch-today notch-sel…\")",
+      "fix": "Use a real screenshot in a figure"
+    },
+    {
+      "gate": "47b",
+      "grade": "WAIVED",
+      "tier": "reflex",
+      "file": "src\\styles\\activities.css",
+      "line": 52,
+      "evidence": "re-drawn chrome selector .notch-history",
+      "fix": "Use a real screenshot in a figure"
+    },
+    {
+      "gate": "F4",
+      "grade": "ANSWERED",
+      "tier": "finish",
+      "file": "src\\styles\\analytics.css",
+      "line": 58,
+      "evidence": "2 filled primary-button recipes: .activity-segments button[aria-pressed=\"true\"] + .a…",
+      "fix": "One filled primary per page; demote the rest to outline/quiet variants"
+    },
+    {
+      "gate": "25",
+      "grade": "DISMISSED",
+      "tier": "reflex",
+      "file": "src\\styles\\activities.css",
+      "line": 41,
+      "evidence": "measure 32ch on .activity-score details p (45-75ch range)",
+      "fix": "Set prose measure between 45 and 75ch; a one-sentence lede or caption from 28ch"
+    },
+    {
+      "gate": "70",
+      "grade": "DISMISSED",
+      "tier": "floor",
+      "file": "src\\components\\activities\\ActivityViews.tsx",
+      "line": 1,
+      "evidence": "a script prints success (\"activity-row ${day.done?activ…\") with no request behind it",
+      "fix": "No success state until the form posts somewhere; an empty data-endpoint and a handoff note"
+    }
+  ]
+}
