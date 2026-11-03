@@ -8,6 +8,7 @@ import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import '@fontsource/ibm-plex-mono/600.css';
 import App from './App';
+import { ActivityDataProvider } from './components/activities/ActivityData';
 import './styles/index.css';
 
 // Request persistent storage to protect local-first IndexedDB data from browser eviction
@@ -44,6 +45,6 @@ if (
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <ActivityDataProvider><App /></ActivityDataProvider>
   </React.StrictMode>
 );

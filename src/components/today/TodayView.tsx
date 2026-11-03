@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
-import { MorningSummary } from './MorningSummary';
+import { ActivityToday } from '../activities/ActivityToday';
 import { ExecutionStrip } from './ExecutionStrip';
 import { TodayTasks } from './TodayTasks';
 import { TodayTargets } from './TodayTargets';
-import { TodayHabits } from './TodayHabits';
 import { getISOWeekString } from '../../utils/periodUtils';
-import { getLocalDateString, shiftDateString } from '../../utils/dateUtils';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { dataOwnershipService } from '../../services/dataOwnershipService';
 import { Inbox, ArrowRight, HardDriveDownload, X } from 'lucide-react';
 
@@ -46,18 +45,6 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
     setBackupDue(false);
   };
 
-  const handlePrevDay = () => {
-    setDateStr(shiftDateString(dateStr, -1));
-  };
-
-  const handleNextDay = () => {
-    setDateStr(shiftDateString(dateStr, 1));
-  };
-
-  const handleToday = () => {
-    setDateStr(getLocalDateString());
-  };
-
   // Query tasks for dateStr (scheduled on or due on this date)
   const tasks = useLiveQuery(
     () =>
@@ -87,62 +74,9 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
     [dateStr, currentWeekStr]
   );
 
-  // Query habits and logs for dateStr
-  const habits = useLiveQuery(
-    () => db.habits.filter((h) => !h.isDeleted && !h.isArchived).toArray()
-  );
-
-  const habitLogs = useLiveQuery(
-    () =>
-      db.progressLogs
-        .where('date')
-        .equals(dateStr)
-        .filter((l) => l.entityType === 'habit')
-        .toArray(),
-    [dateStr]
-  );
-
-  // Query time sessions logged today
-  const sessions = useLiveQuery(
-    () =>
-      db.timeSessions
-        .filter((s) => s.startTime.startsWith(dateStr))
-        .toArray(),
-    [dateStr]
-  );
-
-  // Compute summary numbers with consistent math
-  const targetsTotal = targets?.length ?? 0;
-  const targetsDone = (targets || []).filter((t) => t.status === 'done' || t.currentValue >= t.targetValue).length;
-
-  const tasksTotal = tasks?.length ?? 0;
-  const tasksDone = (tasks || []).filter((t) => t.status === 'done').length;
-
-  const habitsTotal = habits?.length ?? 0;
-  const habitsDone = (habitLogs || []).filter((l) => l.value > 0).length;
-
-  const minutesLogged = (sessions || []).reduce((acc, s) => acc + (s.durationMinutes || 0), 0);
-  const minutesEstimated = (tasks || []).reduce((acc, t) => acc + (t.estimateMinutes || 0), 0);
-
-  const isSunday = new Date(`${dateStr}T00:00:00`).getDay() === 0;
-
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Morning Summary Scan Strip (<5s scan) */}
-      <MorningSummary
-        dateStr={dateStr}
-        onPrevDay={handlePrevDay}
-        onNextDay={handleNextDay}
-        onToday={handleToday}
-        targetsDone={targetsDone}
-        targetsTotal={targetsTotal}
-        tasksDone={tasksDone}
-        tasksTotal={tasksTotal}
-        habitsDone={habitsDone}
-        habitsTotal={habitsTotal}
-        minutesLogged={minutesLogged}
-        minutesEstimated={minutesEstimated}
-      />
+      <ActivityToday date={dateStr} onDateChange={setDateStr} />
 
       {/* Daily Backup Due Banner */}
       {backupDue && (
@@ -203,7 +137,7 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
       )}
 
       {/* Sunday Weekly Review & Triage Prompt */}
-      {isSunday && (
+      {onNavigateTab && (
         <div className="surface-card rounded-[var(--radius-sm)] p-4 border border-[var(--color-accent)]/50 bg-[var(--color-paper-2)] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 flex items-center justify-center text-[var(--color-accent)]">
@@ -235,9 +169,9 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
       <ExecutionStrip tasks={tasks || []} dateStr={dateStr} />
 
       {/* 3. Main Operational Grid: Tasks & Targets (Left) | Habits (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 gap-6 items-start">
         {/* Left Column: Tasks and Targets */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TodayTasks
             tasks={tasks || []}
             dateStr={dateStr}
@@ -246,10 +180,6 @@ export const TodayView: React.FC<TodayViewProps> = ({ onOpenQuickAdd, onNavigate
           <TodayTargets targets={targets || []} dateStr={dateStr} />
         </div>
 
-        {/* Right Column: Habits & Daily Routines */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <TodayHabits dateStr={dateStr} />
-        </div>
       </div>
     </div>
   );

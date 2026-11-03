@@ -339,7 +339,7 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
                 Local App Lock
               </h3>
               <span className="text-xs text-[var(--color-ink-muted)]">
-                Protect your personal plans and reviews with an offline PIN.
+                Hide your screen with a PIN. This does not encrypt your saved data.
               </span>
             </div>
           </div>

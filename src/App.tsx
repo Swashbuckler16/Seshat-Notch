@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
-import { purgePreAddedSeedData } from './db/seedData';
+
 import { BrandLogo } from './components/BrandLogo';
 import { ThemeToggle } from './components/ThemeToggle';
 import { QuickAddModal } from './components/QuickAddModal';
@@ -20,7 +20,6 @@ import {
   Sun,
   Flame,
   BarChart2,
-  BookOpen,
   Settings,
   Bell,
   Lock,
@@ -31,10 +30,10 @@ const PlannerView = lazy(() =>
   import('./components/planner/PlannerView').then((m) => ({ default: m.PlannerView }))
 );
 const HabitsView = lazy(() =>
-  import('./components/habits/HabitsView').then((m) => ({ default: m.HabitsView }))
+  import('./components/activities/ActivitiesView').then((m) => ({ default: m.ActivitiesView }))
 );
 const DashboardView = lazy(() =>
-  import('./components/dashboard/DashboardView').then((m) => ({ default: m.DashboardView }))
+  import('./components/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView }))
 );
 const DataManagementView = lazy(() =>
   import('./components/data/DataManagementView').then((m) => ({ default: m.DataManagementView }))
@@ -46,7 +45,7 @@ const ReviewsView = lazy(() =>
 export type AppTab = 'today' | 'planner' | 'habits' | 'progress' | 'settings' | 'reviews';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<AppTab>('today');
+  const [activeTab, setActiveTab] = useState<AppTab>(() => { const tab = new URLSearchParams(location.search).get('screen'); return ['today', 'planner', 'habits', 'progress', 'settings', 'reviews'].includes(tab || '') ? tab as AppTab : 'today'; });
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
   const [activeReminder, setActiveReminder] = useState<{ title: string; body: string } | null>(null);
   const [isAppUnlocked, setIsAppUnlocked] = useState(false);
@@ -59,6 +58,20 @@ export const App: React.FC = () => {
       return false;
     }
   });
+
+  useEffect(() => {
+    const url = new URL(location.href);
+    url.searchParams.set('screen', activeTab);
+    if (url.href !== location.href) history.pushState(null, '', url);
+  }, [activeTab]);
+  useEffect(() => {
+    const navigate = () => {
+      const tab = new URLSearchParams(location.search).get('screen');
+      if (['today', 'planner', 'habits', 'progress', 'settings', 'reviews'].includes(tab || '')) setActiveTab(tab as AppTab);
+    };
+    window.addEventListener('popstate', navigate);
+    return () => window.removeEventListener('popstate', navigate);
+  }, []);
 
   // Live query for App Lock status
   const appLockStatus = useLiveQuery(
@@ -103,7 +116,7 @@ export const App: React.FC = () => {
   // Active local reminder scheduler check & Tauri desktop shell event wiring
   useEffect(() => {
     // Automatically clean out any legacy pre-added example goals/projects on startup
-    void purgePreAddedSeedData();
+    // Preserve all existing records, including edited starter activities.
 
     const checkReminders = () => {
       const due = reminderService.checkDueReminders();
@@ -166,9 +179,9 @@ export const App: React.FC = () => {
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
         const tabMap: Record<string, AppTab> = {
           '1': 'today',
-          '2': 'planner',
-          '3': 'habits',
-          '4': 'progress',
+          '2': 'habits',
+          '3': 'progress',
+          '4': 'planner',
           '5': 'settings',
           '6': 'reviews',
         };
@@ -190,6 +203,8 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  if (appLockStatus === undefined) return <div role="status" className="p-6">Opening your planner…</div>;
+
   // Show App Lock Gate screen if PIN lock is enabled and session is not yet unlocked
   if (appLockStatus?.enabled && !isAppUnlocked) {
     const handleUnlockSubmit = async (e: React.FormEvent) => {
@@ -200,7 +215,7 @@ export const App: React.FC = () => {
         setLockPinInput('');
         setLockPinError(null);
       } else {
-        setLockPinError('Incorrect PIN. Please try again.');
+        setLockPinError('That PIN did not match. After five tries, wait one minute.');
       }
     };
 
@@ -290,7 +305,7 @@ export const App: React.FC = () => {
               Seshat Notch
             </h1>
             <span className="hidden sm:inline text-xs text-[var(--color-ink-muted)]">
-              Every day, a notch. Every goal, measured.
+              A little progress, every day.
             </span>
           </div>
         </div>
@@ -315,100 +330,16 @@ export const App: React.FC = () => {
           </Button>
 
           {/* Primary navigation stays visible on every screen size. */}
-          <nav
-            className="app-primary-nav flex items-center bg-[var(--color-paper-2)] p-0.5 border border-[var(--color-rule)] rounded-[var(--radius-xs)] text-xs"
-            aria-label="Main navigation"
-          >
-            <button
-              type="button"
-              onClick={() => setActiveTab('today')}
-              aria-current={activeTab === 'today' ? 'page' : undefined}
-              title="Today (Alt+1)"
-              aria-label="Today"
-              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'today'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <Sun className="w-3.5 h-3.5 text-[var(--color-accent)]" />
-              <span className="app-nav-label">Today</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('planner')}
-              aria-current={activeTab === 'planner' ? 'page' : undefined}
-              title="Plan (Alt+2)"
-              aria-label="Plan"
-              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'planner'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5" />
-              <span className="app-nav-label">Plan</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('habits')}
-              aria-current={activeTab === 'habits' ? 'page' : undefined}
-              title="Habits (Alt+3)"
-              aria-label="Habits"
-              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'habits'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <Flame className="w-3.5 h-3.5 text-[var(--color-status-at-risk)]" />
-              <span className="app-nav-label">Habits</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('progress')}
-              aria-current={activeTab === 'progress' ? 'page' : undefined}
-              title="Progress (Alt+4)"
-              aria-label="Progress"
-              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'progress'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <BarChart2 className="w-3.5 h-3.5" />
-              <span className="app-nav-label">Progress</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('settings')}
-              aria-current={activeTab === 'settings' ? 'page' : undefined}
-              title="Settings (Alt+5)"
-              aria-label="Settings"
-              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'settings'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span className="app-nav-label">Settings</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('reviews')}
-              aria-current={activeTab === 'reviews' ? 'page' : undefined}
-              title="Reviews (Alt+6)"
-              aria-label="Reviews"
-              className={`app-nav-item inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-xs)] font-medium transition-colors ${
-                activeTab === 'reviews'
-                  ? 'bg-[var(--color-paper)] text-[var(--color-ink)] shadow-xs font-semibold'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span className="app-nav-label">Reviews</span>
-            </button>
+          <nav className="app-primary-nav" aria-label="Main navigation">
+            {([
+              ['today', 'Today', Sun], ['habits', 'Activities', Flame],
+              ['progress', 'Analytics', BarChart2], ['planner', 'Plan', Briefcase],
+              ['settings', 'Settings', Settings],
+            ] as const).map(([tab, label, Icon], index) => <button type="button" key={tab}
+              className="app-nav-item" aria-label={label} title={label + ' (Alt+' + (index + 1) + ')'}
+              aria-current={activeTab === tab ? 'page' : undefined} onClick={() => setActiveTab(tab)}>
+              <Icon size={19} aria-hidden="true" /><span className="app-nav-label">{label}</span>
+            </button>)}
           </nav>
 
           <ThemeToggle />
@@ -470,16 +401,7 @@ export const App: React.FC = () => {
 
           {activeTab === 'progress' && (
             <section className="app-screen-enter">
-              <DashboardView
-                onNavigateTab={(tab) => {
-                  if (tab === 'reviews') {
-                    setActiveTab('reviews');
-                  } else if (['today', 'planner', 'habits', 'progress', 'settings'].includes(tab)) {
-                    setActiveTab(tab as AppTab);
-                  }
-                }}
-                onOpenProjectDetail={() => setActiveTab('planner')}
-              />
+              <DashboardView onNavigateTab={(tab) => setActiveTab(tab as AppTab)} />
             </section>
           )}
 
@@ -497,7 +419,7 @@ export const App: React.FC = () => {
                   onClick={() => setActiveTab('today')}
                   className="text-xs text-[var(--color-accent)] hover:underline flex items-center gap-1 font-medium"
                 >
-                  ← Back to Today
+                  Back to Today
                 </button>
               </div>
               <ReviewsView currentDateStr={getLocalDateString()} />
