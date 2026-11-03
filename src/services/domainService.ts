@@ -1,4 +1,5 @@
 import { activityService } from './activityService.ts';
+import { assertTodayCompletion } from '../utils/completionDate.ts';
 import { db } from '../db/index.ts';
 import { recordChange, generateId, getCurrentUTC } from '../db/changeLogService.ts';
 import {
@@ -430,6 +431,7 @@ export const domainService = {
   // TARGETS (MONTHLY, WEEKLY, DAILY)
   // ==========================================
   async createTarget(data: Omit<Target, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<Target> {
+    if (data.horizon === 'day' && (data.currentValue > 0 || data.status === 'done')) assertTodayCompletion(data.period);
     if (!data.title || !data.title.trim()) {
       throw new Error('Target title is required.');
     }
@@ -469,6 +471,8 @@ export const domainService = {
     return await db.transaction('rw', [db.targets, db.progressLogs, db.changeLogs], async () => {
       const existing = await db.targets.get(id);
       if (!existing) throw new Error(`Target ${id} not found`);
+
+      if (existing.horizon === 'day') assertTodayCompletion(existing.period);
 
       const now = getCurrentUTC();
       const localToday = getLocalDateString();
@@ -536,6 +540,10 @@ export const domainService = {
 
       const nextHorizon = updates.horizon !== undefined ? updates.horizon : existing.horizon;
       const nextPeriod = updates.period !== undefined ? updates.period : existing.period;
+      if (updates.currentValue !== undefined || updates.status === 'done' || (existing.status === 'done' && updates.status !== undefined)) {
+        if (existing.horizon === 'day') assertTodayCompletion(existing.period);
+        if (nextHorizon === 'day') assertTodayCompletion(nextPeriod);
+      }
       if (!isValidPeriodForHorizon(nextPeriod, nextHorizon)) {
         throw new Error(`Invalid period "${nextPeriod}" for ${nextHorizon} horizon.`);
       }
@@ -799,6 +807,7 @@ export const domainService = {
   // TASKS & SUBTASKS
   // ==========================================
   async createTask(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<Task> {
+    if (data.status === 'done' || data.subtasks?.some(s => s.isCompleted)) assertTodayCompletion(data.scheduleDate || data.dueDate || getLocalDateString());
     if (!data.title || !data.title.trim()) {
       throw new Error('Task title is required.');
     }
@@ -842,6 +851,7 @@ export const domainService = {
     await db.transaction('rw', [db.tasks, db.changeLogs], async () => {
       const existing = await db.tasks.get(id);
       if (!existing) throw new Error(`Task ${id} not found`);
+      if (status === 'done' || existing.status === 'done') assertTodayCompletion(existing.scheduleDate || existing.dueDate || getLocalDateString());
 
       const now = getCurrentUTC();
       await db.tasks.update(id, { status, updatedAt: now });
@@ -862,6 +872,7 @@ export const domainService = {
     return await db.transaction('rw', [db.tasks, db.changeLogs], async () => {
       const existing = await db.tasks.get(id);
       if (!existing) throw new Error(`Task ${id} not found`);
+      assertTodayCompletion(existing.scheduleDate || existing.dueDate || getLocalDateString());
 
       const newStatus: Status = existing.status === 'done' ? 'active' : 'done';
       const now = getCurrentUTC();
@@ -883,6 +894,12 @@ export const domainService = {
     return await db.transaction('rw', [db.tasks, db.changeLogs], async () => {
       const existing = await db.tasks.get(id);
       if (!existing) throw new Error(`Task ${id} not found`);
+      const completionChanged = updates.subtasks?.some(s => s.isCompleted !== (existing.subtasks?.find(old => old.id === s.id)?.isCompleted ?? false));
+      if (completionChanged) assertTodayCompletion(existing.scheduleDate || existing.dueDate || getLocalDateString());
+      if (updates.status === 'done' || (existing.status === 'done' && updates.status !== undefined)) {
+        assertTodayCompletion(existing.scheduleDate || existing.dueDate || getLocalDateString());
+        assertTodayCompletion(updates.scheduleDate || updates.dueDate || existing.scheduleDate || existing.dueDate || getLocalDateString());
+      }
 
       const now = getCurrentUTC();
       const updated: Task = { ...existing, ...updates, updatedAt: now };
@@ -1151,6 +1168,7 @@ export const domainService = {
    * Logs an excused skip day for fair streak preservation (PRD HB-3)
    */
   async logHabitSkip(habitId: EntityId, date: string, reason = 'Excused rest day'): Promise<ProgressLog> {
+    assertTodayCompletion(date);
     return await db.transaction('rw', [db.habits, db.progressLogs, db.changeLogs], async () => {
       const habit = await db.habits.get(habitId);
       if (!habit) throw new Error(`Habit ${habitId} not found`);
@@ -1196,6 +1214,7 @@ export const domainService = {
    * Logs a relapse event for avoidance habits (PRD HB-6)
    */
   async logAvoidanceRelapse(habitId: EntityId, date: string, reason = 'Relapse event'): Promise<ProgressLog> {
+    assertTodayCompletion(date);
     return await db.transaction('rw', [db.habits, db.progressLogs, db.changeLogs], async () => {
       const habit = await db.habits.get(habitId);
       if (!habit) throw new Error(`Habit ${habitId} not found`);

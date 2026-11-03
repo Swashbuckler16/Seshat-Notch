@@ -30,8 +30,7 @@ export function NotchGrid({ activity, entries, today, from, to, compact, calenda
   const dates = useMemo(() => datesBetween(monday(first), shiftDateString(monday(last), 6)), [first, last]);
   const dayMap = useMemo(() => new Map(getActivityDays(activity, entries, today, dates[0], dates.at(-1)).map(day => [day.date, day])), [activity, entries, today, dates]);
   const [focused, setFocused] = useState(selectedDate || today);
-  const [hint, setHint] = useState('Select a box to update your day.');
-  const anchor = useRef<string | null>(null);
+  const [hint, setHint] = useState('Only today’s box can be updated. Other days are read-only.');
   const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const focusDate = today < first ? first : today > last ? last : today;
@@ -46,14 +45,14 @@ export function NotchGrid({ activity, entries, today, from, to, compact, calenda
   };
   const renderBox = (date: string) => {
     const day = dayMap.get(date)!;
-    const inert = date > today || date < activity.startDate || !day.scheduled;
+    const inert = date !== today || date < activity.startDate || !day.scheduled;
     const state = day.state.replaceAll('_', '-');
     return <button key={date} type="button" className={`notch-box notch-${state} ${date === today ? 'notch-today' : ''} ${date === selectedDate ? 'notch-selected' : ''}`}
       tabIndex={date === focused ? 0 : -1} aria-label={describe(date)} aria-disabled={inert || !onSelect} aria-pressed={day.done}
       title={describe(date)} data-date={date} id={`activity-day-${activity.id}-${date}`}
       onFocus={() => { setFocused(date); setHint(describe(date)); }} onMouseEnter={() => setHint(describe(date))}
       onContextMenu={onEdit && !inert ? (event) => { event.preventDefault(); onEdit(date); } : undefined}
-      onClick={(event) => { if (inert || !onSelect) return; if (event.shiftKey && anchor.current) { const a = anchor.current; onSelect(date, datesBetween(a < date ? a : date, a > date ? a : date).filter(d => dayMap.get(d)?.scheduled)); } else { anchor.current = date; onSelect(date); } }}
+      onClick={() => { if (inert || !onSelect) return; onSelect(date); }}
       onKeyDown={(event) => {
         const index = dates.indexOf(date); const row = index % 7;
         const offsets: Record<string, number> = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7, Home: -row, End: 6 - row, PageUp: -28, PageDown: 28 };

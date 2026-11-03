@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { Task, Priority } from '../../types';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import {
@@ -42,7 +43,8 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
   const projectMap = new Map((projects || []).map((p) => [p.id, p.title]));
 
   const handleToggleTask = async (taskId: string) => {
-    await domainService.toggleTaskStatus(taskId);
+    try { await domainService.toggleTaskStatus(taskId); }
+    catch(error) { setTaskError(error instanceof Error ? error.message : 'Could not update this task.'); return; }
     const task = tasks.find((item) => item.id === taskId);
     if (task && task.status !== 'done') {
       setRecentlyCompletedTaskIds((current) => new Set(current).add(taskId));
@@ -66,7 +68,8 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
     const updatedSubtasks = task.subtasks.map((st) =>
       st.id === subtaskId ? { ...st, isCompleted: !st.isCompleted } : st
     );
-    await domainService.updateTask(task.id, { subtasks: updatedSubtasks });
+    try { await domainService.updateTask(task.id, { subtasks: updatedSubtasks }); }
+    catch(error) { setTaskError(error instanceof Error ? error.message : 'Could not update this task.'); }
   };
 
   const handleToggleExpand = (taskId: string) => {
@@ -218,6 +221,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                     <button
                       type="button"
                       onClick={() => handleToggleTask(task.id)}
+                      disabled={(task.scheduleDate || task.dueDate || dateStr) !== getLocalDateString()}
                       className={`task-completion-button min-w-6 min-h-6 inline-flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] ${recentlyCompletedTaskIds.has(task.id) && isDone ? 'task-completion-button--celebrate' : ''}`}
                       title={isDone ? 'Mark as not done' : 'Mark complete'}
                       aria-label={isDone ? `Mark “${task.title}” as not done` : `Mark “${task.title}” complete`}
@@ -311,6 +315,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                       >
                         <input
                           type="checkbox"
+                          disabled={(task.scheduleDate || task.dueDate || dateStr) !== getLocalDateString()}
                           checked={st.isCompleted}
                           onChange={() => handleToggleSubtask(task, st.id)}
                           className="accent-[var(--color-accent)] w-3.5 h-3.5 rounded"

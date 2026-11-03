@@ -6,6 +6,8 @@ A little progress, every day. A local-first activity tracker and planner built w
 
 ## Track your day
 
+Completion is today-only: past and future activity entries, dated task completions and daily goal progress are locked. You can still browse history and plan ahead. The app checks its current local planning day again when saving, including its configured day boundary.
+
 - **Today:** see your week, check off activities, record quantities, add notes and undo an accidental change.
 - **Activities:** create checks, counts, measurements, time windows or avoidance activities. Choose an Area, color, schedule and start date. Explore past days, pause, archive or recover an activity.
 - **Analytics:** explore completion, streaks, recent-weighted scores, momentum, weekday patterns, monthly history and area comparisons. Filter dates and activities; open explanations and data tables.

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { domainService } from '../../services/domainService';
+import { getLocalDateString } from '../../utils/dateUtils';
 import { Target, Status, ScheduleStatus } from '../../types';
 import { Button } from '../ui/Button';
 import { StatusBadge } from '../StatusBadge';
@@ -53,7 +54,8 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
 
   const handleQuickLog = async () => {
     if (logValue === 0 || Number.isNaN(logValue)) return;
-    await domainService.updateTargetProgress(target.id, Number(logValue));
+    try { await domainService.updateTargetProgress(target.id, Number(logValue)); }
+    catch(error) { window.alert(error instanceof Error ? error.message : 'Could not save progress.'); return; }
     setIsLogging(false);
     setLogValue(1);
   };
@@ -65,7 +67,8 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
   };
 
   const handleStatusChange = async (newStatus: Status) => {
-    await domainService.updateTarget(target.id, { status: newStatus });
+    try { await domainService.updateTarget(target.id, { status: newStatus }); }
+    catch(error) { window.alert(error instanceof Error ? error.message : 'Could not update this goal.'); }
   };
 
   const hasChildren = (children && children.length > 0);
@@ -165,7 +168,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
               <span className="text-[11px] font-mono text-[var(--color-ink-muted)]">
                 {target.unit}
               </span>
-              <Button size="sm" variant="primary" onClick={handleQuickLog}>
+              <Button size="sm" variant="primary" onClick={handleQuickLog} disabled={target.horizon==='day' && target.period!==getLocalDateString()}>
                 Log
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setIsLogging(false)}>
@@ -173,7 +176,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
               </Button>
             </div>
           ) : (
-            <Button size="sm" variant="secondary" onClick={() => setIsLogging(true)}>
+            <Button size="sm" variant="secondary" onClick={() => setIsLogging(true)} disabled={target.horizon==='day' && target.period!==getLocalDateString()}>
               <Plus className="w-3.5 h-3.5" />
               <span>Log progress</span>
             </Button>

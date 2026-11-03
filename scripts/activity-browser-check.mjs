@@ -15,10 +15,28 @@ const sample=await page.evaluate(async()=>{
   const {db}=await import('/src/db/index.ts');const {activityService}=await import('/src/services/activityService.ts');const {getActivityStats,dateRange}=await import('/src/utils/activityMath.ts');
   const now=new Date().toISOString();await db.areas.put({id:'health-test',name:'Health and personal development',order:0,isArchived:false,createdAt:now,updatedAt:now});
   const sleep=await activityService.save({title:'Sleep cycle',areaId:'health-test',kind:'time_window',icon:'moon',accent:1,startDate:'2026-10-01',timeWindow:{start:'22:00',end:'06:00',crossesMidnight:true}});
-  for(const date of dateRange('2026-10-01','2026-11-02'))if(!['2026-10-07','2026-10-13','2026-10-21','2026-10-25'].includes(date))await activityService.setEntry(sleep.id,date,{value:1},'2026-11-03');
+  // Historical test fixtures bypass completion actions, which are today-only.
+  for(const date of dateRange('2026-10-01','2026-11-02'))if(!['2026-10-07','2026-10-13','2026-10-21','2026-10-25'].includes(date))await db.progressLogs.put({id:crypto.randomUUID(),entityId:sleep.id,entityType:'habit',date,value:1,isDeleted:false,timestamp:now,createdAt:now});
   return {id:sleep.id,stats:getActivityStats(sleep,await db.progressLogs.toArray(),'2026-11-03')};
 });
 if(sample.stats.done!==29||sample.stats.scheduled!==33||sample.stats.currentStreak!==8)throw Error('Sleep sample mismatch');
+if(process.argv.includes('--completion-lock')) {
+  await page.locator('.activity-row').first().waitFor();
+  for(const date of ['2026-11-02','2026-11-04']) {
+    const cell=page.locator(`[data-date="${date}"]`).first();
+    if(await cell.getAttribute('aria-disabled')!=='true')throw Error(`Unlocked date ${date}`);
+    await cell.dispatchEvent('click');await cell.dispatchEvent('contextmenu');
+    await cell.focus();await page.keyboard.press('Enter');
+  }
+  const unchanged=await page.evaluate(async()=>{const {db}=await import('/src/db/index.ts');return (await db.progressLogs.toArray()).length===29;});
+  if(!unchanged)throw Error('Locked history changed');
+  await page.getByRole('button',{name:'Mark done: Sleep cycle',exact:true}).click();
+  await page.getByRole('button',{name:'Undo completion of Sleep cycle',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Undo',exact:true}).click();
+  if(errors.length)throw Error(errors.join('\n'));
+  console.log('Passed: past/future mouse, keyboard and context-menu locks; today completion and undo.');
+  await browser.close();process.exit(0);
+}
 await page.getByRole('button',{name:'Mark done: Sleep cycle',exact:true}).click();
 await page.getByRole('button',{name:'Undo',exact:true}).click();
 await page.waitForTimeout(150);

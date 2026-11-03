@@ -3,6 +3,7 @@ import type { Habit, ProgressLog, ActivityScheduleVersion } from '../types/index
 import { getLocalDateString, isValidDateString } from '../utils/dateUtils.ts';
 import { activityKind, getActivityDay } from '../utils/activityMath.ts';
 import { recordChange } from '../db/changeLogService.ts';
+import { assertTodayCompletion } from '../utils/completionDate.ts';
 
 export interface EntryInput { value: number; note?: string; actualStart?: string; actualEnd?: string }
 export interface EntrySnapshot { activityId: string; date: string; entries: ProgressLog[] }
@@ -19,6 +20,7 @@ function validateSchedule(s: ActivityScheduleVersion) {
 async function requireActivity(activityId:string) { const a=await db.habits.get(activityId); if(!a||a.isDeleted) throw new Error('This activity is no longer available.'); return a; }
 async function entriesFor(activityId:string,date:string) { return db.progressLogs.where('entityId').equals(activityId).filter(e=>e.entityType==='habit'&&e.date===date).toArray(); }
 async function writeEntry(a:Habit,date:string,input:EntryInput|null,today:string) {
+  assertTodayCompletion(date);
   if(!isValidDateString(date)||date<a.startDate||date>today) throw new Error('Choose a date from the activity’s start through today.');
   const entries=await entriesFor(a.id,date);
   const state=getActivityDay(a,entries,date,today);
@@ -63,6 +65,7 @@ export const activityService = {
     });
   },
   async bulkSet(activityId:string,dates:string[],done:boolean,today=getLocalDateString()):Promise<EntrySnapshot[]> {
+    dates.forEach(assertTodayCompletion);
     return db.transaction('rw',[db.habits,db.progressLogs,db.changeLogs],async()=>{
       const a=await requireActivity(activityId), snapshots:EntrySnapshot[]=[];
       for(const date of [...new Set(dates)]) {
@@ -76,6 +79,7 @@ export const activityService = {
   async restoreEntries(snapshots:EntrySnapshot[]|ProgressLog[]) {
     return db.transaction('rw',[db.progressLogs,db.changeLogs],async()=>{
       const grouped:EntrySnapshot[]=snapshots.length && 'activityId' in snapshots[0] ? snapshots as EntrySnapshot[] : (snapshots as ProgressLog[]).map(e=>({activityId:e.entityId,date:e.date,entries:[e]}));
+      grouped.forEach(snap => { assertTodayCompletion(snap.date); snap.entries.forEach(entry => assertTodayCompletion(entry.date)); });
       for(const snap of grouped) {const current=await entriesFor(snap.activityId,snap.date);for(const e of current) await db.progressLogs.update(e.id,{isDeleted:true});if(snap.entries.length)await db.progressLogs.bulkPut(snap.entries);await recordChange({entityType:'habit',entityId:snap.activityId,action:'update',fieldChanged:'entry',newValue:snap.entries,reason:'Undo entry change'});}
     });
   },

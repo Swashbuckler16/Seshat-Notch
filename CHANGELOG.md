@@ -1,5 +1,13 @@
 # Changes
 
+## Today-only completion — 2026-11-04
+
+- Locked past and future completion writes, including entry edits, clearing, bulk actions, legacy activity actions and undo after the day changes.
+- Applied the rule to dated tasks and daily goal progress while retaining future planning and read-only history navigation.
+- Preserved the interface layout and styling; only control availability and relevant help text changed.
+- Verified with 93 passing tests, a production build, and browser checks for mouse, keyboard, context-menu, today completion and undo.
+- Uses the device's local planning day. This is an application rule, not protection against changing the device clock or editing local storage outside the app.
+
 ## Activities and analytics rebuild — 2026-11-03
 
 - Rebuilt Today, Activities and Analytics with friendly labels, animated completion feedback, theme-aware activity colors and reduced-motion support.
