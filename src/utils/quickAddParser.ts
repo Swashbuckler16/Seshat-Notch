@@ -1,5 +1,5 @@
 import type { Priority } from '../types/index.ts';
-import { getLocalDateString, parseLocalDate, shiftDateString } from './dateUtils.ts';
+import { getLocalDateString, isValidDateString, parseLocalDate, roundMetric, shiftDateString } from './dateUtils.ts';
 
 export interface ParsedTargetMetric {
   unit: string;
@@ -17,6 +17,7 @@ export interface ParsedQuickAdd {
   scheduleDateLabel?: string; // e.g. "Today", "Tomorrow", "Friday, Nov 6"
   targetMetric?: ParsedTargetMetric;
   tags: string[];
+  errors: string[];
   tokens: {
     type: 'project' | 'milestone' | 'estimate' | 'priority' | 'date' | 'metric';
     raw: string;
@@ -30,12 +31,19 @@ export interface ParsedQuickAdd {
 function resolveWeekdayDate(dayCode: string, refDate = new Date()): { dateStr: string; label: string } {
   const dayMap: Record<string, number> = {
     sun: 0,
+    sunday: 0,
     mon: 1,
+    monday: 1,
     tue: 2,
+    tuesday: 2,
     wed: 3,
+    wednesday: 3,
     thu: 4,
+    thursday: 4,
     fri: 5,
+    friday: 5,
     sat: 6,
+    saturday: 6,
   };
 
   const baseDateStr = getLocalDateString(refDate);
@@ -60,30 +68,47 @@ function resolveWeekdayDate(dayCode: string, refDate = new Date()): { dateStr: s
 /**
  * Resolves a date token like @today, @tomorrow, @fri, @2026-11-14
  */
-export function resolveDateToken(tokenVal: string, refDate = new Date()): { dateStr: string; label: string } {
+export function resolveDateToken(
+  tokenVal: string,
+  refDate = new Date()
+): { dateStr: string; label: string; isValid: boolean; error?: string } {
   const clean = tokenVal.toLowerCase().trim();
   const baseDateStr = getLocalDateString(refDate);
 
   if (clean === 'today') {
-    return { dateStr: baseDateStr, label: `Today (${baseDateStr})` };
+    return { dateStr: baseDateStr, label: `Today (${baseDateStr})`, isValid: true };
   }
 
   if (clean === 'tomorrow') {
     const dateStr = shiftDateString(baseDateStr, 1);
-    return { dateStr, label: `Tomorrow (${dateStr})` };
+    return { dateStr, label: `Tomorrow (${dateStr})`, isValid: true };
   }
 
-  if (/^(mon|tue|wed|thu|fri|sat|sun)$/i.test(clean)) {
-    return resolveWeekdayDate(clean, refDate);
+  if (/^(mon|monday|tue|tuesday|wed|wednesday|thu|thursday|fri|friday|sat|saturday|sun|sunday)$/i.test(clean)) {
+    const resolved = resolveWeekdayDate(clean, refDate);
+    return { ...resolved, isValid: true };
   }
 
   // Exact date YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
-    return { dateStr: clean, label: clean };
+    if (!isValidDateString(clean)) {
+      return {
+        dateStr: baseDateStr,
+        label: `Invalid date (@${tokenVal})`,
+        isValid: false,
+        error: `"@${tokenVal}" is not a valid calendar date.`,
+      };
+    }
+    return { dateStr: clean, label: clean, isValid: true };
   }
 
-  // Fallback to today
-  return { dateStr: baseDateStr, label: baseDateStr };
+  // Unrecognized @date token — report error instead of silently becoming today
+  return {
+    dateStr: baseDateStr,
+    label: `Unrecognized (@${tokenVal})`,
+    isValid: false,
+    error: `Unrecognized date token "@${tokenVal}". Use @today, @tomorrow, @mon..@sun, or @YYYY-MM-DD.`,
+  };
 }
 
 /**
@@ -123,19 +148,22 @@ export function parseMetricToken(raw: string): ParsedTargetMetric | undefined {
   // Form: unit:value e.g. pages:25
   const unitFirst = clean.match(/^([a-zA-Z_-]+):(\d+(?:\.\d+)?)$/);
   if (unitFirst) {
-    return { unit: unitFirst[1], value: parseFloat(unitFirst[2]) };
+    const val = roundMetric(parseFloat(unitFirst[2]));
+    return val > 0 ? { unit: unitFirst[1], value: val } : undefined;
   }
 
   // Form: value:unit e.g. 25:pages
   const valueFirst = clean.match(/^(\d+(?:\.\d+)?):([a-zA-Z_-]+)$/);
   if (valueFirst) {
-    return { unit: valueFirst[2], value: parseFloat(valueFirst[1]) };
+    const val = roundMetric(parseFloat(valueFirst[1]));
+    return val > 0 ? { unit: valueFirst[2], value: val } : undefined;
   }
 
   // Form: count only e.g. +5
   const countOnly = clean.match(/^(\d+(?:\.\d+)?)$/);
   if (countOnly) {
-    return { unit: 'count', value: parseFloat(countOnly[1]) };
+    const val = roundMetric(parseFloat(countOnly[1]));
+    return val > 0 ? { unit: 'count', value: val } : undefined;
   }
 
   return undefined;
@@ -147,6 +175,7 @@ export function parseMetricToken(raw: string): ParsedTargetMetric | undefined {
 export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickAdd {
   const tokens: ParsedQuickAdd['tokens'] = [];
   const tags: string[] = [];
+  const errors: string[] = [];
   let projectQuery: string | undefined;
   let milestoneQuery: string | undefined;
   let estimateMinutes: number | undefined;
@@ -156,7 +185,7 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
   let targetMetric: ParsedTargetMetric | undefined;
 
   // Split input into words while preserving grammar prefixes
-  const words = input.trim().split(/\s+/);
+  const words = input.trim().split(/\s+/).filter(Boolean);
   const remainingTitleWords: string[] = [];
 
   for (const word of words) {
@@ -183,7 +212,7 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
     // 3. ~estimate time (e.g. ~90m, ~1.5h)
     if (word.startsWith('~') && word.length > 1) {
       const est = parseEstimateToken(word);
-      if (est !== undefined) {
+      if (est !== undefined && est > 0) {
         estimateMinutes = est;
         tokens.push({ type: 'estimate', raw: word, value: `${est}m` });
         continue;
@@ -204,9 +233,15 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
     if (word.startsWith('@') && word.length > 1) {
       const dateVal = word.substring(1);
       const res = resolveDateToken(dateVal, refDate);
-      scheduleDate = res.dateStr;
-      scheduleDateLabel = res.label;
-      tokens.push({ type: 'date', raw: word, value: res.dateStr });
+      if (!res.isValid && res.error) {
+        errors.push(res.error);
+        scheduleDate = undefined;
+        scheduleDateLabel = res.label;
+      } else {
+        scheduleDate = res.dateStr;
+        scheduleDateLabel = res.label;
+      }
+      tokens.push({ type: 'date', raw: word, value: res.isValid ? res.dateStr : res.label });
       continue;
     }
 
@@ -224,7 +259,7 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
     remainingTitleWords.push(word);
   }
 
-  const title = remainingTitleWords.join(' ');
+  const title = remainingTitleWords.join(' ').trim();
 
   return {
     rawInput: input,
@@ -233,10 +268,11 @@ export function parseQuickAdd(input: string, refDate = new Date()): ParsedQuickA
     milestoneQuery,
     estimateMinutes,
     priority: priority || 'medium',
-    scheduleDate: scheduleDate || getLocalDateString(refDate),
+    scheduleDate: errors.length > 0 ? undefined : (scheduleDate || getLocalDateString(refDate)),
     scheduleDateLabel: scheduleDateLabel || 'Today',
     targetMetric,
     tags,
+    errors,
     tokens,
   };
 }

@@ -23,6 +23,7 @@ import {
   BookOpen,
   Settings,
   Bell,
+  Lock,
   X,
 } from 'lucide-react';
 
@@ -48,6 +49,9 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AppTab>('today');
   const [quickAddModalOpen, setQuickAddModalOpen] = useState(false);
   const [activeReminder, setActiveReminder] = useState<{ title: string; body: string } | null>(null);
+  const [isAppUnlocked, setIsAppUnlocked] = useState(false);
+  const [lockPinInput, setLockPinInput] = useState('');
+  const [lockPinError, setLockPinError] = useState<string | null>(null);
   const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
     try {
       return localStorage.getItem('seshat_onboarding_completed') === 'true';
@@ -55,6 +59,20 @@ export const App: React.FC = () => {
       return false;
     }
   });
+
+  // Live query for App Lock status
+  const appLockStatus = useLiveQuery(
+    async () => {
+      const [lockSetting, pinSetting] = await Promise.all([
+        db.settings.get('app_lock_enabled'),
+        db.settings.get('app_lock_pin_hash'),
+      ]);
+      return {
+        enabled: lockSetting?.value === 'true' && Boolean(pinSetting?.value),
+      };
+    },
+    []
+  );
 
   // Check if database has any areas or projects
   const hasData = useLiveQuery(
@@ -65,6 +83,22 @@ export const App: React.FC = () => {
     },
     []
   );
+
+  // Listen for custom App Lock events from PrivacySecurityPanel
+  useEffect(() => {
+    const onUnlock = () => setIsAppUnlocked(true);
+    const onLockNow = () => {
+      setIsAppUnlocked(false);
+      setLockPinInput('');
+      setLockPinError(null);
+    };
+    window.addEventListener('seshat-app-lock-unlocked', onUnlock);
+    window.addEventListener('seshat-app-lock-now', onLockNow);
+    return () => {
+      window.removeEventListener('seshat-app-lock-unlocked', onUnlock);
+      window.removeEventListener('seshat-app-lock-now', onLockNow);
+    };
+  }, []);
 
   // Active local reminder scheduler check & Tauri desktop shell event wiring
   useEffect(() => {
@@ -155,6 +189,78 @@ export const App: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Show App Lock Gate screen if PIN lock is enabled and session is not yet unlocked
+  if (appLockStatus?.enabled && !isAppUnlocked) {
+    const handleUnlockSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const ok = await dataOwnershipService.verifyAppLockPin(lockPinInput.trim());
+      if (ok) {
+        setIsAppUnlocked(true);
+        setLockPinInput('');
+        setLockPinError(null);
+      } else {
+        setLockPinError('Incorrect PIN. Please try again.');
+      }
+    };
+
+    return (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="app-lock-heading"
+        className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-paper)] text-[var(--color-ink)]"
+      >
+        <div className="surface-card rounded-[var(--radius-md)] border border-[var(--color-rule)] p-6 sm:p-8 max-w-sm w-full flex flex-col gap-5 shadow-sm">
+          <div className="flex items-center gap-3 hairline-b pb-4">
+            <div className="w-10 h-10 rounded-[var(--radius-sm)] bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 flex items-center justify-center text-[var(--color-accent)]">
+              <Lock className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 id="app-lock-heading" className="font-bold text-base text-[var(--color-ink)]">
+                Seshat Notch is Locked
+              </h1>
+              <p className="text-xs text-[var(--color-ink-muted)]">
+                Enter your App Lock PIN to open your planner.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleUnlockSubmit} className="flex flex-col gap-3">
+            <label htmlFor="app-lock-pin-input" className="text-xs font-medium text-[var(--color-ink)]">
+              App Lock PIN
+            </label>
+            <input
+              id="app-lock-pin-input"
+              type="password"
+              inputMode="numeric"
+              maxLength={8}
+              value={lockPinInput}
+              onChange={(e) => {
+                setLockPinInput(e.target.value.replace(/\D/g, ''));
+                if (lockPinError) setLockPinError(null);
+              }}
+              placeholder="Enter 4–8 digit PIN"
+              autoFocus
+              className="w-full min-h-11 px-3 py-2 text-sm font-mono tracking-widest rounded-[var(--radius-xs)] border border-[var(--color-rule-strong)] bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]"
+            />
+            {lockPinError && (
+              <p role="alert" className="text-xs font-medium text-[var(--color-status-behind)]">
+                {lockPinError}
+              </p>
+            )}
+            <Button type="submit" variant="primary" disabled={lockPinInput.length < 4}>
+              Unlock Workspace
+            </Button>
+          </form>
+
+          <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed hairline-t pt-3">
+            Local privacy screen gate: requires your PIN before displaying workspace views in this browser or desktop window.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Show onboarding wizard if completely empty and not yet completed/dismissed
   if (hasData === false && !onboardingDismissed) {

@@ -2,7 +2,7 @@
 
 :root,
 [data-mode="light"] {
-  --palette-preview-one: oklch(58% 0.17 145);
+  --palette-preview-one: oklch(45% 0.14 148);
   --palette-preview-two: oklch(67% 0.14 25);
   /* Color system — OKLCH Light Paper & Ink */
   --color-paper: oklch(98.5% 0.018 93);
@@ -13,31 +13,31 @@
   --color-rule-strong: oklch(79.0% 0.035 75);
 
   --color-ink: oklch(24% 0.035 55);
-  --color-ink-muted: oklch(42% 0.035 55);
-  --color-ink-subtle: oklch(54% 0.035 55);
+  --color-ink-muted: oklch(38% 0.035 55);
+  --color-ink-subtle: oklch(44% 0.035 55);
 
-  /* Single Signal Accent — Deep Egyptian Teal */
-  --color-accent: oklch(58% 0.17 145);
-  --color-accent-hover: oklch(51% 0.17 145);
+  /* Single Signal Accent — Deep Egyptian Teal (WCAG AA >= 5.2:1 contrast with white ink) */
+  --color-accent: oklch(45% 0.14 148);
+  --color-accent-hover: oklch(40% 0.14 148);
   --color-accent-subtle: oklch(94% 0.045 145);
   --color-accent-ink: oklch(99% 0.01 100);
-  --color-focus: oklch(50% 0.19 145);
+  --color-focus: oklch(45% 0.16 148);
   --color-scrim: oklch(24% 0.035 55 / 0.5);
   --color-shadow: oklch(24% 0.035 55 / 0.05);
-  --color-chart-1: oklch(58% 0.17 145);
+  --color-chart-1: oklch(45% 0.14 148);
   --color-chart-2: oklch(74% 0.15 72);
   --color-chart-3: oklch(67% 0.14 25);
-  --color-emerald: oklch(58% 0.17 145);
+  --color-emerald: oklch(45% 0.14 148);
   --color-paper-muted: oklch(74% 0.15 72);
 
-  /* Semantic Status — Dual encodings (Color + Glyph/Word) */
-  --color-status-on-track: oklch(48% 0.14 145);
+  /* Semantic Status — Dual encodings (Color + Glyph/Word) with >= 4.5:1 light contrast */
+  --color-status-on-track: oklch(42% 0.13 145);
   --color-status-on-track-bg: oklch(94% 0.045 145);
-  --color-status-at-risk: oklch(53% 0.14 72);
+  --color-status-at-risk: oklch(43% 0.12 68);
   --color-status-at-risk-bg: oklch(95% 0.04 82);
-  --color-status-behind: oklch(51% 0.15 25);
+  --color-status-behind: oklch(43% 0.15 25);
   --color-status-behind-bg: oklch(95% 0.035 25);
-  --color-status-paused: oklch(48% 0.025 55);
+  --color-status-paused: oklch(42% 0.025 55);
   --color-status-paused-bg: oklch(93% 0.02 75);
 
   /* Typography Scale */
@@ -87,7 +87,7 @@
 
   --color-ink: oklch(95% 0.02 90);
   --color-ink-muted: oklch(76% 0.025 80);
-  --color-ink-subtle: oklch(64% 0.02 80);
+  --color-ink-subtle: oklch(68% 0.02 80);
 
   /* Luminous Teal signal (de-saturated for dark canvas) */
   --color-accent: oklch(75% 0.16 145);
@@ -124,7 +124,7 @@
     --color-rule-strong: oklch(42% 0.03 60);
     --color-ink: oklch(95% 0.02 90);
     --color-ink-muted: oklch(76% 0.025 80);
-    --color-ink-subtle: oklch(64% 0.02 80);
+    --color-ink-subtle: oklch(68% 0.02 80);
     --color-accent: oklch(75% 0.16 145);
     --color-accent-hover: oklch(80% 0.15 145);
     --color-accent-subtle: oklch(29% 0.05 145);
@@ -142,7 +142,7 @@
 
 /* Optional color palettes. The Seshat leaf-and-earth palette remains the default. */
 [data-palette="ocean"]:not([data-mode="dark"]) {
-  --palette-preview-one: oklch(52% 0.16 245);
+  --palette-preview-one: oklch(45% 0.16 245);
   --palette-preview-two: oklch(72% 0.12 195);
   --color-paper: oklch(98.5% 0.012 235);
   --color-paper-2: oklch(96% 0.02 230);
@@ -151,19 +151,19 @@
   --color-rule-subtle: oklch(93% 0.018 230);
   --color-rule-strong: oklch(78% 0.035 235);
   --color-ink: oklch(24% 0.035 250);
-  --color-ink-muted: oklch(42% 0.035 245);
-  --color-ink-subtle: oklch(54% 0.035 245);
-  --color-accent: oklch(49% 0.17 245);
-  --color-accent-hover: oklch(43% 0.17 245);
+  --color-ink-muted: oklch(38% 0.035 245);
+  --color-ink-subtle: oklch(44% 0.035 245);
+  --color-accent: oklch(45% 0.16 245);
+  --color-accent-hover: oklch(40% 0.16 245);
   --color-accent-subtle: oklch(94% 0.04 240);
   --color-accent-ink: oklch(99% 0.008 240);
   --color-focus: oklch(43% 0.18 245);
   --color-scrim: oklch(24% 0.035 250 / 0.5);
   --color-shadow: oklch(24% 0.035 250 / 0.05);
-  --color-chart-1: oklch(49% 0.17 245);
+  --color-chart-1: oklch(45% 0.16 245);
   --color-chart-2: oklch(67% 0.13 190);
   --color-chart-3: oklch(70% 0.16 55);
-  --color-emerald: oklch(55% 0.13 160);
+  --color-emerald: oklch(45% 0.13 160);
   --color-paper-muted: oklch(72% 0.13 190);
 }
 
@@ -178,7 +178,7 @@
   --color-rule-strong: oklch(43% 0.035 240);
   --color-ink: oklch(95% 0.015 230);
   --color-ink-muted: oklch(76% 0.025 230);
-  --color-ink-subtle: oklch(65% 0.02 230);
+  --color-ink-subtle: oklch(68% 0.02 230);
   --color-accent: oklch(76% 0.14 245);
   --color-accent-hover: oklch(82% 0.12 245);
   --color-accent-subtle: oklch(30% 0.06 245);
@@ -194,7 +194,7 @@
 }
 
 [data-palette="berry"]:not([data-mode="dark"]) {
-  --palette-preview-one: oklch(50% 0.18 350);
+  --palette-preview-one: oklch(45% 0.17 350);
   --palette-preview-two: oklch(70% 0.15 35);
   --color-paper: oklch(98.5% 0.012 350);
   --color-paper-2: oklch(96% 0.02 350);
@@ -203,19 +203,19 @@
   --color-rule-subtle: oklch(93% 0.02 350);
   --color-rule-strong: oklch(78% 0.04 350);
   --color-ink: oklch(24% 0.04 350);
-  --color-ink-muted: oklch(42% 0.04 350);
-  --color-ink-subtle: oklch(54% 0.035 350);
-  --color-accent: oklch(49% 0.18 350);
-  --color-accent-hover: oklch(43% 0.18 350);
+  --color-ink-muted: oklch(38% 0.04 350);
+  --color-ink-subtle: oklch(44% 0.035 350);
+  --color-accent: oklch(45% 0.17 350);
+  --color-accent-hover: oklch(40% 0.17 350);
   --color-accent-subtle: oklch(94% 0.045 350);
   --color-accent-ink: oklch(99% 0.008 350);
   --color-focus: oklch(43% 0.18 350);
   --color-scrim: oklch(24% 0.04 350 / 0.5);
   --color-shadow: oklch(24% 0.04 350 / 0.05);
-  --color-chart-1: oklch(49% 0.18 350);
+  --color-chart-1: oklch(45% 0.17 350);
   --color-chart-2: oklch(68% 0.15 35);
   --color-chart-3: oklch(63% 0.13 275);
-  --color-emerald: oklch(55% 0.13 160);
+  --color-emerald: oklch(45% 0.13 160);
   --color-paper-muted: oklch(68% 0.15 35);
 }
 
@@ -230,7 +230,7 @@
   --color-rule-strong: oklch(43% 0.035 350);
   --color-ink: oklch(95% 0.015 350);
   --color-ink-muted: oklch(76% 0.025 350);
-  --color-ink-subtle: oklch(65% 0.02 350);
+  --color-ink-subtle: oklch(68% 0.02 350);
   --color-accent: oklch(76% 0.14 350);
   --color-accent-hover: oklch(82% 0.13 350);
   --color-accent-subtle: oklch(30% 0.06 350);
@@ -244,4 +244,3 @@
   --color-emerald: oklch(76% 0.13 160);
   --color-paper-muted: oklch(79% 0.13 35);
 }
-

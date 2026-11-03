@@ -38,6 +38,7 @@ export const PlannerView: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [priority, setPriority] = useState<Priority>('high');
   const [tagsInput, setTagsInput] = useState('');
+  const [projectFormError, setProjectFormError] = useState<string | null>(null);
 
   // Live queries
   const areas = useLiveQuery(() => db.areas.orderBy('order').toArray(), []);
@@ -61,44 +62,57 @@ export const PlannerView: React.FC = () => {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
-
-    let resolvedAreaId = areaId;
-    if (!resolvedAreaId || resolvedAreaId === '__new__') {
-      const areaTitle = newAreaName.trim() || 'General';
-      const createdArea = await domainService.createArea({
-        name: areaTitle,
-        order: (areas?.length || 0) + 1,
-      });
-      resolvedAreaId = createdArea.id;
+    if (!title.trim()) {
+      setProjectFormError('Please enter a project or goal title.');
+      return;
+    }
+    const effectiveStart = startDate || getLocalDateString();
+    if (endDate && endDate < effectiveStart) {
+      setProjectFormError('End date cannot be earlier than start date.');
+      return;
     }
 
-    const tags = tagsInput
-      .split(/[,\s]+/)
-      .map((t) => t.replace(/^#/, '').trim().toLowerCase())
-      .filter(Boolean);
+    try {
+      let resolvedAreaId = areaId;
+      if (!resolvedAreaId || resolvedAreaId === '__new__') {
+        const areaTitle = newAreaName.trim() || 'General';
+        const createdArea = await domainService.createArea({
+          name: areaTitle,
+          order: (areas?.length || 0) + 1,
+        });
+        resolvedAreaId = createdArea.id;
+      }
 
-    const created = await domainService.createProject({
-      areaId: resolvedAreaId,
-      title: title.trim(),
-      isGoal,
-      why: why.trim() || undefined,
-      successCriteria: successCriteria.trim() || undefined,
-      startDate: startDate || getLocalDateString(),
-      endDate: endDate || undefined,
-      priority,
-      status: 'active',
-      tags,
-      weightType: 'manual',
-    });
+      const tags = tagsInput
+        .split(/[,\s]+/)
+        .map((t) => t.replace(/^#/, '').trim().toLowerCase())
+        .filter(Boolean);
 
-    setTitle('');
-    setNewAreaName('');
-    setWhy('');
-    setSuccessCriteria('');
-    setTagsInput('');
-    setIsNewProjectModalOpen(false);
-    setSelectedProjectId(created.id);
+      const created = await domainService.createProject({
+        areaId: resolvedAreaId,
+        title: title.trim(),
+        isGoal,
+        why: why.trim() || undefined,
+        successCriteria: successCriteria.trim() || undefined,
+        startDate: effectiveStart,
+        endDate: endDate || undefined,
+        priority,
+        status: 'active',
+        tags,
+        weightType: 'manual',
+      });
+
+      setTitle('');
+      setNewAreaName('');
+      setWhy('');
+      setSuccessCriteria('');
+      setTagsInput('');
+      setProjectFormError(null);
+      setIsNewProjectModalOpen(false);
+      setSelectedProjectId(created.id);
+    } catch (err) {
+      setProjectFormError(err instanceof Error ? err.message : 'Unable to create project.');
+    }
   };
 
   return (
@@ -215,7 +229,26 @@ export const PlannerView: React.FC = () => {
                         <span className="font-semibold text-xs text-[var(--color-ink)] truncate">
                           {p.title}
                         </span>
-                        <StatusBadge status={p.status === 'blocked' ? 'behind' : p.status === 'done' ? 'on_track' : 'paused'} />
+                        <StatusBadge
+                          status={
+                            p.status === 'blocked'
+                              ? 'behind'
+                              : p.status === 'active' || p.status === 'done'
+                              ? 'on_track'
+                              : 'paused'
+                          }
+                          customLabel={
+                            p.status === 'active'
+                              ? 'Active'
+                              : p.status === 'done'
+                              ? 'Done'
+                              : p.status === 'not_started'
+                              ? 'Not started'
+                              : p.status === 'dropped'
+                              ? 'Dropped'
+                              : undefined
+                          }
+                        />
                       </div>
                       <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-ink-muted)]">
                         <span className="capitalize">{p.priority}</span>
@@ -277,7 +310,6 @@ export const PlannerView: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleCreateProject}
-              disabled={!title.trim() || (areaId === '__new__' && !newAreaName.trim())}
             >
               <Check className="w-3.5 h-3.5" />
               <span>{isGoal ? 'Create goal' : 'Create project'}</span>
@@ -286,19 +318,29 @@ export const PlannerView: React.FC = () => {
         }
       >
         <form onSubmit={handleCreateProject} className="flex flex-col gap-3.5">
+          {projectFormError && (
+            <p role="alert" className="text-xs font-medium text-[var(--color-status-behind)]">
+              {projectFormError}
+            </p>
+          )}
           <Input
             label="Title"
             placeholder="e.g. Q4 Product Launch, Annual Reading Goal"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (projectFormError) setProjectFormError(null);
+            }}
             required
             autoFocus
           />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-[var(--color-ink)]">Area</label>
+              <label htmlFor="new-project-area" className="text-xs font-medium text-[var(--color-ink)]">Area</label>
               <select
+                id="new-project-area"
+                aria-label="Area"
                 value={areaId || ((areas || []).length === 0 ? '__new__' : '')}
                 onChange={(e) => setAreaId(e.target.value)}
                 className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
@@ -315,8 +357,10 @@ export const PlannerView: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-[var(--color-ink)]">Type</label>
+              <label htmlFor="new-project-type" className="text-xs font-medium text-[var(--color-ink)]">Type</label>
               <select
+                id="new-project-type"
+                aria-label="Type"
                 value={isGoal ? 'goal' : 'project'}
                 onChange={(e) => setIsGoal(e.target.value === 'goal')}
                 className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
@@ -356,17 +400,25 @@ export const PlannerView: React.FC = () => {
               label="Start date"
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (projectFormError) setProjectFormError(null);
+              }}
             />
             <Input
               label="End date"
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                if (projectFormError) setProjectFormError(null);
+              }}
             />
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-[var(--color-ink)]">Priority</label>
+              <label htmlFor="new-project-priority" className="text-xs font-medium text-[var(--color-ink)]">Priority</label>
               <select
+                id="new-project-priority"
+                aria-label="Priority"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
                 className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] capitalize"

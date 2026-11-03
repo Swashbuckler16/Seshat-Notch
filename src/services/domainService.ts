@@ -1,6 +1,12 @@
 import { db } from '../db/index.ts';
 import { recordChange, generateId, getCurrentUTC } from '../db/changeLogService.ts';
-import { getLocalDateString, shiftDateString } from '../utils/dateUtils.ts';
+import {
+  getLocalDateString,
+  isValidDateString,
+  isValidPeriodForHorizon,
+  roundMetric,
+  shiftDateString,
+} from '../utils/dateUtils.ts';
 import type {
   Area,
   ProjectGoal,
@@ -22,9 +28,13 @@ export const domainService = {
   // AREAS
   // ==========================================
   async createArea(data: Omit<Area, 'id' | 'createdAt' | 'updatedAt' | 'isArchived'>): Promise<Area> {
+    if (!data.name || !data.name.trim()) {
+      throw new Error('Area name is required.');
+    }
     const now = getCurrentUTC();
     const area: Area = {
       ...data,
+      name: data.name.trim(),
       id: generateId(),
       isArchived: false,
       createdAt: now,
@@ -43,12 +53,20 @@ export const domainService = {
   },
 
   async updateArea(id: EntityId, updates: Partial<Area>): Promise<void> {
+    if (updates.name !== undefined && !updates.name.trim()) {
+      throw new Error('Area name cannot be empty.');
+    }
     await db.transaction('rw', [db.areas, db.changeLogs], async () => {
       const existing = await db.areas.get(id);
       if (!existing) throw new Error(`Area ${id} not found`);
 
       const now = getCurrentUTC();
-      const updated = { ...existing, ...updates, updatedAt: now };
+      const updated = {
+        ...existing,
+        ...updates,
+        name: updates.name !== undefined ? updates.name.trim() : existing.name,
+        updatedAt: now,
+      };
       await db.areas.put(updated);
 
       await recordChange({
@@ -85,9 +103,23 @@ export const domainService = {
   // PROJECTS & GOALS
   // ==========================================
   async createProject(data: Omit<ProjectGoal, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<ProjectGoal> {
+    if (!data.title || !data.title.trim()) {
+      throw new Error('Project title is required.');
+    }
+    if (data.startDate && !isValidDateString(data.startDate)) {
+      throw new Error(`Invalid start date: ${data.startDate}`);
+    }
+    if (data.endDate && !isValidDateString(data.endDate)) {
+      throw new Error(`Invalid end date: ${data.endDate}`);
+    }
+    if (data.startDate && data.endDate && data.endDate < data.startDate) {
+      throw new Error('End date cannot be earlier than start date.');
+    }
+
     const now = getCurrentUTC();
     const project: ProjectGoal = {
       ...data,
+      title: data.title.trim(),
       id: generateId(),
       isDeleted: false,
       createdAt: now,
@@ -131,12 +163,32 @@ export const domainService = {
   },
 
   async updateProject(id: EntityId, updates: Partial<ProjectGoal>): Promise<ProjectGoal> {
+    if (updates.title !== undefined && !updates.title.trim()) {
+      throw new Error('Project title cannot be empty.');
+    }
     return await db.transaction('rw', [db.projects, db.changeLogs], async () => {
       const existing = await db.projects.get(id);
       if (!existing) throw new Error(`Project ${id} not found`);
 
+      const nextStart = updates.startDate !== undefined ? updates.startDate : existing.startDate;
+      const nextEnd = updates.endDate !== undefined ? updates.endDate : existing.endDate;
+      if (nextStart && !isValidDateString(nextStart)) {
+        throw new Error(`Invalid start date: ${nextStart}`);
+      }
+      if (nextEnd && !isValidDateString(nextEnd)) {
+        throw new Error(`Invalid end date: ${nextEnd}`);
+      }
+      if (nextStart && nextEnd && nextEnd < nextStart) {
+        throw new Error('End date cannot be earlier than start date.');
+      }
+
       const now = getCurrentUTC();
-      const updated: ProjectGoal = { ...existing, ...updates, updatedAt: now };
+      const updated: ProjectGoal = {
+        ...existing,
+        ...updates,
+        title: updates.title !== undefined ? updates.title.trim() : existing.title,
+        updatedAt: now,
+      };
       await db.projects.put(updated);
 
       await recordChange({
@@ -152,29 +204,85 @@ export const domainService = {
   },
 
   async softDeleteProject(id: EntityId, reason?: string): Promise<void> {
-    await db.transaction('rw', [db.projects, db.changeLogs], async () => {
-      const existing = await db.projects.get(id);
-      if (!existing) throw new Error(`Project ${id} not found`);
+    await db.transaction(
+      'rw',
+      [db.projects, db.milestones, db.targets, db.tasks, db.changeLogs],
+      async () => {
+        const existing = await db.projects.get(id);
+        if (!existing) throw new Error(`Project ${id} not found`);
 
-      const now = getCurrentUTC();
-      await db.projects.update(id, { isDeleted: true, updatedAt: now });
+        const now = getCurrentUTC();
+        await db.projects.update(id, { isDeleted: true, updatedAt: now });
 
-      await recordChange({
-        entityType: 'project',
-        entityId: id,
-        action: 'soft_delete',
-        reason,
-      });
-    });
+        // Cascade soft-delete to all child milestones, goals/targets, and tasks
+        const [childMilestones, childTargets, childTasks] = await Promise.all([
+          db.milestones.where('projectId').equals(id).filter((m) => !m.isDeleted).toArray(),
+          db.targets.where('projectId').equals(id).filter((t) => !t.isDeleted).toArray(),
+          db.tasks.where('projectId').equals(id).filter((t) => !t.isDeleted).toArray(),
+        ]);
+
+        for (const ms of childMilestones) {
+          await db.milestones.update(ms.id, { isDeleted: true, updatedAt: now });
+          await recordChange({
+            entityType: 'milestone',
+            entityId: ms.id,
+            action: 'soft_delete',
+            reason: `Cascaded from deleted project "${existing.title}"`,
+          });
+        }
+
+        for (const tgt of childTargets) {
+          await db.targets.update(tgt.id, { isDeleted: true, updatedAt: now });
+          await recordChange({
+            entityType: 'target',
+            entityId: tgt.id,
+            action: 'soft_delete',
+            reason: `Cascaded from deleted project "${existing.title}"`,
+          });
+        }
+
+        for (const tsk of childTasks) {
+          await db.tasks.update(tsk.id, { isDeleted: true, updatedAt: now });
+          await recordChange({
+            entityType: 'task',
+            entityId: tsk.id,
+            action: 'soft_delete',
+            reason: `Cascaded from deleted project "${existing.title}"`,
+          });
+        }
+
+        await recordChange({
+          entityType: 'project',
+          entityId: id,
+          action: 'soft_delete',
+          reason,
+        });
+      }
+    );
   },
 
   // ==========================================
   // MILESTONES & PHASES
   // ==========================================
   async createMilestone(data: Omit<MilestonePhase, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<MilestonePhase> {
+    if (!data.title || !data.title.trim()) {
+      throw new Error('Milestone title is required.');
+    }
+    if (data.startDate && !isValidDateString(data.startDate)) {
+      throw new Error(`Invalid milestone start date: ${data.startDate}`);
+    }
+    if (data.endDate && !isValidDateString(data.endDate)) {
+      throw new Error(`Invalid milestone end date: ${data.endDate}`);
+    }
+    if (data.startDate && data.endDate && data.endDate < data.startDate) {
+      throw new Error('Milestone end date cannot be earlier than start date.');
+    }
+
     const now = getCurrentUTC();
     const milestone: MilestonePhase = {
       ...data,
+      title: data.title.trim(),
+      weight: roundMetric(data.weight ?? 10),
       id: generateId(),
       isDeleted: false,
       createdAt: now,
@@ -193,12 +301,33 @@ export const domainService = {
   },
 
   async updateMilestone(id: EntityId, updates: Partial<MilestonePhase>): Promise<void> {
+    if (updates.title !== undefined && !updates.title.trim()) {
+      throw new Error('Milestone title cannot be empty.');
+    }
     await db.transaction('rw', [db.milestones, db.changeLogs], async () => {
       const existing = await db.milestones.get(id);
       if (!existing) throw new Error(`Milestone ${id} not found`);
 
+      const nextStart = updates.startDate !== undefined ? updates.startDate : existing.startDate;
+      const nextEnd = updates.endDate !== undefined ? updates.endDate : existing.endDate;
+      if (nextStart && !isValidDateString(nextStart)) {
+        throw new Error(`Invalid milestone start date: ${nextStart}`);
+      }
+      if (nextEnd && !isValidDateString(nextEnd)) {
+        throw new Error(`Invalid milestone end date: ${nextEnd}`);
+      }
+      if (nextStart && nextEnd && nextEnd < nextStart) {
+        throw new Error('Milestone end date cannot be earlier than start date.');
+      }
+
       const now = getCurrentUTC();
-      const updated = { ...existing, ...updates, updatedAt: now };
+      const updated = {
+        ...existing,
+        ...updates,
+        title: updates.title !== undefined ? updates.title.trim() : existing.title,
+        weight: updates.weight !== undefined ? roundMetric(updates.weight) : existing.weight,
+        updatedAt: now,
+      };
       await db.milestones.put(updated);
 
       await recordChange({
@@ -300,9 +429,24 @@ export const domainService = {
   // TARGETS (MONTHLY, WEEKLY, DAILY)
   // ==========================================
   async createTarget(data: Omit<Target, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<Target> {
+    if (!data.title || !data.title.trim()) {
+      throw new Error('Target title is required.');
+    }
+    if (!Number.isFinite(Number(data.targetValue)) || Number(data.targetValue) <= 0) {
+      throw new Error('Target value must be greater than zero.');
+    }
+    if (!isValidPeriodForHorizon(data.period, data.horizon)) {
+      throw new Error(`Invalid period "${data.period}" for ${data.horizon} horizon.`);
+    }
+
     const now = getCurrentUTC();
     const target: Target = {
       ...data,
+      title: data.title.trim(),
+      period: data.period.trim(),
+      targetValue: roundMetric(data.targetValue),
+      currentValue: roundMetric(data.currentValue ?? 0),
+      weight: roundMetric(data.weight ?? 1.0),
       id: generateId(),
       isDeleted: false,
       createdAt: now,
@@ -327,8 +471,18 @@ export const domainService = {
 
       const now = getCurrentUTC();
       const localToday = getLocalDateString();
-      const newCurrent = Math.max(0, existing.currentValue + addedValue);
-      const newStatus: Status = newCurrent >= existing.targetValue ? 'done' : existing.status === 'not_started' ? 'active' : existing.status;
+      const prevCurrent = roundMetric(existing.currentValue);
+      const newCurrent = roundMetric(Math.max(0, prevCurrent + Number(addedValue)));
+      const actualDelta = roundMetric(newCurrent - prevCurrent);
+
+      let newStatus: Status = existing.status;
+      if (newCurrent >= existing.targetValue) {
+        newStatus = 'done';
+      } else if (existing.status === 'done') {
+        newStatus = newCurrent > 0 ? 'active' : 'not_started';
+      } else if (existing.status === 'not_started' && newCurrent > 0) {
+        newStatus = 'active';
+      }
 
       const updated: Target = {
         ...existing,
@@ -338,19 +492,21 @@ export const domainService = {
       };
       await db.targets.put(updated);
 
-      // Record both progress log and change log
-      await db.progressLogs.add({
-        id: generateId(),
-        entityType: 'target',
-        entityId: id,
-        timestamp: now,
-        date: localToday,
-        value: addedValue,
-        unit: existing.unit,
-        note,
-        isDeleted: false,
-        createdAt: now,
-      });
+      // Record progress log only for the actual delta applied (so logs and stored value always agree)
+      if (actualDelta !== 0 || Number(addedValue) === 0) {
+        await db.progressLogs.add({
+          id: generateId(),
+          entityType: 'target',
+          entityId: id,
+          timestamp: now,
+          date: localToday,
+          value: actualDelta,
+          unit: existing.unit,
+          note,
+          isDeleted: false,
+          createdAt: now,
+        });
+      }
 
       await recordChange({
         entityType: 'target',
@@ -367,12 +523,46 @@ export const domainService = {
   },
 
   async updateTarget(id: EntityId, updates: Partial<Target>): Promise<Target> {
+    if (updates.title !== undefined && !updates.title.trim()) {
+      throw new Error('Target title cannot be empty.');
+    }
+    if (updates.targetValue !== undefined && Number(updates.targetValue) <= 0) {
+      throw new Error('Target value must be greater than zero.');
+    }
     return await db.transaction('rw', [db.targets, db.changeLogs], async () => {
       const existing = await db.targets.get(id);
       if (!existing) throw new Error(`Target ${id} not found`);
 
+      const nextHorizon = updates.horizon !== undefined ? updates.horizon : existing.horizon;
+      const nextPeriod = updates.period !== undefined ? updates.period : existing.period;
+      if (!isValidPeriodForHorizon(nextPeriod, nextHorizon)) {
+        throw new Error(`Invalid period "${nextPeriod}" for ${nextHorizon} horizon.`);
+      }
+
       const now = getCurrentUTC();
-      const updated: Target = { ...existing, ...updates, updatedAt: now };
+      const nextTargetVal =
+        updates.targetValue !== undefined ? roundMetric(updates.targetValue) : existing.targetValue;
+      const nextCurrentVal =
+        updates.currentValue !== undefined ? roundMetric(Math.max(0, updates.currentValue)) : existing.currentValue;
+
+      let nextStatus = updates.status !== undefined ? updates.status : existing.status;
+      if (updates.status === undefined) {
+        if (nextCurrentVal >= nextTargetVal) {
+          nextStatus = 'done';
+        } else if (existing.status === 'done' && nextCurrentVal < nextTargetVal) {
+          nextStatus = nextCurrentVal > 0 ? 'active' : 'not_started';
+        }
+      }
+
+      const updated: Target = {
+        ...existing,
+        ...updates,
+        title: updates.title !== undefined ? updates.title.trim() : existing.title,
+        targetValue: nextTargetVal,
+        currentValue: nextCurrentVal,
+        status: nextStatus,
+        updatedAt: now,
+      };
       await db.targets.put(updated);
 
       await recordChange({
@@ -406,6 +596,7 @@ export const domainService = {
   /**
    * Cascade Distribution Engine (PRD Section 6.2)
    * Splits a higher horizon target (Month or Week) into sub-targets (Week or Day)
+   * Skips any period that already has an active cascaded child for this parent target.
    */
   async cascadeTarget(params: {
     parentTargetId: EntityId;
@@ -416,20 +607,34 @@ export const domainService = {
       const parent = await db.targets.get(params.parentTargetId);
       if (!parent) throw new Error(`Parent target ${params.parentTargetId} not found`);
 
+      const existingChildren = await db.targets
+        .where('parentTargetId')
+        .equals(parent.id)
+        .filter((t) => !t.isDeleted && t.horizon === params.childHorizon)
+        .toArray();
+
       const now = getCurrentUTC();
       const createdChildren: Target[] = [];
 
       for (const item of params.distribution) {
         if (item.value <= 0) continue;
+        const resolvedTitle = item.title?.trim() || parent.title;
+
+        // Skip if a child target for this period & title already exists
+        const alreadyPresent = existingChildren.some(
+          (c) => c.period === item.period && c.title === resolvedTitle
+        );
+        if (alreadyPresent) continue;
+
         const child: Target = {
           id: generateId(),
           projectId: parent.projectId,
           parentTargetId: parent.id,
           horizon: params.childHorizon,
           period: item.period,
-          title: item.title?.trim() || parent.title,
+          title: resolvedTitle,
           metricType: parent.metricType,
-          targetValue: item.value,
+          targetValue: roundMetric(item.value),
           currentValue: 0,
           unit: parent.unit,
           weight: 1.0,
@@ -440,6 +645,7 @@ export const domainService = {
         };
 
         await db.targets.add(child);
+        existingChildren.push(child);
         await recordChange({
           entityType: 'target',
           entityId: child.id,
@@ -456,7 +662,8 @@ export const domainService = {
 
   /**
    * Copy-Forward Period Tool (PRD Section 6.3)
-   * Replicates targets from a previous period into the new active period with zeroed progress
+   * Replicates targets from a previous period into the new active period with zeroed progress.
+   * Skips any target that is already present in the destination period.
    */
   async copyForwardPeriod(params: {
     sourcePeriod: string;
@@ -475,10 +682,23 @@ export const domainService = {
         sourceTargets = sourceTargets.filter((t) => params.targetIds!.includes(t.id));
       }
 
+      const existingInTargetPeriod = await db.targets
+        .where('period')
+        .equals(params.targetPeriod)
+        .filter((t) => !t.isDeleted && t.horizon === params.horizon)
+        .toArray();
+
       const now = getCurrentUTC();
       const copiedTargets: Target[] = [];
 
       for (const src of sourceTargets) {
+        const alreadyExists = existingInTargetPeriod.some(
+          (dest) =>
+            dest.title.trim().toLowerCase() === src.title.trim().toLowerCase() &&
+            (dest.projectId || '') === (src.projectId || '')
+        );
+        if (alreadyExists) continue;
+
         const clone: Target = {
           id: generateId(),
           projectId: src.projectId,
@@ -487,10 +707,10 @@ export const domainService = {
           period: params.targetPeriod,
           title: src.title,
           metricType: src.metricType,
-          targetValue: src.targetValue,
+          targetValue: roundMetric(src.targetValue),
           currentValue: 0,
           unit: src.unit,
-          weight: src.weight,
+          weight: roundMetric(src.weight),
           status: 'not_started',
           isDeleted: false,
           createdAt: now,
@@ -498,6 +718,7 @@ export const domainService = {
         };
 
         await db.targets.add(clone);
+        existingInTargetPeriod.push(clone);
         await recordChange({
           entityType: 'target',
           entityId: clone.id,
@@ -577,9 +798,25 @@ export const domainService = {
   // TASKS & SUBTASKS
   // ==========================================
   async createTask(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Promise<Task> {
+    if (!data.title || !data.title.trim()) {
+      throw new Error('Task title is required.');
+    }
+    if (data.scheduleDate && !isValidDateString(data.scheduleDate)) {
+      throw new Error(`Invalid task schedule date: ${data.scheduleDate}`);
+    }
+    if (data.dueDate && !isValidDateString(data.dueDate)) {
+      throw new Error(`Invalid task due date: ${data.dueDate}`);
+    }
+    if (data.scheduleDate && data.dueDate && data.dueDate < data.scheduleDate) {
+      throw new Error('Task due date cannot be earlier than schedule date.');
+    }
+
     const now = getCurrentUTC();
     const task: Task = {
       ...data,
+      title: data.title.trim(),
+      estimateMinutes: data.estimateMinutes !== undefined ? roundMetric(data.estimateMinutes) : undefined,
+      actualMinutes: data.actualMinutes !== undefined ? roundMetric(data.actualMinutes) : undefined,
       id: generateId(),
       isDeleted: false,
       createdAt: now,
@@ -818,9 +1055,21 @@ export const domainService = {
   // HABITS & ROUTINES
   // ==========================================
   async createHabit(data: Omit<Habit, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted' | 'isArchived'>): Promise<Habit> {
+    if (!data.title || !data.title.trim()) {
+      throw new Error('Habit title is required.');
+    }
+    if (data.startDate && !isValidDateString(data.startDate)) {
+      throw new Error(`Invalid habit start date: ${data.startDate}`);
+    }
+    if (data.targetValue !== undefined && Number(data.targetValue) <= 0) {
+      throw new Error('Habit target value must be greater than zero.');
+    }
+
     const now = getCurrentUTC();
     const habit: Habit = {
       ...data,
+      title: data.title.trim(),
+      targetValue: roundMetric(data.targetValue ?? 1),
       id: generateId(),
       isArchived: false,
       isDeleted: false,
@@ -840,10 +1089,14 @@ export const domainService = {
   },
 
   async logHabitCompletion(habitId: EntityId, date: string, value = 1, note?: string): Promise<ProgressLog> {
+    if (!isValidDateString(date)) {
+      throw new Error(`Invalid habit check-in date: ${date}`);
+    }
     return await db.transaction('rw', [db.habits, db.progressLogs, db.changeLogs], async () => {
       const habit = await db.habits.get(habitId);
       if (!habit) throw new Error(`Habit ${habitId} not found`);
 
+      const cleanVal = roundMetric(value);
       const now = getCurrentUTC();
       const log: ProgressLog = {
         id: generateId(),
@@ -851,7 +1104,7 @@ export const domainService = {
         entityId: habitId,
         timestamp: now,
         date,
-        value,
+        value: cleanVal,
         unit: habit.unit || (habit.metricType === 'duration' ? 'minutes' : 'count'),
         note,
         isDeleted: false,
@@ -864,7 +1117,7 @@ export const domainService = {
         entityId: habitId,
         action: 'update',
         fieldChanged: 'check_in',
-        newValue: { date, value },
+        newValue: { date, value: cleanVal },
         reason: note,
       });
 
@@ -873,6 +1126,12 @@ export const domainService = {
   },
 
   async updateHabit(habitId: EntityId, updates: Partial<Habit>): Promise<Habit> {
+    if (updates.title !== undefined && !updates.title.trim()) {
+      throw new Error('Habit title cannot be empty.');
+    }
+    if (updates.startDate !== undefined && !isValidDateString(updates.startDate)) {
+      throw new Error(`Invalid habit start date: ${updates.startDate}`);
+    }
     return await db.transaction('rw', [db.habits, db.changeLogs], async () => {
       const habit = await db.habits.get(habitId);
       if (!habit) throw new Error(`Habit ${habitId} not found`);
@@ -881,6 +1140,9 @@ export const domainService = {
       const updated: Habit = {
         ...habit,
         ...updates,
+        title: updates.title !== undefined ? updates.title.trim() : habit.title,
+        targetValue:
+          updates.targetValue !== undefined ? roundMetric(updates.targetValue) : habit.targetValue,
         updatedAt: now,
       };
 

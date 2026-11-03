@@ -15,6 +15,7 @@ import {
   Folder,
   CornerDownLeft,
   CheckCircle2,
+  AlertTriangle,
   X,
   HelpCircle,
 } from 'lucide-react';
@@ -34,8 +35,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   const [parsed, setParsed] = useState<ParsedQuickAdd>(() => parseQuickAdd(initialText));
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showCheatSheet, setShowCheatSheet] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Load existing projects & milestones to resolve queries
   const projects = useLiveQuery(() => db.projects.filter((p) => !p.isDeleted).toArray(), []);
@@ -44,6 +47,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   // Update parsed whenever input changes
   useEffect(() => {
     setParsed(parseQuickAdd(input));
+    setSaveError(null);
   }, [input]);
 
   // Focus input when opened
@@ -51,18 +55,39 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     if (isOpen) {
       setInput(initialText || '');
       setSaveSuccess(null);
+      setSaveError(null);
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
     }
   }, [isOpen, initialText]);
 
-  // Escape key listener
+  // Escape key & Tab focus trap listener
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first || !dialogRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last || !dialogRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -97,6 +122,15 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     return m.id.toLowerCase().includes(q) || m.title.toLowerCase().includes(q);
   });
 
+  // Unknown token warnings
+  const unknownWarnings: string[] = [];
+  if (parsed.projectQuery && projects && !matchedProject) {
+    unknownWarnings.push(`Unknown project "#${parsed.projectQuery}" — task will be saved to Unsorted Inbox.`);
+  }
+  if (parsed.milestoneQuery && milestones && !matchedMilestone) {
+    unknownWarnings.push(`Unknown milestone ">${parsed.milestoneQuery}" — milestone link will be skipped.`);
+  }
+
   const handleAppendToken = (token: string) => {
     setInput((prev) => {
       const trimmed = prev.trim();
@@ -107,9 +141,17 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !parsed.title.trim() || parsed.title === 'Untitled Item') {
+      setSaveError('Please enter a task title before saving.');
+      return;
+    }
+    if (parsed.errors.length > 0) {
+      setSaveError(parsed.errors[0]);
+      return;
+    }
 
     setIsSaving(true);
+    setSaveError(null);
     try {
       // 1. Create measurable target if +unit:value is provided
       let targetId: string | undefined;
@@ -150,7 +192,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
         onClose();
       }, 700);
     } catch (err) {
-      console.error('Quick-add save error:', err);
+      setSaveError(err instanceof Error ? err.message : 'Failed to save task.');
       setIsSaving(false);
     }
   };
@@ -164,7 +206,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     >
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-2xl bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded-[var(--radius-sm)] flex flex-col overflow-hidden z-10 text-[var(--color-ink)]">
+      <div
+        ref={dialogRef}
+        className="relative w-full max-w-2xl bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded-[var(--radius-sm)] flex flex-col overflow-hidden z-10 text-[var(--color-ink)]"
+      >
         {/* Top Input Bar */}
         <form onSubmit={handleSave} className="flex flex-col">
           <div className="p-4 bg-[var(--color-paper-2)] hairline-b flex items-center gap-3">
@@ -174,13 +219,14 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              aria-label="Quick add task input"
               placeholder={`Draft project brief ${sampleProjectToken} ${sampleMilestoneToken} ~45m !high @today +pages:5`}
               className="w-full bg-transparent text-sm font-normal text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] focus:outline-none"
             />
             <button
               type="button"
               onClick={onClose}
-              className="p-1 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] rounded"
+              className="p-1 min-w-6 min-h-6 inline-flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] rounded"
               aria-label="Close"
             >
               <X className="w-4 h-4" />
@@ -193,42 +239,42 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
             <button
               type="button"
               onClick={() => handleAppendToken(sampleProjectToken)}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
+              className="px-1.5 py-0.5 min-h-6 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
               {sampleProjectToken}
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken(sampleMilestoneToken)}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
+              className="px-1.5 py-0.5 min-h-6 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
               {sampleMilestoneToken}
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('~45m')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
+              className="px-1.5 py-0.5 min-h-6 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
             >
               ~45m
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('!high')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-status-at-risk)]"
+              className="px-1.5 py-0.5 min-h-6 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-status-at-risk)]"
             >
               !high
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('@today')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
+              className="px-1.5 py-0.5 min-h-6 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-ink)]"
             >
               @today
             </button>
             <button
               type="button"
               onClick={() => handleAppendToken('+pages:5')}
-              className="px-1.5 py-0.5 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
+              className="px-1.5 py-0.5 min-h-6 rounded bg-[var(--color-paper-2)] hover:bg-[var(--color-paper-3)] border border-[var(--color-rule)] text-xs text-[var(--color-accent)]"
             >
               +pages:5
             </button>
@@ -236,7 +282,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
             <button
               type="button"
               onClick={() => setShowCheatSheet(!showCheatSheet)}
-              className="ml-auto inline-flex items-center gap-1 text-xs text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
+              className="ml-auto min-h-6 inline-flex items-center gap-1 text-xs text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
             >
               <HelpCircle className="w-3.5 h-3.5" />
               <span>How quick add works</span>
@@ -280,7 +326,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--color-paper)] border border-[var(--color-rule)] text-[var(--color-accent)]">
                   <Folder className="w-3 h-3" />
                   <span>
-                    {matchedProject ? matchedProject.title : parsed.projectQuery ? `#${parsed.projectQuery}` : 'Unsorted Inbox'}
+                    {matchedProject ? matchedProject.title : parsed.projectQuery ? `#${parsed.projectQuery} (Unmatched)` : 'Unsorted Inbox'}
                   </span>
                 </span>
 
@@ -289,7 +335,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--color-paper)] border border-[var(--color-rule)] text-[var(--color-ink)]">
                     <span>&gt;</span>
                     <span>
-                      {matchedMilestone ? matchedMilestone.title : parsed.milestoneQuery}
+                      {matchedMilestone ? matchedMilestone.title : `${parsed.milestoneQuery} (Unmatched)`}
                     </span>
                   </span>
                 )}
@@ -330,6 +376,37 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               </div>
             </div>
 
+            {/* Unknown Project / Milestone Warning */}
+            {unknownWarnings.length > 0 && (
+              <div
+                role="status"
+                className="p-2.5 bg-[var(--color-status-at-risk-bg)] text-[var(--color-status-at-risk)] rounded-[var(--radius-xs)] border border-[var(--color-status-at-risk)]/30 flex items-start gap-2 text-xs font-mono"
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-0.5">
+                  {unknownWarnings.map((w, idx) => (
+                    <span key={idx}>{w}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Validation Errors (e.g. @2026-02-30, @frday, blank title) */}
+            {(parsed.errors.length > 0 || saveError) && (
+              <div
+                role="alert"
+                className="p-2.5 bg-[var(--color-status-behind-bg)] text-[var(--color-status-behind)] rounded-[var(--radius-xs)] border border-[var(--color-status-behind)]/30 flex items-start gap-2 text-xs font-mono font-medium"
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-0.5">
+                  {saveError && <span>{saveError}</span>}
+                  {parsed.errors.map((err, idx) => (
+                    <span key={idx}>{err}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Notification on save */}
             {saveSuccess && (
               <div className="p-2.5 bg-[var(--color-status-on-track-bg)] text-[var(--color-status-on-track)] rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex items-center gap-2 text-xs font-mono font-medium">
@@ -353,7 +430,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               <Button variant="ghost" onClick={onClose} disabled={isSaving}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" isLoading={isSaving} disabled={!input.trim()}>
+              <Button variant="primary" type="submit" isLoading={isSaving} disabled={parsed.errors.length > 0}>
                 <CornerDownLeft className="w-3.5 h-3.5" />
                 <span>Add to Ledger</span>
               </Button>

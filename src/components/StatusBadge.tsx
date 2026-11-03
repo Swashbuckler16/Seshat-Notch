@@ -4,6 +4,7 @@ import { ScheduleStatus } from '../types';
 interface StatusBadgeProps {
   status: ScheduleStatus;
   ratio?: number;
+  customLabel?: string;
   className?: string;
 }
 
@@ -38,7 +39,12 @@ const STATUS_CONFIG: Record<ScheduleStatus, { label: string; glyph: string; colo
  * Hallmark Status Badge
  * Never relies on color alone: binds explicit word + geometric glyph + ratio figure
  */
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, ratio, className = '' }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({
+  status,
+  ratio,
+  customLabel,
+  className = '',
+}) => {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.paused;
 
   return (
@@ -52,7 +58,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, ratio, classNa
       <span className="text-[10px] leading-none" aria-hidden="true">
         {config.glyph}
       </span>
-      <span>{config.label}</span>
+      <span>{customLabel || config.label}</span>
       {ratio !== undefined && (
         <span className="font-mono text-[11px] tabular-figure opacity-85">
           ({(ratio * 100).toFixed(0)}%)

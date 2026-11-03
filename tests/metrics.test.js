@@ -88,6 +88,11 @@ test('PRD 7.3: calculateScheduleRatio classifies status by word and shape', () =
   assert.equal(atRisk.statusLabel, 'At risk');
   assert.equal(atRisk.glyph, '▲');
 
+  // Boundary precision: 0.8999 must not round up to 0.90 ("on_track")
+  const boundaryAtRisk = calculateScheduleRatio(89.99, 100);
+  assert.equal(boundaryAtRisk.scheduleRatio, 0.89);
+  assert.equal(boundaryAtRisk.status, 'at_risk');
+
   // Ratio < 0.70 -> Behind (■)
   const behind = calculateScheduleRatio(40, 80); // 40/80 = 0.50
   assert.equal(behind.scheduleRatio, 0.5);

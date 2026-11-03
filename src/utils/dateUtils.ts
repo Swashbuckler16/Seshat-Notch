@@ -84,3 +84,56 @@ export function shiftDateString(dateStr: string, deltaDays: number): string {
   d.setDate(d.getDate() + deltaDays);
   return formatLocalDate(d);
 }
+
+/**
+ * Eliminates IEEE-754 floating-point noise (e.g. 0.1 + 0.2 -> 0.3).
+ */
+export function roundMetric(val: number): number {
+  const num = Number(val);
+  if (!Number.isFinite(num)) return 0;
+  return Math.round(num * 1_000_000) / 1_000_000;
+}
+
+/**
+ * Strictly validates that `dateStr` is a real calendar date in `YYYY-MM-DD` format
+ * (rejects impossible dates like `2026-02-30` or `2026-13-01`).
+ */
+export function isValidDateString(dateStr: string): boolean {
+  if (typeof dateStr !== 'string') return false;
+  const match = dateStr.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  const year = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const day = parseInt(match[3], 10);
+  if (year < 1970 || year > 2100) return false;
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+  const dt = new Date(Date.UTC(year, month - 1, day));
+  return (
+    dt.getUTCFullYear() === year &&
+    dt.getUTCMonth() + 1 === month &&
+    dt.getUTCDate() === day
+  );
+}
+
+/**
+ * Validates that a period string matches the expected format for its horizon.
+ */
+export function isValidPeriodForHorizon(
+  period: string,
+  horizon: 'month' | 'week' | 'day'
+): boolean {
+  if (typeof period !== 'string' || !period.trim()) return false;
+  const clean = period.trim();
+  if (horizon === 'month') {
+    return /^\d{4}-(0[1-9]|1[0-2])$/.test(clean);
+  }
+  if (horizon === 'week') {
+    return /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])$/.test(clean);
+  }
+  if (horizon === 'day') {
+    return isValidDateString(clean);
+  }
+  return false;
+}
+

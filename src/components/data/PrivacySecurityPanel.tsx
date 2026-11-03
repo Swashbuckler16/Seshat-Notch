@@ -73,10 +73,11 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
     try {
       setIsVerifying(true);
       await dataOwnershipService.setAppLockPin(pinInput);
+      window.dispatchEvent(new CustomEvent('seshat-app-lock-unlocked'));
       setPinInput('');
       setConfirmPinInput('');
       setShowPinSetup(false);
-      onNotify('App Lock PIN successfully configured.');
+      onNotify('App Lock PIN configured. Reload or click Lock Now to lock the screen.');
       await loadSettings();
     } catch (err: unknown) {
       onNotify(`Error setting PIN: ${err instanceof Error ? err.message : String(err)}`);
@@ -356,20 +357,34 @@ export const PrivacySecurityPanel: React.FC<PrivacySecurityPanelProps> = ({ onNo
 
         <div className="flex flex-col gap-3 text-xs">
           {appLockEnabled ? (
-            <div className="flex items-center justify-between p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
-              <div className="flex items-center gap-2">
-                <Key className="w-4 h-4 text-[var(--color-accent)]" />
-                <span className="text-xs text-[var(--color-ink)] font-medium">
-                  App lock PIN is configured and active.
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <Key className="w-4 h-4 text-[var(--color-accent)]" />
+                  <span className="text-xs text-[var(--color-ink)] font-medium">
+                    App lock PIN is configured and active.
+                  </span>
+                </div>
+                <span className="text-[11px] text-[var(--color-ink-muted)]">
+                  Acts as a local privacy screen gate when opening or reloading the app.
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={handleDisableLock}
-                className="px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink)] transition-colors min-h-8"
-              >
-                Disable PIN Lock
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('seshat-app-lock-now'))}
+                  className="px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink)] transition-colors min-h-8"
+                >
+                  Lock Now
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDisableLock}
+                  className="px-2.5 py-1 text-xs font-medium rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] hover:bg-[var(--color-paper-3)] text-[var(--color-ink)] transition-colors min-h-8"
+                >
+                  Disable PIN Lock
+                </button>
+              </div>
             </div>
           ) : showPinSetup ? (
             <div className="surface-well p-3.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] flex flex-col gap-3 max-w-sm">

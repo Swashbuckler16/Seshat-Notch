@@ -132,8 +132,9 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
                       e.stopPropagation();
                       handleMove(area, 'up');
                     }}
-                    className="p-0.5 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] disabled:opacity-20"
+                    className="min-w-6 min-h-6 inline-flex items-center justify-center p-0.5 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] disabled:opacity-20"
                     title="Move up"
+                    aria-label={`Move ${area.name} up`}
                   >
                     <ChevronUp className="w-3 h-3" />
                   </button>
@@ -144,8 +145,9 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
                       e.stopPropagation();
                       handleMove(area, 'down');
                     }}
-                    className="p-0.5 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] disabled:opacity-20"
+                    className="min-w-6 min-h-6 inline-flex items-center justify-center p-0.5 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] disabled:opacity-20"
                     title="Move down"
+                    aria-label={`Move ${area.name} down`}
                   >
                     <ChevronDown className="w-3 h-3" />
                   </button>
@@ -155,8 +157,9 @@ export const AreaManager: React.FC<AreaManagerProps> = ({ selectedAreaId, onSele
                       e.stopPropagation();
                       handleToggleArchive(area);
                     }}
-                    className="p-0.5 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] ml-1"
+                    className="min-w-6 min-h-6 inline-flex items-center justify-center p-0.5 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] ml-1"
                     title={area.isArchived ? 'Unarchive' : 'Archive'}
+                    aria-label={area.isArchived ? `Unarchive ${area.name}` : `Archive ${area.name}`}
                   >
                     <Archive className="w-3 h-3" />
                   </button>

@@ -28,6 +28,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
   const [endDate, setEndDate] = useState('');
   const [weight, setWeight] = useState(10);
   const [dependsOn, setDependsOn] = useState<string>('');
+  const [milestoneError, setMilestoneError] = useState<string | null>(null);
 
   const milestones = useLiveQuery(
     () =>
@@ -46,25 +47,37 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
 
   const handleCreateMilestone = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setMilestoneError('Please enter a milestone title.');
+      return;
+    }
+    if (startDate && endDate && endDate < startDate) {
+      setMilestoneError('Milestone end date cannot be earlier than start date.');
+      return;
+    }
 
-    await domainService.createMilestone({
-      projectId,
-      title: title.trim(),
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-      status: 'not_started',
-      dependsOnMilestoneId: dependsOn || undefined,
-      weight: Number(weight) || 10,
-      order: (milestones?.length || 0) + 1,
-    });
+    try {
+      await domainService.createMilestone({
+        projectId,
+        title: title.trim(),
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        status: 'not_started',
+        dependsOnMilestoneId: dependsOn || undefined,
+        weight: Number(weight) || 10,
+        order: (milestones?.length || 0) + 1,
+      });
 
-    setTitle('');
-    setStartDate('');
-    setEndDate('');
-    setWeight(10);
-    setDependsOn('');
-    setIsAddModalOpen(false);
+      setTitle('');
+      setStartDate('');
+      setEndDate('');
+      setWeight(10);
+      setDependsOn('');
+      setMilestoneError(null);
+      setIsAddModalOpen(false);
+    } catch (err) {
+      setMilestoneError(err instanceof Error ? err.message : 'Unable to save milestone.');
+    }
   };
 
   const handleStatusChange = async (milestone: MilestonePhase, newStatus: Status) => {
@@ -186,6 +199,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
 
                   {/* Status Toggle Button */}
                   <select
+                    aria-label={`Status for ${ms.title}`}
                     value={ms.status}
                     onChange={(e) => handleStatusChange(ms, e.target.value as Status)}
                     className="bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] px-2 py-1 text-xs font-medium text-[var(--color-ink)]"
@@ -200,8 +214,9 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
                   <button
                     type="button"
                     onClick={() => handleDelete(ms.id)}
-                    className="p-1 text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)]"
+                    className="min-w-6 min-h-6 inline-flex items-center justify-center p-1 text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)]"
                     title="Delete phase"
+                    aria-label={`Delete milestone ${ms.title}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -223,7 +238,7 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
             <Button variant="ghost" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleCreateMilestone} disabled={!title.trim()}>
+            <Button variant="primary" onClick={handleCreateMilestone}>
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Save Phase</span>
             </Button>
@@ -231,11 +246,19 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
         }
       >
         <form onSubmit={handleCreateMilestone} className="flex flex-col gap-3">
+          {milestoneError && (
+            <p role="alert" className="text-xs font-medium text-[var(--color-status-behind)]">
+              {milestoneError}
+            </p>
+          )}
           <Input
             label="Phase / Milestone Title"
             placeholder="e.g. Phase 6: Attack Emulation & Detection Engineering"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (milestoneError) setMilestoneError(null);
+            }}
             required
             autoFocus
           />
@@ -245,13 +268,19 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
               label="Start Date (Optional)"
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (milestoneError) setMilestoneError(null);
+              }}
             />
             <Input
               label="End Date (Optional)"
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                if (milestoneError) setMilestoneError(null);
+              }}
             />
           </div>
 
@@ -267,10 +296,12 @@ export const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({ projectId,
             />
 
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-[var(--color-ink)]">
+              <label htmlFor="milestone-dependency" className="text-xs font-medium text-[var(--color-ink)]">
                 Finish-to-Start Dependency
               </label>
               <select
+                id="milestone-dependency"
+                aria-label="Finish-to-Start Dependency"
                 value={dependsOn}
                 onChange={(e) => setDependsOn(e.target.value)}
                 className="w-full h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"

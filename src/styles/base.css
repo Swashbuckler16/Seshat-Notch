@@ -70,32 +70,48 @@ th,
 
 /* Seshat Brand Motif: The Notch on a Rib */
 /* Rows of vertical ticks grouped in 7s (representing days of the week) */
+/* Each button has a 24x24px accessible hit target while ::before renders the crisp visual notch */
 .seshat-notch-group {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2xs);
-  padding: var(--space-3xs) var(--space-2xs);
+  gap: 0px;
+  padding: 2px 4px;
 }
 
 .seshat-notch-tick {
-  width: 2.5px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border-radius: 3px;
+  transition: opacity var(--dur-micro) var(--ease-ledger), transform var(--dur-micro) var(--ease-ledger);
+}
+
+.seshat-notch-tick::before {
+  content: "";
+  display: block;
+  width: 3px;
   height: 14px;
   border-radius: 1px;
   background-color: var(--color-rule-strong);
   transition: opacity var(--dur-micro) var(--ease-ledger), transform var(--dur-micro) var(--ease-ledger);
 }
 
-.seshat-notch-tick[data-completed="true"] {
+.seshat-notch-tick[data-completed="true"]::before {
   background-color: var(--color-accent);
   height: 16px;
 }
 
-.seshat-notch-tick[data-today="true"] {
+.seshat-notch-tick[data-today="true"]::before {
   outline: 1.5px solid var(--color-focus);
   outline-offset: 1px;
 }
 
-.seshat-notch-tick[data-skipped="true"] {
+.seshat-notch-tick[data-skipped="true"]::before {
   background-color: var(--color-rule);
   height: 8px;
 }
@@ -134,4 +150,3 @@ th,
   background-color: var(--color-rule-strong);
   opacity: 0.5;
 }
-

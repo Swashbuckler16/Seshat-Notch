@@ -3,6 +3,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
 import { TargetHorizon, MetricType, EntityId } from '../../types';
 import { domainService } from '../../services/domainService';
+import { getCurrentPeriod } from '../../utils/periodUtils';
+import { isValidPeriodForHorizon } from '../../utils/dateUtils';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -25,11 +27,16 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
 }) => {
   const [title, setTitle] = useState('');
   const [horizon, setHorizon] = useState<TargetHorizon>(defaultHorizon);
-  const [period, setPeriod] = useState(defaultPeriod);
+  const [period, setPeriod] = useState(() =>
+    defaultPeriod && isValidPeriodForHorizon(defaultPeriod, defaultHorizon)
+      ? defaultPeriod
+      : getCurrentPeriod(defaultHorizon)
+  );
   const [projectId, setProjectId] = useState<string>(defaultProjectId);
   const [targetValue, setTargetValue] = useState<number>(5);
   const [unit, setUnit] = useState('items');
   const [metricType, setMetricType] = useState<MetricType>('numeric');
+  const [formError, setFormError] = useState<string | null>(null);
   const weight = 1.0;
 
   // Projects list for linking
@@ -37,31 +44,57 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
 
   useEffect(() => {
     setHorizon(defaultHorizon);
-    setPeriod(defaultPeriod);
+    setPeriod(
+      defaultPeriod && isValidPeriodForHorizon(defaultPeriod, defaultHorizon)
+        ? defaultPeriod
+        : getCurrentPeriod(defaultHorizon)
+    );
     if (defaultProjectId) setProjectId(defaultProjectId);
+    setFormError(null);
   }, [defaultHorizon, defaultPeriod, defaultProjectId, isOpen]);
+
+  const handleHorizonSelect = (nextHorizon: TargetHorizon) => {
+    setHorizon(nextHorizon);
+    setPeriod(getCurrentPeriod(nextHorizon));
+    setFormError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || targetValue <= 0) return;
+    if (!title.trim()) {
+      setFormError('Please enter a goal name.');
+      return;
+    }
+    if (targetValue <= 0) {
+      setFormError('Goal amount must be greater than zero.');
+      return;
+    }
+    const cleanPeriod = isValidPeriodForHorizon(period.trim(), horizon)
+      ? period.trim()
+      : getCurrentPeriod(horizon);
 
-    await domainService.createTarget({
-      title: title.trim(),
-      horizon,
-      period: period.trim(),
-      projectId: projectId || undefined,
-      targetValue: Number(targetValue),
-      currentValue: 0,
-      unit: unit.trim() || 'count',
-      metricType,
-      weight: Number(weight) || 1.0,
-      status: 'not_started',
-    });
+    try {
+      await domainService.createTarget({
+        title: title.trim(),
+        horizon,
+        period: cleanPeriod,
+        projectId: projectId || undefined,
+        targetValue: Number(targetValue),
+        currentValue: 0,
+        unit: unit.trim() || 'count',
+        metricType,
+        weight: Number(weight) || 1.0,
+        status: 'not_started',
+      });
 
-    setTitle('');
-    setTargetValue(5);
-    setUnit('items');
-    onClose();
+      setTitle('');
+      setTargetValue(5);
+      setUnit('items');
+      setFormError(null);
+      onClose();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Unable to save goal.');
+    }
   };
 
   return (
@@ -78,7 +111,6 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={!title.trim() || targetValue <= 0 || !period.trim()}
           >
             <Check className="w-3.5 h-3.5" />
             <span>Create goal</span>
@@ -87,23 +119,33 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
       }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {formError && (
+          <p role="alert" className="text-xs font-medium text-[var(--color-status-behind)]">
+            {formError}
+          </p>
+        )}
         <Input
           label="Goal name"
           placeholder="e.g. Document 3 detection rules and test coverage"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            if (formError) setFormError(null);
+          }}
           required
           autoFocus
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-[var(--color-ink)]">
+            <label htmlFor="new-target-horizon" className="text-xs font-medium text-[var(--color-ink)]">
               Time period
             </label>
             <select
+              id="new-target-horizon"
+              aria-label="Time period"
               value={horizon}
-              onChange={(e) => setHorizon(e.target.value as TargetHorizon)}
+              onChange={(e) => handleHorizonSelect(e.target.value as TargetHorizon)}
               className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] font-medium"
             >
               <option value="month">Monthly</option>
@@ -130,10 +172,12 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-[var(--color-ink)]">
+            <label htmlFor="new-target-project" className="text-xs font-medium text-[var(--color-ink)]">
               Add to a project (optional)
             </label>
             <select
+              id="new-target-project"
+              aria-label="Add to a project (optional)"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"
@@ -148,10 +192,12 @@ export const NewTargetModal: React.FC<NewTargetModalProps> = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-[var(--color-ink)]">
+            <label htmlFor="new-target-metric" className="text-xs font-medium text-[var(--color-ink)]">
               What do you want to track?
             </label>
             <select
+              id="new-target-metric"
+              aria-label="What do you want to track?"
               value={metricType}
               onChange={(e) => setMetricType(e.target.value as MetricType)}
               className="h-9 px-3 text-xs bg-[var(--color-paper)] text-[var(--color-ink)] border border-[var(--color-rule)] rounded-[var(--radius-xs)]"

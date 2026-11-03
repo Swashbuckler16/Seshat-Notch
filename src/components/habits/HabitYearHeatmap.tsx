@@ -118,7 +118,6 @@ export const HabitYearHeatmap: React.FC<HabitYearHeatmapProps> = ({ habit, logs,
                         onMouseEnter={() => setHoveredCell(cell)}
                         onMouseLeave={() => setHoveredCell(null)}
                         title={tooltipDesc}
-                        aria-label={tooltipDesc}
                       />
                     );
                   })}
@@ -157,4 +156,3 @@ export const HabitYearHeatmap: React.FC<HabitYearHeatmapProps> = ({ habit, logs,
     </div>
   );
 };
-

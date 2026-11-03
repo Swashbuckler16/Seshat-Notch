@@ -18,6 +18,7 @@ import {
   Scale,
   Plus,
   X,
+  Trash2,
   Target as TargetIcon,
 } from 'lucide-react';
 
@@ -109,6 +110,16 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
     await db.projects.update(project.id, { tags: updated, updatedAt: new Date().toISOString() });
   };
 
+  const handleDeleteProject = async () => {
+    if (
+      window.confirm(
+        `Delete "${project.title}" and move its milestones, goals, and tasks to the Recovery Bin?`
+      )
+    ) {
+      await domainService.softDeleteProject(project.id, 'Deleted from project inspector');
+    }
+  };
+
   return (
     <div className="surface-card rounded-[var(--radius-sm)] p-5 flex flex-col gap-5">
       {/* Top Banner: Area, Priority, Status */}
@@ -137,6 +148,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
           <div className="flex items-center gap-1 text-xs">
             <Flag className="w-3.5 h-3.5 text-[var(--color-status-at-risk)]" />
             <select
+              aria-label="Project priority"
               value={project.priority}
               onChange={(e) => handlePriorityChange(e.target.value as Priority)}
               className="bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-[var(--radius-xs)] px-2 py-1 text-xs text-[var(--color-ink)] capitalize"
@@ -150,6 +162,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
 
           {/* Status selector (enforces PRD TR-3 drop reason) */}
           <select
+            aria-label="Project status"
             value={project.status}
             onChange={(e) => handleStatusSelect(e.target.value as Status)}
             className="bg-[var(--color-paper-2)] border border-[var(--color-rule-strong)] rounded-[var(--radius-xs)] px-2.5 py-1 text-xs font-semibold text-[var(--color-ink)]"
@@ -161,6 +174,16 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
             <option value="done">Done</option>
             <option value="dropped">Dropped</option>
           </select>
+
+          <button
+            type="button"
+            onClick={handleDeleteProject}
+            className="min-w-8 min-h-8 p-1.5 rounded-[var(--radius-xs)] text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)] hover:bg-[var(--color-paper-3)] inline-flex items-center justify-center transition-colors"
+            title="Delete project"
+            aria-label="Delete project"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -267,7 +290,8 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
             <button
               type="button"
               onClick={() => handleRemoveTag(tag)}
-              className="text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)]"
+              className="min-w-6 min-h-6 inline-flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)]"
+              aria-label={`Remove tag ${tag}`}
             >
               <X className="w-3 h-3" />
             </button>
@@ -278,6 +302,7 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
           <div className="flex items-center gap-1">
             <input
               type="text"
+              aria-label="New tag"
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
@@ -286,7 +311,12 @@ export const ProjectInspector: React.FC<ProjectInspectorProps> = ({ project }) =
               className="h-8 min-w-28 px-2 text-xs bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded text-[var(--color-ink)]"
             />
             <Button size="sm" variant="ghost" onClick={handleAddTag}>Add</Button>
-            <button type="button" onClick={() => setIsAddingTag(false)} className="text-xs text-[var(--color-ink-subtle)]">
+            <button
+              type="button"
+              onClick={() => setIsAddingTag(false)}
+              className="min-w-6 min-h-6 inline-flex items-center justify-center text-xs text-[var(--color-ink-subtle)]"
+              aria-label="Cancel adding tag"
+            >
               <X className="w-3 h-3" />
             </button>
           </div>

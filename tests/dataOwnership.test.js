@@ -2,21 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { hashPin, escapeCsvCell } from '../src/services/dataOwnershipService.ts';
+import { isValidDateString, isValidPeriodForHorizon, roundMetric } from '../src/utils/dateUtils.ts';
+import { parseQuickAdd } from '../src/utils/quickAddParser.ts';
 
-// Test RFC 4180 CSV escaping logic
-function escapeCsv(val) {
-  if (val === null || val === undefined) return '""';
-  const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
-  return `"${str.replace(/"/g, '""')}"`;
-}
+test('PRD Section 6.8 DT-3: CSV RFC 4180 escaping logic handles commas, quotes, newlines, and formula injection', () => {
+  assert.equal(escapeCsvCell('Simple Text'), '"Simple Text"');
+  assert.equal(escapeCsvCell('Text with, comma'), '"Text with, comma"');
+  assert.equal(escapeCsvCell('Text with "quotes" inside'), '"Text with ""quotes"" inside"');
+  assert.equal(escapeCsvCell('Multi-line\nText'), '"Multi-line\nText"');
+  assert.equal(escapeCsvCell(120), '"120"');
+  assert.equal(escapeCsvCell(null), '""');
 
-test('PRD Section 6.8 DT-3: CSV RFC 4180 escaping logic handles commas, quotes, and newlines', () => {
-  assert.equal(escapeCsv('Simple Text'), '"Simple Text"');
-  assert.equal(escapeCsv('Text with, comma'), '"Text with, comma"');
-  assert.equal(escapeCsv('Text with "quotes" inside'), '"Text with ""quotes"" inside"');
-  assert.equal(escapeCsv('Multi-line\nText'), '"Multi-line\nText"');
-  assert.equal(escapeCsv(120), '"120"');
-  assert.equal(escapeCsv(null), '""');
+  // Formula injection protection (prefix risky leading characters with single quote ')
+  assert.equal(escapeCsvCell('=cmd|\'/C calc\'!A0'), '"\'=cmd|\'/C calc\'!A0"');
+  assert.equal(escapeCsvCell('+SUM(A1:A10)'), '"\'+SUM(A1:A10)"');
+  assert.equal(escapeCsvCell('@IMPORTXML()'), '"\'@IMPORTXML()"');
+  assert.equal(escapeCsvCell('-2+3+cmd'), '"\'-2+3+cmd"');
+  // Plain negative numbers should not be prefixed
+  assert.equal(escapeCsvCell('-42.5'), '"-42.5"');
 });
 
 test('PRD Section 6.8 DT-3: Export formats include complete JSON, CSV, and Markdown', () => {
@@ -29,7 +33,7 @@ test('PRD Section 6.8 DT-3: Export formats include complete JSON, CSV, and Markd
   assert.ok(content.includes('exportAllToMarkdown'), 'Must export exportAllToMarkdown');
 });
 
-test('PRD Section 6.8 DT-5: Recovery Bin soft-delete and restore operations', () => {
+test('PRD Section 6.8 DT-5: Recovery Bin soft-delete and cascading restore/purge operations', () => {
   const servicePath = path.resolve(process.cwd(), 'src/services/dataOwnershipService.ts');
   const content = fs.readFileSync(servicePath, 'utf8');
   assert.ok(content.includes('getRecoveryBinItems'), 'Must query recovery bin items');
@@ -46,49 +50,33 @@ test('PRD Section 6.8 DT-4: Snapshot backups rotation and safety snapshots', () 
   assert.ok(content.includes('autoBackups.length > 10'), 'Must rotate automated snapshots to max 10');
 });
 
-test('PRD Section 6.1 PL-9: Markdown checklist parser matches quick-add tokens', () => {
-  const sampleMarkdown = `
-# My Project Checklist
-- [ ] Configure Sysmon Event ID 1 telemetry #heimdall ~45m !high @2026-11-06 +rules:2
-- [x] Initial SOC lab network architecture diagram #heimdall ~120m
-- Simple non-checklist note to ignore
-`;
+test('PRD Section 6.1 PL-9 & Quick Add: Date validation, float rounding, and unrecognized date error reporting', () => {
+  assert.equal(isValidDateString('2026-11-06'), true);
+  assert.equal(isValidDateString('2026-02-30'), false, 'Feb 30 must be rejected');
+  assert.equal(isValidDateString('2026-13-01'), false, 'Month 13 must be rejected');
 
-  const lines = sampleMarkdown.split('\n');
-  const checklistItems = [];
+  assert.equal(isValidPeriodForHorizon('2026-W45', 'week'), true);
+  assert.equal(isValidPeriodForHorizon('2026-W45', 'month'), false, 'Monthly goal must reject week-format period');
+  assert.equal(isValidPeriodForHorizon('2026-11', 'month'), true);
 
-  for (const rawLine of lines) {
-    const line = rawLine.trim();
-    const match = line.match(/^[-*]\s*\[([ xX])\]\s*(.+)$/);
-    if (match) {
-      checklistItems.push({
-        isDone: match[1].toLowerCase() === 'x',
-        text: match[2].trim(),
-      });
-    }
-  }
+  assert.equal(roundMetric(0.1 + 0.2), 0.3, 'Float noise must be rounded cleanly');
 
-  assert.equal(checklistItems.length, 2);
-  assert.equal(checklistItems[0].isDone, false);
-  assert.ok(checklistItems[0].text.includes('#heimdall'));
-  assert.equal(checklistItems[1].isDone, true);
+  const badCalendarDate = parseQuickAdd('Write report @2026-02-30', new Date('2026-11-01T12:00:00'));
+  assert.ok(badCalendarDate.errors.length > 0, '@2026-02-30 must report a validation error');
+  assert.equal(badCalendarDate.scheduleDate, undefined);
+
+  const typoDate = parseQuickAdd('Review slides @frday', new Date('2026-11-01T12:00:00'));
+  assert.ok(typoDate.errors.length > 0, '@frday must report an unrecognized date error instead of silently becoming today');
+  assert.equal(typoDate.scheduleDate, undefined);
 });
 
-test('PRD Section 6.8 DT-6: Local App Lock PIN hash and verification', () => {
-  function hashPin(pin) {
-    let hash = 0;
-    for (let i = 0; i < pin.length; i++) {
-      const char = pin.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash |= 0;
-    }
-    return `sn_pin_${Math.abs(hash).toString(16)}`;
-  }
-
+test('PRD Section 6.8 DT-6: Cryptographic 256-bit SHA-256 PIN hash and verification', () => {
   const hash1 = hashPin('1234');
   const hash2 = hashPin('1234');
   const hashOther = hashPin('9999');
 
+  assert.ok(hash1.startsWith('sn_sha256_'), 'Must use 256-bit SHA-256 prefix');
+  assert.equal(hash1.length, 'sn_sha256_'.length + 64, 'Must produce full 64-hex-char 256-bit digest');
   assert.equal(hash1, hash2, 'Identical PIN produces identical hash');
   assert.notEqual(hash1, hashOther, 'Different PIN produces different hash');
 });

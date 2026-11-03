@@ -415,12 +415,23 @@ export function calculateScheduleRatio(
     },
   ];
 
+  let rawRatio = 1.0;
   let ratio = 1.0;
   if (expectedPercent <= 0) {
-    ratio = progressPercent > 0 ? 1.0 : 1.0;
+    rawRatio = 1.0;
+    ratio = 1.0;
     steps.push('Expected progress is 0% (project just started or not yet scheduled); baseline ratio is 1.0.');
   } else {
-    ratio = Math.round((progressPercent / expectedPercent) * 100) / 100;
+    rawRatio = progressPercent / expectedPercent;
+    // Avoid rounding 0.8999 up to 0.90 across a status threshold boundary
+    if (
+      (rawRatio < onTrackThreshold && Math.round(rawRatio * 100) / 100 >= onTrackThreshold) ||
+      (rawRatio < atRiskThreshold && Math.round(rawRatio * 100) / 100 >= atRiskThreshold)
+    ) {
+      ratio = Math.floor(rawRatio * 100) / 100;
+    } else {
+      ratio = Math.round(rawRatio * 100) / 100;
+    }
     steps.push(`Quotient: ${progressPercent}% / ${expectedPercent}% = ${ratio}.`);
   }
 
@@ -428,12 +439,12 @@ export function calculateScheduleRatio(
   let statusLabel = 'On track';
   let glyph = '●'; // Circle for on track
 
-  if (ratio >= onTrackThreshold) {
+  if (rawRatio >= onTrackThreshold) {
     status = 'on_track';
     statusLabel = 'On track';
     glyph = '●';
     steps.push(`Ratio ${ratio} ≥ on-track threshold (${onTrackThreshold}) → On track`);
-  } else if (ratio >= atRiskThreshold) {
+  } else if (rawRatio >= atRiskThreshold) {
     status = 'at_risk';
     statusLabel = 'At risk';
     glyph = '▲'; // Triangle for warning/at-risk

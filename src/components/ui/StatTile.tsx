@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
+import { Modal } from './Modal';
+import { Button } from './Button';
 
 export interface StatTileProps {
   label: string;
@@ -16,7 +18,7 @@ export interface StatTileProps {
  * Hallmark Stat Tile Primitive
  * - Numbers are the hero: large tabular numerals with explicit units.
  * - Hairline rule separation, no heavy box-in-box cards.
- * - PRD 7.1: Every number shows its formula and explanation on tap or hover.
+ * - PRD 7.1: Every number shows its formula and explanation in an accessible dialog on click.
  */
 export const StatTile: React.FC<StatTileProps> = ({
   label,
@@ -45,8 +47,8 @@ export const StatTile: React.FC<StatTileProps> = ({
         {(formula || formulaExplanation) && (
           <button
             type="button"
-            onClick={() => setShowFormula(!showFormula)}
-            className="p-0.5 rounded text-[var(--color-ink-subtle)] hover:text-[var(--color-accent)] hover:bg-[var(--color-paper-3)] transition-opacity"
+            onClick={() => setShowFormula(true)}
+            className="p-1 min-w-6 min-h-6 inline-flex items-center justify-center rounded text-[var(--color-ink-subtle)] hover:text-[var(--color-accent)] hover:bg-[var(--color-paper-3)] transition-opacity"
             title="Inspect calculation formula"
             aria-label={`View formula for ${label}`}
           >
@@ -77,32 +79,46 @@ export const StatTile: React.FC<StatTileProps> = ({
         </div>
       )}
 
-      {/* Transparent Formula Popover (PRD Section 7 & 7.3) */}
-      {showFormula && (formula || formulaExplanation) && (
-        <div className="absolute inset-x-0 bottom-full mb-1.5 p-2.5 bg-[var(--color-paper)] border border-[var(--color-rule-strong)] shadow-md rounded-[var(--radius-xs)] z-20 text-xs flex flex-col gap-1">
-          <div className="flex items-center justify-between text-[11px] font-mono text-[var(--color-accent)] font-semibold">
-            <span>Formula Inspector</span>
-            <button
-              type="button"
-              onClick={() => setShowFormula(false)}
-              className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-            >
-              ✕
-            </button>
-          </div>
-          {formula && (
-            <div className="font-mono text-[11px] bg-[var(--color-paper-2)] p-1.5 rounded-[var(--radius-xs)] text-[var(--color-ink)]">
-              {formula}
+      {/* Formula Inspector Modal Dialog (PRD Section 7 & 7.3) */}
+      {(formula || formulaExplanation) && (
+        <Modal
+          isOpen={showFormula}
+          onClose={() => setShowFormula(false)}
+          title={`Formula Inspector: ${label}`}
+          subtitle="Exact local calculation used for this metric"
+          maxWidth="sm"
+          footer={
+            <Button size="sm" variant="primary" onClick={() => setShowFormula(false)}>
+              Close
+            </Button>
+          }
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex items-baseline gap-2 p-2.5 surface-well rounded-[var(--radius-xs)] border border-[var(--color-rule)]">
+              <span className="text-xs text-[var(--color-ink-muted)]">Current value:</span>
+              <span className="font-mono font-bold text-sm tabular-figure text-[var(--color-ink)]">
+                {value} {unit || ''}
+              </span>
             </div>
-          )}
-          {formulaExplanation && (
-            <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">
-              {formulaExplanation}
-            </p>
-          )}
-        </div>
+            {formula && (
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold text-[var(--color-ink-muted)]">Formula</span>
+                <div className="font-mono text-xs bg-[var(--color-paper-2)] p-2.5 rounded-[var(--radius-xs)] border border-[var(--color-rule)] text-[var(--color-ink)]">
+                  {formula}
+                </div>
+              </div>
+            )}
+            {formulaExplanation && (
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold text-[var(--color-ink-muted)]">How it works</span>
+                <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
+                  {formulaExplanation}
+                </p>
+              </div>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );
 };
-

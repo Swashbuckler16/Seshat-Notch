@@ -52,7 +52,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
   );
 
   const handleQuickLog = async () => {
-    if (logValue <= 0) return;
+    if (logValue === 0 || Number.isNaN(logValue)) return;
     await domainService.updateTargetProgress(target.id, Number(logValue));
     setIsLogging(false);
     setLogValue(1);
@@ -155,7 +155,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
             <div className="flex items-center gap-1.5">
               <input
                 type="number"
-                min="0.1"
+                aria-label="Progress amount to log"
                 step="any"
                 value={logValue}
                 onChange={(e) => setLogValue(parseFloat(e.target.value) || 0)}
@@ -198,7 +198,7 @@ export const TargetCard: React.FC<TargetCardProps> = ({ target, onOpenCascade })
         <button
           type="button"
           onClick={handleDelete}
-          className="text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)] p-1 rounded focus-visible:outline-2"
+          className="min-w-6 min-h-6 inline-flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)] p-1 rounded focus-visible:outline-2"
           title="Delete goal"
           aria-label="Delete goal"
         >

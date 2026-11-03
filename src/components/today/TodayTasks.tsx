@@ -33,6 +33,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
   const [newEstimate, setNewEstimate] = useState<number>(30);
   const [newPriority, setNewPriority] = useState<Priority>('medium');
   const [isAddingInline, setIsAddingInline] = useState(false);
+  const [taskError, setTaskError] = useState<string | null>(null);
   const [expandedTaskIds, setExpandedTaskIds] = useState<string[]>([]);
   const [recentlyCompletedTaskIds, setRecentlyCompletedTaskIds] = useState<Set<string>>(() => new Set());
 
@@ -76,8 +77,12 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
 
   const handleCreateInlineTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      setTaskError('Please enter a task title.');
+      return;
+    }
 
+    setTaskError(null);
     await domainService.createTask({
       title: newTitle.trim(),
       scheduleDate: dateStr,
@@ -116,7 +121,10 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
           <Button
             size="sm"
             variant="primary"
-            onClick={() => setIsAddingInline(!isAddingInline)}
+            onClick={() => {
+              setIsAddingInline(!isAddingInline);
+              setTaskError(null);
+            }}
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{isAddingInline ? 'Close' : 'Add task'}</span>
@@ -133,15 +141,19 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <Input
+                aria-label="Task title"
                 placeholder="What needs to get done?"
                 value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
+                onChange={(e) => {
+                  setNewTitle(e.target.value);
+                  setTaskError(null);
+                }}
                 autoFocus
-                required
               />
             </div>
             <div className="w-24">
               <Input
+                aria-label="Estimated minutes"
                 type="number"
                 min="5"
                 step="5"
@@ -151,6 +163,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
               />
             </div>
             <select
+              aria-label="Task priority"
               value={newPriority}
               onChange={(e) => setNewPriority(e.target.value as Priority)}
               className="h-9 px-2 text-xs bg-[var(--color-paper)] border border-[var(--color-rule)] rounded text-[var(--color-ink)] capitalize font-mono"
@@ -160,10 +173,15 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
               <option value="high">High</option>
               <option value="urgent">Urgent</option>
             </select>
-            <Button size="sm" variant="primary" onClick={handleCreateInlineTask}>
+            <Button size="sm" variant="primary" type="submit">
               Save
             </Button>
           </div>
+          {taskError && (
+            <div role="alert" className="text-[11px] font-medium text-[var(--color-status-behind)]">
+              {taskError}
+            </div>
+          )}
         </form>
       )}
 
@@ -200,7 +218,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                     <button
                       type="button"
                       onClick={() => handleToggleTask(task.id)}
-                      className={`task-completion-button text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] ${recentlyCompletedTaskIds.has(task.id) && isDone ? 'task-completion-button--celebrate' : ''}`}
+                      className={`task-completion-button min-w-6 min-h-6 inline-flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] ${recentlyCompletedTaskIds.has(task.id) && isDone ? 'task-completion-button--celebrate' : ''}`}
                       title={isDone ? 'Mark as not done' : 'Mark complete'}
                       aria-label={isDone ? `Mark “${task.title}” as not done` : `Mark “${task.title}” complete`}
                       aria-pressed={isDone}
@@ -235,7 +253,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                       {/* Meta stats row */}
                       <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-[var(--color-ink-muted)] mt-1">
                         <span
-                          className={`px-1.5 py-0.2 rounded border text-[10px]  font-semibold ${priorityBadgeColors[task.priority]}`}
+                          className={`px-1.5 py-0.2 rounded border text-[10px] font-semibold ${priorityBadgeColors[task.priority]}`}
                         >
                           {task.priority}
                         </span>
@@ -253,7 +271,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                           <button
                             type="button"
                             onClick={() => handleToggleExpand(task.id)}
-                            className="inline-flex items-center gap-1 text-[var(--color-accent)] hover:underline focus-visible:outline-2"
+                            className="inline-flex items-center gap-1 min-h-6 text-[var(--color-accent)] hover:underline focus-visible:outline-2"
                           >
                             <span>
                               {subtasksCompleted}/{task.subtasks.length} steps
@@ -274,7 +292,7 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDeleteTask(task.id)}
-                      className="text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)] p-1 rounded focus-visible:outline-2"
+                      className="text-[var(--color-ink-subtle)] hover:text-[var(--color-status-behind)] p-1 min-w-6 min-h-6 inline-flex items-center justify-center rounded focus-visible:outline-2"
                       title="Delete task"
                       aria-label="Delete task"
                     >
@@ -312,4 +330,3 @@ export const TodayTasks: React.FC<TodayTasksProps> = ({
     </div>
   );
 };
-

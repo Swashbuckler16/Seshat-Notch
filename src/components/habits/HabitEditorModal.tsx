@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Habit, HabitScheduleType } from '../../types';
 import { domainService } from '../../services/domainService';
-import { getLocalDateString } from '../../utils/dateUtils';
+import { getLocalDateString, isValidDateString } from '../../utils/dateUtils';
 import { Sparkles, Target as TargetIcon } from 'lucide-react';
 
 interface HabitEditorModalProps {
@@ -42,11 +42,20 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
   const [linkedGoalId, setLinkedGoalId] = useState(habitToEdit?.linkedGoalId || '');
   const [startDate, setStartDate] = useState(habitToEdit?.startDate || todayStr);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setFormError('Please enter a habit name.');
+      return;
+    }
+    if (!isValidDateString(startDate)) {
+      setFormError('Please enter a valid calendar start date.');
+      return;
+    }
 
+    setFormError(null);
     setIsSubmitting(true);
     try {
       if (habitToEdit) {
@@ -78,7 +87,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
       }
       onClose();
     } catch (err) {
-      console.error('Failed to save habit:', err);
+      setFormError(err instanceof Error ? err.message : 'Failed to save habit.');
     } finally {
       setIsSubmitting(false);
     }
@@ -96,9 +105,11 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
         <Input
           label="Habit name"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            setTitle(e.target.value);
+            setFormError(null);
+          }}
           placeholder="e.g. Daily Deep Study Block, Strength Training, Sleep Window"
-          required
         />
 
         {/* Avoidance Toggle */}
@@ -113,6 +124,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
           </div>
           <input
             type="checkbox"
+            aria-label="A habit you want to change"
             checked={isAvoidance}
             onChange={(e) => setIsAvoidance(e.target.checked)}
             className="w-4 h-4 rounded text-[var(--color-accent)] focus:ring-[var(--color-focus)]"
@@ -201,10 +213,12 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
         {!isAvoidance && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-[var(--color-ink)]">
+              <label htmlFor="habit-metric-type" className="text-xs font-medium text-[var(--color-ink)]">
                 Track this habit by
               </label>
               <select
+                id="habit-metric-type"
+                aria-label="Track this habit by"
                 className="input-field px-2.5 py-1.5 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
                 value={metricType}
                 onChange={(e) => setMetricType(e.target.value as 'boolean' | 'count' | 'duration')}
@@ -216,7 +230,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
             </div>
 
             <Input
-            label="Goal amount"
+              label="Goal amount"
               type="number"
               min={1}
               value={targetValue}
@@ -225,7 +239,7 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
             />
 
             <Input
-            label="Count as"
+              label="Count as"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               placeholder={metricType === 'duration' ? 'minutes' : 'times'}
@@ -235,11 +249,13 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
 
         {/* Linked Goal Selector (PRD HB-7) */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-[var(--color-ink)] flex items-center gap-1.5">
+          <label htmlFor="habit-linked-goal" className="text-xs font-medium text-[var(--color-ink)] flex items-center gap-1.5">
             <TargetIcon className="w-3.5 h-3.5 text-[var(--color-accent)]" />
             <span>Connect to a goal (optional)</span>
           </label>
           <select
+            id="habit-linked-goal"
+            aria-label="Connect to a goal"
             className="input-field px-2.5 py-1.5 text-xs rounded-[var(--radius-xs)] border border-[var(--color-rule)] bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-accent)]"
             value={linkedGoalId}
             onChange={(e) => setLinkedGoalId(e.target.value)}
@@ -261,9 +277,18 @@ export const HabitEditorModal: React.FC<HabitEditorModalProps> = ({
           label="Start date"
           type="date"
           value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
+          onChange={(e) => {
+            setStartDate(e.target.value);
+            setFormError(null);
+          }}
           required
         />
+
+        {formError && (
+          <div role="alert" className="text-[11px] font-medium text-[var(--color-status-behind)] bg-[var(--color-status-behind-bg)] px-2.5 py-1.5 rounded border border-[var(--color-status-behind)]/30">
+            {formError}
+          </div>
+        )}
 
         <div className="flex items-center justify-end gap-2 hairline-t pt-3 mt-1">
           <Button variant="secondary" size="sm" type="button" onClick={onClose}>

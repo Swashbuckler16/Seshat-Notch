@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -14,7 +14,7 @@ export interface ModalProps {
  * Hallmark-compliant Modal Dialog Primitive
  * - Z-level 400 per Craft § 3.
  * - Measured opacity scrim (no heavy blur or glow).
- * - Full Escape key listening.
+ * - Full Escape key listening and keyboard Tab focus trapping.
  */
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
@@ -25,11 +25,35 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = 'md',
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first || !dialogRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last || !dialogRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -49,6 +73,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
+      aria-label={title}
       className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-[var(--color-scrim)] backdrop-contrast-125"
     >
       {/* Backdrop click */}
@@ -56,6 +81,7 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Dialog Surface */}
       <div
+        ref={dialogRef}
         className={`relative w-full ${widthClass} bg-[var(--color-paper)] border border-[var(--color-rule-strong)] rounded-[var(--radius-sm)] flex flex-col max-h-[90vh] overflow-hidden z-10 text-[var(--color-ink)]`}
       >
         {/* Header */}
@@ -69,7 +95,7 @@ export const Modal: React.FC<ModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] rounded-[var(--radius-xs)] hover:bg-[var(--color-paper-3)] transition-opacity"
+            className="p-1 min-w-6 min-h-6 inline-flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] rounded-[var(--radius-xs)] hover:bg-[var(--color-paper-3)] transition-opacity"
             aria-label="Close dialog"
           >
             ✕
@@ -91,4 +117,3 @@ export const Modal: React.FC<ModalProps> = ({
     </div>
   );
 };
-
