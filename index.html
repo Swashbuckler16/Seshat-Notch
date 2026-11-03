@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="256x256" href="./icon-256.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="theme-color" content="#0d9488" />
+    <meta name="description" content="Seshat Notch — Personal multi-horizon planning and tracking application for Windows. Every day, a notch. Every goal, measured." />
+    <title>Seshat Notch — Planner and Tracker</title>
+    <!-- Prevent theme flash before first paint -->
+    <script>
+      (function() {
+        const saved = localStorage.getItem('seshat-theme');
+        const savedPalette = localStorage.getItem('seshat-palette');
+        const palettes = ['seshat', 'ocean', 'berry'];
+        document.documentElement.dataset.palette = palettes.includes(savedPalette) ? savedPalette : 'seshat';
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.mode = 'dark';
+        } else {
+          document.documentElement.dataset.mode = 'light';
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-amgFZYii.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/vendor-db-CtEDcIYA.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-react-BgaN8qjX.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-icons-I6TmG_GU.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-B6qyzqCB.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
