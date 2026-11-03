@@ -1,0 +1,20 @@
+{
+  "activities": 40,
+  "entries": 29200,
+  "mathMs": 289,
+  "results": [
+    {
+      "screen": "Activities",
+      "elapsedMs": 1840
+    },
+    {
+      "screen": "Analytics",
+      "elapsedMs": 2496
+    },
+    {
+      "screen": "Today",
+      "elapsedMs": 1521
+    }
+  ],
+  "note": "Cold route switch on Vite development server, including Playwright click dispatch and two animation frames. Isolated browser context; no personal data."
+}

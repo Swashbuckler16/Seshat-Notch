@@ -1,5 +1,5 @@
 // Service Worker for Seshat Notch Offline Desktop App
-const CACHE_NAME = 'seshat-notch-v4';
+const CACHE_NAME = 'seshat-notch-v5-activities';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

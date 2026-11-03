@@ -1,8 +1,11 @@
 
-/* hallmark v2.0.0 */
+/* Hallmark · v2.0.0 · shape: app screen · theme: locked design.md · signature: daily Notch Grid */
+/* Critique: preserve warm paper, make daily check-in primary, show evidence before summaries. */
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./base.css";
+@import "./activities.css";
+@import "./analytics.css";
 
 /* Custom utility bindings for Seshat design system */
 @theme {
@@ -199,7 +202,7 @@
   position: absolute;
   top: calc(100% + var(--space-xs));
   right: 0;
-  width: min(21rem, calc(100vw - 24px));
+  width: min(21rem, calc(100dvw - 24px));
   padding: var(--space-md);
   display: flex;
   flex-direction: column;

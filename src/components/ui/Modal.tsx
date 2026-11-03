@@ -29,8 +29,22 @@ export const Modal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const frame = requestAnimationFrame(() => {
+      dialogRef.current?.querySelector<HTMLElement>('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])')?.focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const dialogs = document.querySelectorAll('[role="dialog"]');
+      if (dialogRef.current?.closest('[role="dialog"]') !== dialogs[dialogs.length - 1]) return;
       if (e.key === 'Escape') {
         onClose();
         return;

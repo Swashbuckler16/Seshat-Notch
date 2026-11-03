@@ -126,6 +126,15 @@ export interface HabitPauseRange {
 }
 
 export interface Habit {
+  areaId?: EntityId;
+  icon?: string;
+  accent?: number;
+  kind?: 'yes_no' | 'count' | 'measure' | 'time_window' | 'avoid';
+  targetDirection?: 'at_least' | 'at_most';
+  timeWindow?: { start: string; end: string; crossesMidnight: boolean };
+  scheduleVersions?: ActivityScheduleVersion[];
+  notes?: string;
+  autoClean?: boolean;
   id: EntityId;
   linkedGoalId?: EntityId;
   title: string;
@@ -166,6 +175,8 @@ export interface Routine {
 }
 
 export interface ProgressLog {
+  actualStart?: string;
+  actualEnd?: string;
   id: EntityId;
   entityType: 'target' | 'task' | 'habit';
   entityId: EntityId;
@@ -176,6 +187,14 @@ export interface ProgressLog {
   note?: string;
   isDeleted: boolean;
   createdAt: string;
+}
+
+export interface ActivityScheduleVersion {
+  effectiveFrom: string;
+  scheduleType: HabitScheduleType;
+  weekdays?: number[];
+  timesPerWeek?: number;
+  intervalDays?: number;
 }
 
 export interface TimeSession {

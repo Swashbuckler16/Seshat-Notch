@@ -1,0 +1,22 @@
+{
+  "activities": 40,
+  "entries": 29200,
+  "routes": [
+    {
+      "screen": "Activities",
+      "elapsedMs": 404
+    },
+    {
+      "screen": "Analytics",
+      "elapsedMs": 385
+    },
+    {
+      "screen": "Today",
+      "elapsedMs": 432
+    }
+  ],
+  "offlineReload": true,
+  "offlineAnalytics": true,
+  "errors": [],
+  "note": "Production preview. Isolated Chrome context; timings include click dispatch and two frames. Cached Today and Analytics verified offline."
+}

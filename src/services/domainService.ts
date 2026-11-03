@@ -1,3 +1,4 @@
+import { activityService } from './activityService.ts';
 import { db } from '../db/index.ts';
 import { recordChange, generateId, getCurrentUTC } from '../db/changeLogService.ts';
 import {
@@ -139,7 +140,7 @@ export const domainService = {
 
   async updateProjectStatus(id: EntityId, newStatus: Status, reason?: string): Promise<void> {
     if (newStatus === 'dropped' && (!reason || reason.trim().length === 0)) {
-      throw new Error('PRD Requirement TR-3: Dropping an item requires an explicit reason.');
+      throw new Error('Add a short reason before dropping this item.');
     }
 
     await db.transaction('rw', [db.projects, db.changeLogs], async () => {
@@ -836,7 +837,7 @@ export const domainService = {
 
   async setTaskStatus(id: EntityId, status: Status, reason?: string): Promise<void> {
     if (status === 'dropped' && (!reason || reason.trim().length === 0)) {
-      throw new Error('PRD Requirement TR-3: Dropping a task requires an explicit reason.');
+      throw new Error('Add a short reason before dropping this task.');
     }
     await db.transaction('rw', [db.tasks, db.changeLogs], async () => {
       const existing = await db.tasks.get(id);
@@ -1023,32 +1024,7 @@ export const domainService = {
    * Toggles habit completion for a specific local date
    */
   async toggleHabitForDate(habitId: EntityId, dateStr: string): Promise<boolean> {
-    return await db.transaction('rw', [db.habits, db.progressLogs, db.changeLogs], async () => {
-      const habit = await db.habits.get(habitId);
-      if (!habit) throw new Error(`Habit ${habitId} not found`);
-
-      const existingLog = await db.progressLogs
-        .where('entityId')
-        .equals(habitId)
-        .filter((l) => !l.isDeleted && l.entityType === 'habit' && l.date === dateStr)
-        .first();
-
-      if (existingLog) {
-        await db.progressLogs.delete(existingLog.id);
-        await recordChange({
-          entityType: 'habit',
-          entityId: habitId,
-          action: 'hard_delete',
-          fieldChanged: 'progressLog',
-          oldValue: existingLog,
-          reason: `Removed completion for ${dateStr}`,
-        });
-        return false; // Now uncompleted
-      } else {
-        await this.logHabitCompletion(habitId, dateStr, habit.targetValue || 1);
-        return true; // Now completed
-      }
-    });
+    return activityService.toggle(habitId, dateStr);
   },
 
   // ==========================================
@@ -1065,9 +1041,22 @@ export const domainService = {
       throw new Error('Habit target value must be greater than zero.');
     }
 
+    let areaId = data.areaId;
+    if (!areaId && data.linkedGoalId) areaId = (await db.projects.get(data.linkedGoalId))?.areaId;
+    if (!areaId) {
+      let area = await db.areas.where('name').equals('Unsorted').first();
+      if (!area) area = await this.createArea({name:'Unsorted',order:await db.areas.count()});
+      areaId = area.id;
+    }
     const now = getCurrentUTC();
     const habit: Habit = {
       ...data,
+      areaId,
+      kind: data.kind ?? (data.isAvoidance ? 'avoid' : data.metricType === 'boolean' ? 'yes_no' : 'count'),
+      icon: data.icon ?? 'leaf',
+      accent: data.accent ?? 0,
+      targetDirection: data.targetDirection ?? 'at_least',
+      scheduleVersions: data.scheduleVersions ?? [{effectiveFrom:data.startDate,scheduleType:data.scheduleType,weekdays:data.scheduleDaysOfWeek,timesPerWeek:data.targetFrequency,intervalDays:data.intervalDays}],
       title: data.title.trim(),
       targetValue: roundMetric(data.targetValue ?? 1),
       id: generateId(),
@@ -1089,40 +1078,8 @@ export const domainService = {
   },
 
   async logHabitCompletion(habitId: EntityId, date: string, value = 1, note?: string): Promise<ProgressLog> {
-    if (!isValidDateString(date)) {
-      throw new Error(`Invalid habit check-in date: ${date}`);
-    }
-    return await db.transaction('rw', [db.habits, db.progressLogs, db.changeLogs], async () => {
-      const habit = await db.habits.get(habitId);
-      if (!habit) throw new Error(`Habit ${habitId} not found`);
-
-      const cleanVal = roundMetric(value);
-      const now = getCurrentUTC();
-      const log: ProgressLog = {
-        id: generateId(),
-        entityType: 'habit',
-        entityId: habitId,
-        timestamp: now,
-        date,
-        value: cleanVal,
-        unit: habit.unit || (habit.metricType === 'duration' ? 'minutes' : 'count'),
-        note,
-        isDeleted: false,
-        createdAt: now,
-      };
-
-      await db.progressLogs.add(log);
-      await recordChange({
-        entityType: 'habit',
-        entityId: habitId,
-        action: 'update',
-        fieldChanged: 'check_in',
-        newValue: { date, value: cleanVal },
-        reason: note,
-      });
-
-      return log;
-    });
+    if (!isValidDateString(date)) throw new Error(`Invalid habit check-in date: ${date}`);
+    return (await activityService.setEntry(habitId, date, { value, note }))!;
   },
 
   async updateHabit(habitId: EntityId, updates: Partial<Habit>): Promise<Habit> {
@@ -1198,16 +1155,14 @@ export const domainService = {
       const habit = await db.habits.get(habitId);
       if (!habit) throw new Error(`Habit ${habitId} not found`);
 
-      // Remove any existing log for this date first
+      // Preserve prior entries while enforcing one active entry per day.
       const existing = await db.progressLogs
         .where('entityId')
         .equals(habitId)
         .filter((l) => !l.isDeleted && l.entityType === 'habit' && l.date === date)
-        .first();
+        .toArray();
 
-      if (existing) {
-        await db.progressLogs.delete(existing.id);
-      }
+      for (const entry of existing) await db.progressLogs.update(entry.id, { isDeleted: true });
 
       const now = getCurrentUTC();
       const log: ProgressLog = {
@@ -1244,6 +1199,10 @@ export const domainService = {
     return await db.transaction('rw', [db.habits, db.progressLogs, db.changeLogs], async () => {
       const habit = await db.habits.get(habitId);
       if (!habit) throw new Error(`Habit ${habitId} not found`);
+
+      const existing = await db.progressLogs.where('entityId').equals(habitId)
+        .filter(l => !l.isDeleted && l.entityType === 'habit' && l.date === date).toArray();
+      for (const entry of existing) await db.progressLogs.update(entry.id, { isDeleted: true });
 
       const now = getCurrentUTC();
       const log: ProgressLog = {
@@ -1415,7 +1374,7 @@ export const domainService = {
 
   async dropTask(taskId: EntityId, reason: string): Promise<void> {
     if (!reason || reason.trim().length === 0) {
-      throw new Error('PRD Requirement TR-3: Dropping a task requires an explicit reason.');
+      throw new Error('Add a short reason before dropping this task.');
     }
     await this.setTaskStatus(taskId, 'dropped', reason.trim());
   },

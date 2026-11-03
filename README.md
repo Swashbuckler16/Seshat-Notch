@@ -1,103 +1,68 @@
 # Seshat Notch
 
-> **Every day, a notch. Every goal, measured.**  
-> *A local-first personal planning and tracking application for Windows, built for deep work and long-term mastery.*
+A little progress, every day. A local-first activity tracker and planner built with React, TypeScript, Dexie and an optional Tauri desktop shell.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Type: Local--First](https://img.shields.io/badge/Architecture-Local--First_Offline-black)](design.md)
-[![Build Status](https://github.com/Swashbuckler16/Seshat-Notch/actions/workflows/ci.yml/badge.svg)](https://github.com/Swashbuckler16/Seshat-Notch/actions)
+![Today with weekly progress and activity histories](docs/screenshots/today.png)
 
-![Today View, Quick-Add Grammar, and Fair Streak Habits](docs/screenshots/today-overview.svg)
+## Track your day
 
-![Progress Dashboard, Project Pacing, and Time Breakdown](docs/screenshots/habits-progress.svg)
+- **Today:** see your week, check off activities, record quantities, add notes and undo an accidental change.
+- **Activities:** create checks, counts, measurements, time windows or avoidance activities. Choose an Area, color, schedule and start date. Explore past days, pause, archive or recover an activity.
+- **Analytics:** explore completion, streaks, recent-weighted scores, momentum, weekday patterns, monthly history and area comparisons. Filter dates and activities; open explanations and data tables.
+- **Plan:** keep projects, milestones, goals and tasks connected. Focus tools and reflections remain available.
+- **Settings:** export/import backups, recover deleted items, choose a day boundary and set an optional PIN.
 
----
+![Activities library](docs/screenshots/activities.png)
 
-## Install & Use on Windows
+![Analytics overview](docs/screenshots/analytics.png)
 
-### Option 1: Install as a Windows Desktop Web App (Edge / Chrome)
-- **Live App:** [https://swashbuckler16.github.io/Seshat-Notch/](https://swashbuckler16.github.io/Seshat-Notch/)
-- **10-Page User Manual (.docx):** [`Seshat-Notch-User-Manual.docx`](Seshat-Notch-User-Manual.docx) (also in [`docs/Seshat-Notch-User-Manual.docx`](docs/Seshat-Notch-User-Manual.docx))
-  1. Open [https://swashbuckler16.github.io/Seshat-Notch/](https://swashbuckler16.github.io/Seshat-Notch/) in **Microsoft Edge** or **Google Chrome** on Windows.
-  2. Click the **Install app** icon in the right side of the address bar (or open the browser menu → **Apps** → **Install Seshat Notch**).
-  3. Launch **Seshat Notch** from your Windows Start Menu or Taskbar. All fonts (`Inter` and `IBM Plex Mono`), icons (`192px`, `256px`, `512px`, `maskable`, `favicon.svg`), and shell assets are self-hosted and cached individually for 100% offline use.
-  > **Note for GitHub Pages maintainers:** Ensure **Settings → Pages → Build and deployment** in your repository is set to **Deploy from a branch (`gh-pages` / `/ (root)`)**.
+## Run locally
 
-### Option 2: Native Windows Desktop Shell (Tauri v2 — `src-tauri/`)
-For background system tray persistence when the window is closed:
-- **Install from Releases (or build locally):** Download the `.msi` or `.exe` installer from **GitHub Releases** (triggered automatically on `v*` tags or via the `Build Windows Desktop Installer` workflow action). *Note: Because this open-source installer is unsigned, Windows SmartScreen may show an "Unknown publisher" prompt on first run — click **More info → Run anyway**.*
-- **System Tray & Close-to-Tray:** Closing the window minimizes Seshat Notch to the Windows system tray (`Open`, `Quick Add`, `Save Backup Now`, `Quit`) and shows a first-close tray notification hint.
-- **Single-Instance & Start with Windows:** Launching a second copy focuses the existing window, and an optional **Start with Windows** toggle in **Settings → Privacy & Preferences** keeps reminders active across reboots.
-- **Global Quick-Add Hotkey:** Press `Ctrl+Shift+K` from any Windows application to summon Quick Add.
-- **Native Toast Notifications & Silent Disk Backups:** Fires scheduled reminders even when minimized to the system tray and writes daily `.json` backups to `Documents/SeshatNotch/Backups/`.
-- **Moving Data Between Browser & Desktop App:** The browser PWA and the native desktop app maintain separate local databases. To move your data between them, click **Save backup (.json)** on Today (or in Settings) and import that file under **Settings → Import Plans**.
-
----
-
-## 1. Overview
-
-Seshat Notch takes its name from **Seshat**, the ancient Egyptian goddess of writing, measurement, and records, who was depicted notching a palm rib to record the passing of years and stretching a measuring cord to survey foundations.
-
-The app is built for personal mastery on Windows laptops and desktops:
-- **Multi-Horizon Planning:** Define and connect targets across three horizons: monthly milestones, weekly goals, and daily tasks.
-- **Plan vs. Reality:** Log what actually happened. Compare your plan to reality with visible, transparent mathematics.
-- **Unified Tracking:** Manage technical projects, goals, daily habits, and routines in one cohesive system.
-- **Local-First & 100% Private:** Zero telemetry, no ads, no external servers. All data stays offline on your machine with transactional writes (`db.transaction`) and an append-only change log for complete auditability.
-
----
-
-## 2. Core Capabilities
-
-- **Today Execution Strip:** A streamlined morning dashboard showing scheduled tasks, due habits, time estimates, a **"Daily backup due"** banner when today's backup hasn't been saved yet, and rapid one-click focus logging.
-- **Configurable Local Day Boundary:** Choose when your planning day rolls over (`00:00` Midnight to `05:00 AM`) in **Settings → Privacy & Preferences** so late-night work sessions resolve `@today` to your local calendar date.
-- **Multi-Horizon Planner:** Organize life areas, projects, milestones with finish-to-start dependencies, and cascade targets across months, weeks, and days.
-- **Quick-Add Grammar:** Fast keyboard entry (`Ctrl+K` or `N` in-app, `Ctrl+Shift+K` globally in the Tauri desktop app, plus `Alt+1`..`Alt+5` for tab navigation):
-  ```text
-  Draft project specification #roadmap >phase1 ~45m !high @today +pages:5
-  ```
-- **Habit Tracker & Fair Streaks:** Flexible habit schedules (daily, weekdays, N times per week) with fair streak logic that accounts for scheduled rest days and excused sick/vacation pauses without breaking your momentum.
-- **Time Tracker & Focus Mode:** Integrated focus timer with configurable work/break intervals, manual duration entry, and classification into deep work, shallow work, or deliberate learning.
-- **Executive Dashboard:** All 7 views (`Overview`, `Projects`, `Habits`, `Activity`, `Goals`, `Reviews`, `Insights`) are directly accessible with custom SVG graphics (sparklines, Few-style bullet charts, burn-up curves, and horizontal focus breakdowns) and traceable formulas.
-- **Reminders & Scheduled Prompts:**
-  - *In Browser / Installed PWA:* Reminders are **off by default** and are checked every 60 seconds while the app tab or window is open.
-  - *In Tauri Windows Desktop Shell:* Reminders run in the background via the system tray even when the main window is closed.
-- **Data Ownership, Daily Backups & Recovery Bin:**
-  - Shows a **"Daily backup due"** prompt on **Today** until you save a backup or snooze it for the day (or saves silently to `Documents/SeshatNotch/Backups/` in the Tauri desktop shell).
-  - Full `.json` backups and snapshots preserve all projects, tasks, habits, logs, **and** your app preferences (day rollover boundary and reminder schedule).
-  - Soft-deleted items are retained in a Recovery Bin with one-click restore.
-
----
-
-## 3. Local Development & Packaging
-
-### Prerequisites
-- Node.js 22 LTS or newer
-- *(Optional, for native `.msi` / `.exe` packaging)* Rust stable toolchain & Windows WebView2
-
-### Commands
-```powershell
-# Install dependencies
-npm install
-
-# Start local development server
+```sh
+npm ci
 npm run dev
-
-# Run Hallmark 58-gate design audit
-npm run audit
-
-# Run automated unit, IndexedDB, & static-server offline test suite (76 tests)
-npm test
-
-# Build production web & desktop assets
-npm run build
-
-# Run or package the Tauri Windows Desktop Shell (requires Rust toolchain)
-npm run tauri:dev
-npm run tauri:build
 ```
 
----
+Open the local address printed by Vite. For a production preview:
 
-## 4. License
+```sh
+npm run build
+npm run preview
+```
 
-- **License:** [MIT](LICENSE) © 2026 Atharva Ghag (Swashbuckler16)
+For the optional desktop shell, install the Tauri prerequisites, including Rust and the Windows build tools, then use `npm run tauri:dev` or `npm run tauri:build`. The native installer was not built during this rebuild because Rust was unavailable.
+
+## Your data
+
+Data stays in the local `seshat_notch_db` database. Schema 3 upgrades existing records in place; it does not create a replacement database. Backups preserve activities, entries, plans and preferences. Save a backup before moving between browsers, devices or the desktop shell, which have separate storage.
+
+The PIN is a screen lock, not encryption. Backups are readable JSON. Offline use works for cached app assets; visit screens once while online before relying on them offline.
+
+Daily completion excludes rest days, pauses, excused days and an unfinished today. Weekly schedules use weekly quotas for streaks; completion charts show daily completion, not quota attainment. Scores and momentum are explained inside Analytics.
+
+## Shortcuts
+
+- `Ctrl+K`: Quick Add. Try `activity Read daily` or `tick Sleep cycle`.
+- `Alt+1` through `Alt+5`: Today, Activities, Analytics, Plan, Settings.
+- `Alt+6`: Reviews.
+- Arrow keys: move through a history grid. `Escape`: close the current dialog.
+
+## Verification and guide
+
+```sh
+npm test
+npm run build
+npm audit
+```
+
+The rebuild passed 91 tests, the production build and the dependency audit. Browser checks cover five screens, three widths and four theme combinations. Production route changes measured 385–432 ms with 40 activities and 29,200 entries in an isolated browser. See the [test report](docs/test-report.md) for scope, evidence and limitations.
+
+- [User manual](docs/Seshat-Notch-User-Manual.docx)
+- [Changes](CHANGELOG.md)
+- [Implementation decisions](docs/decisions.md)
+
+Screenshot records are isolated test fixtures, not preloaded personal statistics. This local rebuild has not been pushed or deployed.
+
+## License
+
+[MIT](LICENSE) © 2026 Atharva Ghag (Swashbuckler16)

@@ -4,6 +4,8 @@ import { db } from '../db';
 import { parseQuickAdd, ParsedQuickAdd } from '../utils/quickAddParser';
 import { getLocalDateString } from '../utils/dateUtils';
 import { domainService } from '../services/domainService';
+import { activityService } from '../services/activityService';
+import { parseActivityCommand } from '../utils/activityQuickAdd';
 import { Button } from './ui/Button';
 import { StatusBadge } from './StatusBadge';
 import {
@@ -125,10 +127,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
   // Unknown token warnings
   const unknownWarnings: string[] = [];
   if (parsed.projectQuery && projects && !matchedProject) {
-    unknownWarnings.push(`Unknown project "#${parsed.projectQuery}" — task will be saved to Unsorted Inbox.`);
+    unknownWarnings.push(`No project matches "#${parsed.projectQuery}". Choose an existing project or remove this tag.`);
   }
   if (parsed.milestoneQuery && milestones && !matchedMilestone) {
-    unknownWarnings.push(`Unknown milestone ">${parsed.milestoneQuery}" — milestone link will be skipped.`);
+    unknownWarnings.push(`No milestone matches ">${parsed.milestoneQuery}". Choose an existing milestone or remove this tag.`);
   }
 
   const handleAppendToken = (token: string) => {
@@ -149,10 +151,29 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
       setSaveError(parsed.errors[0]);
       return;
     }
+    if (unknownWarnings.length > 0) {
+      setSaveError(unknownWarnings[0]);
+      return;
+    }
 
     setIsSaving(true);
     setSaveError(null);
     try {
+      const command = parseActivityCommand(input);
+      if (command) {
+        if (command.action === 'tick') {
+          const matches = await db.habits.filter((a) => !a.isDeleted && !a.isArchived && a.title.toLowerCase().includes(command.title.toLowerCase())).toArray();
+          if (matches.length !== 1) throw new Error(matches.length ? 'Several activities match. Type the full name.' : 'No activity matches that name.');
+          await activityService.toggle(matches[0].id, getLocalDateString());
+        } else {
+          let area = await db.areas.where('name').equals('Unsorted').first();
+          if (!area) area = await domainService.createArea({name:'Unsorted',order:await db.areas.count()});
+          await activityService.save({ title: command.title, areaId:area.id, kind: 'yes_no', startDate: getLocalDateString() });
+        }
+        setIsSaving(false);
+        onClose();
+        return;
+      }
       // 1. Create measurable target if +unit:value is provided
       let targetId: string | undefined;
       if (parsed.targetMetric) {
@@ -186,7 +207,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
         tags: parsed.tags,
       });
 
-      setSaveSuccess(`Added to Ledger: "${parsed.title}"`);
+      setSaveSuccess(`Added "${parsed.title}" to your plans.`);
       setTimeout(() => {
         setIsSaving(false);
         onClose();
@@ -220,7 +241,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               aria-label="Quick add task input"
-              placeholder={`Draft project brief ${sampleProjectToken} ${sampleMilestoneToken} ~45m !high @today +pages:5`}
+              placeholder="Add a task, tick Sleep cycle, or activity Read daily"
               className="w-full bg-transparent text-sm font-normal text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] focus:outline-none"
             />
             <button
